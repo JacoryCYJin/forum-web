@@ -62,7 +62,7 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-4 rounded-lg mb-6 shadow-md">
+      {/* <div className="bg-gradient-to-r from-primary to-primary-light text-white p-4 rounded-lg mb-6 shadow-md">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold mb-2">实时地图</h2>
@@ -78,7 +78,7 @@ export default function Home() {
             </svg>
           </Link>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-neutral-800 dark:text-white">热门帖子</h1>
