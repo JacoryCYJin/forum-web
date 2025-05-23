@@ -252,7 +252,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <button className="ml-4 text-neutral-400 hover:text-primary">回复</button>
+                  <button className="text-neutral-400 hover:text-primary ml-4">回复</button>
                 </div>
               </div>
             </div>
@@ -261,4 +261,4 @@ export default function PostPage({ params }: { params: { id: string } }) {
       </div>
     </div>
   );
-} 
+}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import 'element-plus/dist/index.css';
 import '../styles/element-plus-theme.css';
-import RootClientLayout from "@/components/common/Layout/RootClientLayout";
+import { ThemeProvider } from 'next-themes';
 
 // Metadata不能在客户端组件中使用，所以需要单独创建
 export const metadata: Metadata = {
@@ -19,9 +19,9 @@ export default function RootLayout({
   return (
     <html lang="zh" suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-neutral-200 dark:bg-dark-primary">
-        <RootClientLayout>
-        {children}
-        </RootClientLayout>
+        <ThemeProvider attribute="class" enableSystem defaultTheme="system" disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
