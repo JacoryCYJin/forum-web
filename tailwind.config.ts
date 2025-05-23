@@ -14,7 +14,9 @@ export default {
         foreground: "var(--foreground)",
         primary: {
           DEFAULT: "#FF4500", // Reddit橙色
+          light: "#FF7043", // 添加浅色版本
           hover: "#FF5722",
+          dark: "#E64A19", // 添加深色版本
         },
         secondary: {
           DEFAULT: "#0079D3", // Reddit蓝色
