@@ -28,7 +28,7 @@ export default function MapWrapper() {
 
   if (!isMounted) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100" style={{ minHeight: '500px' }}>
+      <div className="w-full h-full flex items-center justify-center bg-gray-100" style={{ height: '100vh' }}>
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
           <p className="mt-2 text-gray-700">准备加载地图...</p>
@@ -38,7 +38,7 @@ export default function MapWrapper() {
   }
 
   return (
-    <div className="w-full h-full" style={{ minHeight: '500px' }}>
+    <div className="w-full h-full" style={{ height: '100vh' }}>
       <MapDisplay />
     </div>
   );

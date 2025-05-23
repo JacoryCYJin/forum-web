@@ -1,12 +1,11 @@
 import Link from "next/link";
-import Footer from "@/components/common/Footer/Footer";
 import MapWrapper from "./MapWrapper";
 
 export default function MapPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* 地图组件占据主要空间 */}
-      <div className="flex-grow relative" style={{ minHeight: 'calc(100vh - 80px)' }}>
+    <div className="flex flex-col h-screen">
+      {/* 地图组件占据整个屏幕 */}
+      <div className="flex-grow relative h-screen">
         <MapWrapper />
 
         {/* 顶部项目名称和介绍 */}
@@ -136,9 +135,6 @@ export default function MapPage() {
           </ul>
         </div>
       </div>
-
-      {/* 页脚 */}
-      <Footer />
     </div>
   );
 }

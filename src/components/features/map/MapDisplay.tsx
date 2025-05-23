@@ -22,19 +22,32 @@ export default function MapDisplay() {
 
   // 生成随机帖子数据
   const generateRandomPosts = (): MapPost[] => {
-    // 北京市中心区域的经纬度范围
-    const centerLng = 116.397428;
-    const centerLat = 39.90923;
-    const range = 0.05; // 经纬度范围约5公里
+    // 在中国范围内生成随机点
+    const chinaCoordinates = [
+      { city: '北京', lng: 116.397428, lat: 39.90923 },
+      { city: '上海', lng: 121.4737, lat: 31.2304 },
+      { city: '广州', lng: 113.2644, lat: 23.1291 },
+      { city: '深圳', lng: 114.0579, lat: 22.5431 },
+      { city: '成都', lng: 104.0668, lat: 30.5728 },
+      { city: '杭州', lng: 120.1551, lat: 30.2741 },
+      { city: '武汉', lng: 114.3162, lat: 30.5810 },
+      { city: '西安', lng: 108.9402, lat: 34.3416 },
+      { city: '重庆', lng: 106.5516, lat: 29.5630 },
+      { city: '南京', lng: 118.7969, lat: 32.0603 }
+    ];
     
     const mockPosts: MapPost[] = [];
     const topics = ['今天天气真好', '附近有什么好吃的', '有人一起去看电影吗', '刚刚看到一只可爱的小猫', '这里交通太堵了'];
     const authors = ['用户A', '用户B', '用户C', '用户D', '用户E'];
     
-    // 生成20个随机帖子
-    for (let i = 0; i < 20; i++) {
-      const randomLng = centerLng + (Math.random() * 2 - 1) * range;
-      const randomLat = centerLat + (Math.random() * 2 - 1) * range;
+    // 生成30个随机帖子，分布在中国各地
+    for (let i = 0; i < 30; i++) {
+      // 随机选择一个城市作为基准点
+      const baseLocation = chinaCoordinates[Math.floor(Math.random() * chinaCoordinates.length)];
+      // 在基准点附近随机偏移
+      const randomOffset = 0.5; // 约50公里范围内
+      const randomLng = baseLocation.lng + (Math.random() * 2 - 1) * randomOffset;
+      const randomLat = baseLocation.lat + (Math.random() * 2 - 1) * randomOffset;
       const randomTopic = topics[Math.floor(Math.random() * topics.length)];
       const randomAuthor = authors[Math.floor(Math.random() * authors.length)];
       
@@ -44,7 +57,7 @@ export default function MapDisplay() {
       mockPosts.push({
         id: i + 1,
         title: randomTopic,
-        content: `这是一条位于 [${randomLng.toFixed(4)}, ${randomLat.toFixed(4)}] 的随机消息`,
+        content: `这是一条位于${baseLocation.city}附近的消息 [${randomLng.toFixed(4)}, ${randomLat.toFixed(4)}]`,
         author: randomAuthor,
         longitude: randomLng,
         latitude: randomLat,
@@ -126,11 +139,12 @@ export default function MapDisplay() {
           return;
         }
         
-        // 创建地图实例
+        // 创建地图实例 - 调整缩放级别为5，显示整个中国
         const map = new AMap.Map(mapRef.current, {
-          zoom: 13, // 初始缩放级别
-          center: [116.397428, 39.90923], // 北京市中心
-          viewMode: '2D'
+          zoom: 5, // 缩放级别为5，显示整个中国
+          center: [105.0, 35.0], // 中国中心点
+          viewMode: '2D',
+          mapStyle: 'amap://styles/normal' // 使用标准地图样式
         });
         
         console.log('地图实例创建成功，添加控件...');
@@ -157,7 +171,7 @@ export default function MapDisplay() {
             offset: new AMap.Pixel(0, -30)
           });
 
-          // 创建标记
+          // 创建标记 - 使用橙色主题
           const marker = new AMap.Marker({
             position: [post.longitude, post.latitude],
             title: post.title,
@@ -204,8 +218,8 @@ export default function MapDisplay() {
 
   return (
     <div className="w-full h-full relative">
-      {/* 地图容器 */}
-      <div ref={mapRef} id="map-container" className="w-full h-full" style={{ minHeight: '500px' }}></div>
+      {/* 地图容器 - 占满整个空间 */}
+      <div ref={mapRef} id="map-container" className="w-full h-full" style={{ minHeight: '100vh' }}></div>
       
       {/* 地图加载中的占位显示 */}
       <div className={`absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 z-10 map-loading ${isMapLoaded ? 'hidden' : ''}`}>

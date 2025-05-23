@@ -1,7 +1,7 @@
 .map-marker {
   width: 16px;
   height: 16px;
-  background-color: var(--el-color-primary);
+  background-color: #FF4500;
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   animation: pulse 1.5s infinite;
@@ -10,17 +10,17 @@
 @keyframes pulse {
   0% {
     transform: scale(0.8);
-    box-shadow: 0 0 0 0 rgba(var(--el-color-primary-rgb), 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.7);
   }
   
   70% {
     transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(var(--el-color-primary-rgb), 0);
+    box-shadow: 0 0 0 10px rgba(255, 69, 0, 0);
   }
   
   100% {
     transform: scale(0.8);
-    box-shadow: 0 0 0 0 rgba(var(--el-color-primary-rgb), 0);
+    box-shadow: 0 0 0 0 rgba(255, 69, 0, 0);
   }
 }
 
