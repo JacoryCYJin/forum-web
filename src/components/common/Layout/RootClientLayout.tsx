@@ -21,8 +21,8 @@ export default function RootClientLayout({
   return (
     <ThemeProvider attribute="class" enableSystem defaultTheme="system" disableTransitionOnChange>
       <div className="flex flex-col min-h-screen">
-        <Sidebar onToggle={handleSidebarToggle} />
         <Navbar />
+        <Sidebar onToggle={handleSidebarToggle} />
         <div className="flex flex-1 pt-14">
           <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-10' : 'w-60'}`}></div>
           <main className="flex-1">
