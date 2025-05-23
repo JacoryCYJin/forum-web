@@ -8,6 +8,7 @@ import RootClientLayout from "@/components/common/Layout/RootClientLayout";
 export const metadata: Metadata = {
   title: "论坛 - Next.js 示例",
   description: "使用Next.js、Element Plus和Tailwind CSS构建的论坛网站",
+  keywords: "论坛, Next.js, Element Plus, Tailwind CSS",
 };
 
 export default function RootLayout({

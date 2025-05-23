@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Home, Fire, Code, VideoOne, ArrowLeft, ArrowRight } from '@icon-park/react';
+import { usePathname } from 'next/navigation';
+import { Home, Fire, Code, VideoOne, ActivitySource, Down } from '@icon-park/react';
 
 interface SidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -15,12 +16,23 @@ interface SidebarCategory {
 
 interface SidebarItem {
   name: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   path?: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<{[key: string]: boolean}>({});
+  const pathname = usePathname();
+
+  // 初始化所有分类为展开状态
+  useEffect(() => {
+    const initialState: {[key: string]: boolean} = {};
+    categories.forEach(category => {
+      initialState[category.title] = true;
+    });
+    setExpandedCategories(initialState);
+  }, []);
 
   // 当折叠状态改变时，调用父组件的回调函数
   useEffect(() => {
@@ -33,22 +45,33 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const categories: SidebarCategory[] = [
+  const toggleCategory = (title: string) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
+
+  // 检查链接是否被选中
+  const isLinkActive = (path: string) => {
+    return pathname === path;
+  };
+
+  // 顶部固定导航项
+  const topNavItems: SidebarItem[] = [
     {
-      title: '话题',
-      items: [
-        {
-          name: '首页',
-          icon: <Home theme="outline" size="22" className="sidebar-icon" />,
-          path: '/',
-        },
-        {
-          name: '热门',
-          icon: <Fire theme="outline" size="22" className="sidebar-icon" />,
-          path: '/popular',
-        },
-      ],
+      name: '首页',
+      icon: <Home theme="outline" size="22" className="sidebar-icon" />,
+      path: '/',
     },
+    {
+      name: '热门',
+      icon: <Fire theme="outline" size="22" className="sidebar-icon" />,
+      path: '/popular',
+    },
+  ];
+
+  const categories: SidebarCategory[] = [
     {
       title: '分类',
       items: [
@@ -75,39 +98,104 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
       <div className="relative">
         <button
           onClick={toggleSidebar}
-          className="absolute right-0 top-4 p-1 text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-white rounded-full bg-white dark:bg-dark-primary border border-neutral-200 dark:border-zinc-700 shadow-md"
+          className="absolute right-0 top-8 p-3 text-neutral-400 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-white rounded-full bg-white dark:bg-dark-primary border border-neutral-200 dark:border-zinc-700 shadow-md"
           style={{ transform: 'translateX(50%)' }}
         >
           {isCollapsed ? (
-            <ArrowRight theme="outline" size="18" fill="currentColor" />
+            <ActivitySource theme="outline" size="18"strokeLinejoin="miter"/>
           ) : (
-            <ArrowLeft theme="outline" size="18" fill="currentColor" />
+            <ActivitySource theme="outline" size="18" strokeLinejoin="miter"/>
           )}
         </button>
       </div>
 
       {!isCollapsed && (
-        <div className="overflow-y-auto h-[calc(100vh-6rem)] mt-12 px-4">
+        <div className="overflow-y-auto h-[calc(100vh-6rem)] mt-4 pl-4 pr-7">
+          {/* 顶部固定导航项 */}
+          <div className="mb-6">
+            <ul>
+              {topNavItems.map((item, index) => (
+                <li key={index}>
+                  {item.path ? (
+                    <Link 
+                      href={item.path} 
+                      className={`flex items-center p-2 rounded-md ${
+                        isLinkActive(item.path) 
+                          ? 'bg-neutral-200 dark:bg-zinc-700 text-neutral-900 dark:text-white' 
+                          : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      {item.path === '/' && isLinkActive(item.path) ? (
+                        <Home theme="filled" size="22" className="sidebar-icon" />
+                      ) : item.path === '/popular' && isLinkActive(item.path) ? (
+                        <Fire theme="filled" size="22" className="sidebar-icon" />
+                      ) : (
+                        item.icon
+                      )}
+                      <span className="ml-3">{item.name}</span>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center p-2 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-md">
+                      {item.icon}
+                      <span className="ml-3">{item.name}</span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 分隔线 */}
+          <div className="border-b border-neutral-200 dark:border-zinc-800 mb-4"></div>
+
+          {/* 分类 */}
           {categories.map((category, index) => (
             <div key={index} className="mb-6">
-              <h3 className="mb-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider">{category.title}</h3>
-              <ul>
-                {category.items.map((item, itemIndex) => (
-                  <li key={itemIndex}>
-                    {item.path ? (
-                      <Link href={item.path} className="flex items-center p-2 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-md">
-                        {item.icon}
-                        <span className="ml-3">{item.name}</span>
-                      </Link>
-                    ) : (
-                      <div className="flex items-center p-2 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-md">
-                        {item.icon}
-                        <span className="ml-3">{item.name}</span>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <div 
+                className="flex items-center justify-between mb-2 cursor-pointer"
+                onClick={() => toggleCategory(category.title)}
+              >
+                <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                  {category.title}
+                </h3>
+                <Down 
+                  theme="outline" 
+                  size="14" 
+                  className={`text-neutral-400 transition-transform duration-300 ${expandedCategories[category.title] ? 'rotate-180' : ''}`}
+                />
+              </div>
+              {expandedCategories[category.title] && (
+                <ul className="transition-all duration-300">
+                  {category.items.map((item, itemIndex) => (
+                    <li key={itemIndex}>
+                      {item.path ? (
+                        <Link 
+                          href={item.path} 
+                          className={`flex items-center p-2 rounded-md ${
+                            isLinkActive(item.path) 
+                              ? 'bg-neutral-200 dark:bg-zinc-700 text-neutral-900 dark:text-white' 
+                              : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800'
+                          }`}
+                        >
+                          {item.path === '/category/tech' && isLinkActive(item.path) ? (
+                            <Code theme="filled" size="22" className="sidebar-icon" />
+                          ) : item.path === '/category/entertainment' && isLinkActive(item.path) ? (
+                            <VideoOne theme="filled" size="22" className="sidebar-icon" />
+                          ) : (
+                            item.icon
+                          )}
+                          <span className="ml-3">{item.name}</span>
+                        </Link>
+                      ) : (
+                        <div className="flex items-center p-2 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-md">
+                          {item.icon}
+                          <span className="ml-3">{item.name}</span>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>

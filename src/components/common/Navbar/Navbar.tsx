@@ -12,9 +12,9 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-white dark:bg-dark-primary border-b border-neutral-200 dark:border-zinc-800">
-      <div className="container mx-auto flex items-center justify-between h-14 px-4">
-        {/* Logo */}
-        <div className="flex items-center">
+      <div className="flex items-center justify-between h-14 px-4 md:px-6 lg:px-8">
+        {/* Logo - 左侧固定宽度 */}
+        <div className="flex-shrink-0 w-32">
           <Link href="/" className="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" className="h-8 w-8 text-primary">
               <g>
@@ -26,8 +26,8 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 mx-6 relative max-w-xl">
+        {/* Search Bar - 中间自适应宽度 */}
+        <div className="flex-1 max-w-xl px-4">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search theme="outline" size="20" fill="currentColor" className="text-neutral-400" />
@@ -42,8 +42,8 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Avatar and Theme Toggle */}
-        <div className="flex items-center space-x-3">
+        {/* Avatar and Theme Toggle - 右侧固定宽度 */}
+        <div className="flex-shrink-0 w-32 flex items-center justify-end space-x-3">
           <ThemeToggle />
           <div 
             className="cursor-pointer relative"
