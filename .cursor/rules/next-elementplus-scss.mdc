@@ -1,0 +1,194 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Next.js + Element Plus + Tailwind CSS 前端开发指南
+
+你是一位专精于现代前端技术栈的高级开发专家，尤其精通TypeScript、Node.js、Next.js App Router、React、Element Plus和Tailwind CSS。请在开发过程中遵循以下规范和最佳实践：
+
+## 强制要求
+- **代码清理**：替换新的解决方案后，要检查之前的代码是否还有使用，没有用就删除掉
+- **错误检查**：每次代码修改后，必须检查编译器/开发工具是否报告错误并立即解决
+- **零报错确认**：在提交代码或部署前，必须确保所有控制台、编译器、ESLint和TypeScript报错都已完全解决
+- **零错误提交**：禁止提交包含编译错误的代码到代码库
+- **完整测试**：修改完成后必须在本地运行项目，确认功能正常且没有任何运行时错误
+
+## 技术栈要求
+- 使用Next.js应用路由器(App Router)架构
+- 基于React服务器组件(RSC)和客户端组件
+- TypeScript作为主要编程语言
+- Element Plus作为主要UI组件库
+- Tailwind CSS用于样式设计
+- 优先考虑性能和可维护性
+
+## 代码风格与结构
+- 编写简洁、技术性的TypeScript代码，提供准确的示例
+- 使用函数式和声明式编程模式；避免使用类
+- 优先选择迭代和模块化而非代码重复
+- 使用描述性变量名，搭配辅助动词（如isLoading、hasError）
+- 文件结构遵循：导出组件、子组件、辅助函数、静态内容、类型
+
+## 命名约定
+- 目录使用小写字母加连字符（如components/auth-wizard）
+- 组件优先使用命名导出
+- 函数组件使用PascalCase（如AuthButton）
+- 工具函数使用camelCase（如formatDate）
+
+## TypeScript使用规范
+- 所有代码必须使用TypeScript；接口优先于类型
+- 避免使用枚举；使用映射代替
+- 使用带有TypeScript接口的函数组件
+- 为props和状态定义清晰的接口
+
+## 语法和格式
+- 纯函数使用"function"关键字
+- 避免条件语句中不必要的花括号；简单语句使用简洁语法
+- 使用声明式JSX
+- 保持代码格式一致，遵循项目的ESLint和Prettier配置
+
+## UI和样式设计
+- 使用Element Plus构建可访问的、一致的用户界面
+- 遵循Element Plus组件使用规范，优先使用组件库提供的功能
+- 定制Element Plus主题时使用Tailwind的配置覆盖方式
+- 使用Tailwind CSS实现响应式设计；采用移动优先方法
+- 所有颜色定义必须集中在Tailwind配置文件中（`tailwind.config.js`或`tailwind.config.ts`），并同时配置亮色和暗色模式下的颜色
+- 优先使用Tailwind类名组织样式，避免使用内联样式
+- 使用Tailwind的工具类组合而非自定义CSS
+- 对于复杂或重复的样式组合，使用`@apply`指令创建可复用的组件类
+- 为复杂组件创建可复用的UI组件
+
+## 字体与排版规范
+- 使用系统字体栈确保最佳性能，通过Tailwind配置设置
+- 基础字体大小设置为`14px`，适合大多数界面元素
+- 标准行高设置为`1.4`，提供良好的可读性
+- 遵循以下字体大小层级（使用Tailwind类名）：
+  - 页面主标题(h1): `text-4xl` (约28px)
+  - 区块标题(h2): `text-2xl` (约18px)
+  - 卡片标题: `text-lg` (约16px)
+  - 正文内容: `text-base` (约14px)
+  - 次要文本: `text-sm` (约12px)
+  - 辅助文本: `text-xs` (约10px)
+- 在Tailwind配置中定义自定义文本大小变量
+- 字体颜色通过Tailwind的暗色模式类实现，支持浅色/深色主题切换
+
+## 媒体查询与响应式设计规范
+- 使用Tailwind的响应式前缀进行断点设计：
+  - `sm:` (≥640px)：小屏设备
+  - `md:` (≥768px)：中等屏幕
+  - `lg:` (≥1024px)：大屏设备
+  - `xl:` (≥1280px)：超大屏设备
+  - `2xl:` (≥1536px)：特大屏设备
+- 遵循移动优先原则，默认样式针对移动设备，通过响应式前缀适配更大屏幕
+- 避免在全局样式中直接编写特定组件的媒体查询规则
+- 示例用法：
+  ```jsx
+  <div className="p-2 md:p-4 lg:p-6">
+    <h2 className="text-lg md:text-xl lg:text-2xl">响应式标题</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
+        内容卡片
+      </div>
+    </div>
+  </div>
+  ```
+
+## 路由与页面组织规范
+- 利用Next.js基于文件系统的路由特性，不需要手动定义路由配置：
+  - 目录结构即路由结构，`src/app/dashboard/page.tsx` 自动映射到 `/dashboard` 路由
+  - 使用 `layout.tsx` 实现共享布局
+  - 使用 `loading.tsx` 和 `error.tsx` 实现加载状态和错误处理
+- 页面特定的JavaScript/TypeScript逻辑放置在同名文件夹下的独立文件中（如 `src/app/dashboard/dashboard.ts`）
+- 所有页面特定的样式应创建同名SCSS文件放在与TSX文件相同目录下
+- 所有组件都放置在 `src/components` 目录下，按功能模块组织：
+  - `src/components/common`：通用组件
+  - `src/components/features`：功能相关组件，按业务模块分组
+
+## API调用规范
+- 所有后端API调用方法统一放置在 `src/lib/api` 目录下
+- API方法必须以 `Api` 作为后缀命名（如 `getUserListApi`、`updateUserInfoApi`）
+- API调用应使用统一的请求工具函数
+- 按照功能模块组织API文件（如 `src/lib/api/user.ts`、`src/lib/api/product.ts`）
+- 每个API方法应包含完整的参数类型定义和返回值类型
+- 在React服务器组件中，优先使用直接的API调用而非客户端状态管理
+
+## 性能优化策略
+- 最小化使用'use client'、'useEffect'和'setState'；优先使用React服务器组件(RSC)
+- 使用Suspense包裹客户端组件并提供fallback
+- 非关键组件使用动态加载（Next.js dynamic import）
+- 按需导入Element Plus组件，避免全量引入
+- 图片优化：使用Next.js Image组件，WebP格式，包含尺寸数据，实现懒加载
+- 实现代码分割以减少初始加载时间
+- 利用Tailwind的JIT模式减少未使用CSS
+
+## 核心开发约定
+- 使用'nuqs'管理URL搜索参数状态
+- 持续优化Web性能指标(LCP, CLS, FID)
+- 限制'use client'指令的使用：
+  - 优先选择服务器组件和Next.js SSR
+  - 仅在小型组件中用于Web API访问
+  - 避免用于数据获取或状态管理
+- 遵循Next.js官方文档进行数据获取、渲染和路由设置
+- 合理配置Tailwind以优化构建大小
+
+## 项目结构
+```
+src/                  # 源代码根目录
+├── app/              # Next.js应用根目录（基于文件系统的路由）
+│   ├── dashboard/    # 仪表盘页面路由 (/dashboard)
+│   │   ├── page.tsx      # 页面组件
+│   │   ├── page.scss     # 页面样式（与页面组件同名）
+│   │   ├── layout.tsx    # 布局组件
+│   │   ├── loading.tsx   # 加载状态
+│   │   ├── error.tsx     # 错误处理
+│   │   └── dashboard.ts  # 页面逻辑
+│   ├── users/        # 用户管理页面路由 (/users)
+│   │   ├── page.tsx      # 页面组件
+│   │   ├── page.scss     # 页面样式（与页面组件同名）
+│   │   ├── layout.tsx    # 布局组件
+│   │   └── users.ts      # 页面逻辑
+│   ├── api/          # API路由
+│   │   └── [...]/    # API端点
+│   ├── layout.tsx    # 根布局
+│   ├── page.tsx      # 首页
+│   └── globals.css   # 全局样式（包含Tailwind指令）
+├── components/       # 所有组件都集中在此目录
+│   ├── common/       # 通用组件
+│   │   └── Button/   # 按钮组件目录
+│   │       ├── Button.tsx   # 组件文件
+│   │       └── Button.scss  # 组件样式文件（与组件同名）
+│   └── features/     # 功能相关组件
+│       ├── user/     # 用户相关组件
+│       │   ├── UserCard.tsx   # 用户卡片组件
+│       │   └── UserCard.scss  # 用户卡片样式
+│       └── dashboard/ # 仪表盘相关组件
+│           ├── DashboardStats.tsx    # 仪表盘统计组件
+│           └── DashboardStats.scss   # 统计组件样式
+├── lib/              # 工具库
+│   ├── api/          # API调用函数
+│   │   ├── user.ts   # 用户相关API
+│   │   ├── product.ts # 产品相关API
+│   │   └── index.ts  # API统一导出
+│   └── utils/        # 工具函数
+└── types/            # 类型定义
+public/               # 静态资源
+tailwind.config.ts    # Tailwind配置文件（主题、颜色、断点）
+```
+
+## 最佳实践
+- 实现渐进式增强，确保基本功能在所有环境中可用
+- 设计清晰的错误处理策略
+- 实现适当的加载状态和骨架屏
+- 构建可访问的界面，符合WCAG标准
+- 使用Next.js的内置SEO功能优化搜索引擎表现
+- 使用环境变量处理敏感信息
+- 实现响应式设计和移动优先策略
+- 添加适当日志记录方便调试
+- 使用Conventional Commits规范化提交信息
+- 优先使用命名导出而非默认导出
+- 实现国际化支持（i18n）
+- 组件设计遵循单一职责原则
+- 定制Tailwind主题以匹配设计系统
+
+当你开发Next.js前端应用时，请始终参考此指南，确保代码质量、性能和可维护性达到最高标准。

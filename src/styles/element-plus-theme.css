@@ -1,0 +1,12 @@
+/* 自定义Element Plus主题 */
+.el-button--primary {
+  --el-button-bg-color: var(--primary-color);
+  --el-button-border-color: var(--primary-color);
+  --el-button-hover-bg-color: var(--primary-color);
+  --el-button-hover-border-color: var(--primary-color);
+}
+
+.el-input__inner {
+  background-color: var(--card-bg);
+  color: var(--foreground);
+} 

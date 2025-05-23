@@ -3,19 +3,48 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #DAE0E6;
+  --foreground: #1A1A1B;
+  --card-bg: #FFFFFF;
+  --border-color: #EDEFF1;
+  --primary-color: #FF4500;
+  --secondary-color: #0079D3;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1A1A1B;
+    --foreground: #D7DADC;
+    --card-bg: #272729;
+    --border-color: #343536;
+    --primary-color: #FF4500;
+    --secondary-color: #0079D3;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center px-4 py-2 rounded-md cursor-pointer hover:bg-neutral-100 dark:hover:bg-dark-secondary;
+  }
+  
+  .sidebar-icon {
+    @apply mr-3 text-lg text-neutral-400;
+  }
 }
