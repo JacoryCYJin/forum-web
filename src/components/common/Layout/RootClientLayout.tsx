@@ -21,16 +21,11 @@ export default function RootClientLayout({
   return (
     <ThemeProvider attribute="class" enableSystem defaultTheme="system" disableTransitionOnChange>
       <div className="flex flex-col min-h-screen">
-        <Navbar sidebarCollapsed={sidebarCollapsed} />
-        <div className="flex flex-1 mt-14">
-          <Sidebar 
-            onToggle={handleSidebarToggle} 
-          />
-          <main 
-            className={`flex-1 transition-all duration-300 ${
-              sidebarCollapsed ? 'ml-10' : 'ml-60'
-            }`}
-          >
+        <Sidebar onToggle={handleSidebarToggle} />
+        <Navbar />
+        <div className="flex flex-1 pt-14">
+          <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-10' : 'w-60'}`}></div>
+          <main className="flex-1">
             <div className="container mx-auto px-4 py-6">
               {children}
             </div>
