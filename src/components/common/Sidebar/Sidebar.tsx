@@ -91,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
   return (
     <aside
-      className={`h-screen bg-white dark:bg-dark-primary border-r border-neutral-200 dark:border-zinc-800 transition-all duration-300 ease-in-out fixed top-14 left-0 z-40 ${
+      className={`h-screen bg-white dark:bg-dark-primary border-r border-neutral-200 dark:border-zinc-800 transition-all duration-300 ease-in-out fixed top-0 left-0 z-40 ${
         isCollapsed ? 'w-10' : 'w-60'
       }`}
     >
@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
       <div className="relative">
         <button
           onClick={toggleSidebar}
-          className="absolute right-0 top-8 p-3 text-neutral-400 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-white rounded-full bg-white dark:bg-dark-primary border border-neutral-200 dark:border-zinc-700 shadow-md z-10"
+          className="absolute right-0 top-20 p-3 text-neutral-400 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-white rounded-full bg-white dark:bg-dark-primary border border-neutral-200 dark:border-zinc-700 shadow-md z-10"
           style={{ transform: 'translateX(50%)' }}
         >
           <ActivitySource theme="outline" size="18" strokeLinejoin="miter"/>
@@ -108,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
       {/* 侧边栏内容 - 使用 opacity 和 width 过渡，避免闪烁 */}
       <div 
-        className={`overflow-y-auto h-[calc(100vh-6rem)] mt-4 pl-4 pr-7 transition-all duration-300 ease-in-out ${
+        className={`overflow-y-auto h-[calc(100vh-3.5rem)] mt-20 pl-4 pr-7 transition-all duration-300 ease-in-out ${
           isCollapsed 
             ? 'opacity-0 invisible w-0 pl-0 pr-0' 
             : 'opacity-100 visible w-full'
