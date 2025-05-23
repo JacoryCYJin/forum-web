@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ElMessage } from 'element-plus';
 import { MapPost } from '@/lib/api/posts';
-import AMapLoader from '@amap/amap-jsapi-loader';
 import './MapDisplay.css';
 
 // 为window对象添加_AMapSecurityConfig属性
@@ -91,79 +90,91 @@ export default function MapDisplay() {
 
   // 初始化高德地图
   useEffect(() => {
-    // 配置安全密钥（如果你的key是2021年12月2日后申请的，需要配置安全密钥）
-    window._AMapSecurityConfig = {
-      securityJsCode: '9bdea8960678552c012b993488a73203', // 请替换为你的安全密钥
+    // 确保代码只在浏览器环境中执行
+    if (typeof window === 'undefined') return;
+
+    // 动态导入AMapLoader，避免服务器端渲染问题
+    const loadMap = async () => {
+      try {
+        // 配置安全密钥（如果你的key是2021年12月2日后申请的，需要配置安全密钥）
+        window._AMapSecurityConfig = {
+          securityJsCode: '9bdea8960678552c012b993488a73203', // 请替换为你的安全密钥
+        };
+
+        // 动态导入AMapLoader
+        const AMapLoader = (await import('@amap/amap-jsapi-loader')).default;
+        const posts = generateRandomPosts();
+
+        // 加载高德地图API
+        const AMap = await AMapLoader.load({
+          key: '37fc8d676413b9a955a49104a6dc6bb9', // 高德地图API密钥
+          version: '2.0',
+          plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.ControlBar']
+        });
+
+        if (!mapRef.current) return;
+        
+        // 创建地图实例
+        const map = new AMap.Map(mapRef.current, {
+          zoom: 13, // 初始缩放级别
+          center: [116.397428, 39.90923], // 北京市中心
+          viewMode: '2D'
+        });
+        
+        // 添加控件
+        map.addControl(new AMap.Scale());
+        map.addControl(new AMap.ToolBar());
+        
+        // 保存地图实例到ref
+        mapInstance.current = map;
+        
+        // 添加标记
+        const markers = posts.map(post => {
+          // 计算透明度
+          const opacity = calculateOpacity(post.createdAt);
+          if (opacity <= 0) return null;
+
+          // 创建自定义内容的信息窗体
+          const infoWindow = new AMap.InfoWindow({
+            isCustom: true,
+            content: createInfoWindowContent(post),
+            offset: new AMap.Pixel(0, -30)
+          });
+
+          // 创建标记
+          const marker = new AMap.Marker({
+            position: [post.longitude, post.latitude],
+            title: post.title,
+            content: `<div class="map-marker" style="opacity:${opacity}"></div>`,
+            anchor: 'center'
+          });
+
+          // 绑定事件
+          marker.on('mouseover', () => {
+            infoWindow.open(map, marker.getPosition());
+          });
+          marker.on('mouseout', () => {
+            infoWindow.close();
+          });
+
+          return marker;
+        }).filter(Boolean);
+
+        // 将标记添加到地图
+        if (markers.length > 0) {
+          map.add(markers);
+          markersRef.current = markers;
+        }
+        
+        // 地图加载完成
+        setIsMapLoaded(true);
+      } catch (error) {
+        console.error('地图初始化失败:', error);
+        ElMessage.error('地图加载失败，请刷新页面重试');
+      }
     };
 
-    const posts = generateRandomPosts();
-
-    // 加载高德地图API
-    AMapLoader.load({
-      key: '37fc8d676413b9a955a49104a6dc6bb9', // 高德地图API密钥
-      version: '2.0',
-      plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.ControlBar']
-    }).then((AMap) => {
-      if (!mapRef.current) return;
-      
-      // 创建地图实例
-      const map = new AMap.Map(mapRef.current, {
-        zoom: 13, // 初始缩放级别
-        center: [116.397428, 39.90923], // 北京市中心
-        viewMode: '2D'
-      });
-      
-      // 添加控件
-      map.addControl(new AMap.Scale());
-      map.addControl(new AMap.ToolBar());
-      
-      // 保存地图实例到ref
-      mapInstance.current = map;
-      
-      // 添加标记
-      const markers = posts.map(post => {
-        // 计算透明度
-        const opacity = calculateOpacity(post.createdAt);
-        if (opacity <= 0) return null;
-
-        // 创建自定义内容的信息窗体
-        const infoWindow = new AMap.InfoWindow({
-          isCustom: true,
-          content: createInfoWindowContent(post),
-          offset: new AMap.Pixel(0, -30)
-        });
-
-        // 创建标记
-        const marker = new AMap.Marker({
-          position: [post.longitude, post.latitude],
-          title: post.title,
-          content: `<div class="map-marker" style="opacity:${opacity}"></div>`,
-          anchor: 'center'
-        });
-
-        // 绑定事件
-        marker.on('mouseover', () => {
-          infoWindow.open(map, marker.getPosition());
-        });
-        marker.on('mouseout', () => {
-          infoWindow.close();
-        });
-
-        return marker;
-      }).filter(Boolean);
-
-      // 将标记添加到地图
-      if (markers.length > 0) {
-        map.add(markers);
-        markersRef.current = markers;
-      }
-      
-      // 地图加载完成
-      setIsMapLoaded(true);
-    }).catch((e) => {
-      console.error('地图初始化失败:', e);
-      ElMessage.error('地图加载失败，请刷新页面重试');
-    });
+    loadMap();
 
     // 组件卸载时清理地图实例
     return () => {

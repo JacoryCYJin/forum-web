@@ -1,20 +1,20 @@
 import Link from "next/link";
-import MapDisplay from "@/components/features/map/MapDisplay";
 import Footer from "@/components/common/Footer/Footer";
+import MapWrapper from "./MapWrapper";
 
 export default function MapPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* 地图组件占据主要空间 */}
       <div className="flex-grow relative">
-        <MapDisplay />
+        <MapWrapper />
 
         {/* 顶部项目名称和介绍 */}
         <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-10 text-center">
-          <h1 className="text-4xl font-bold text-white shadow-text mb-2">
+          <h1 className="text-4xl font-bold text-white mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
             综合性社区论坛
           </h1>
-          <p className="text-xl text-white shadow-text max-w-lg">
+          <p className="text-xl text-white max-w-lg px-4" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
             一个面向所有用户的互动型社区论坛，支持信息交流、资源分享与动态社交。在地图上发现身边的话题，让交流更智能、更有温度。
           </p>
         </div>
