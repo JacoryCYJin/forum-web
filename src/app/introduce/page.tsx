@@ -6,11 +6,11 @@ export default function MapPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* 地图组件占据主要空间 */}
-      <div className="flex-grow relative">
+      <div className="flex-grow relative" style={{ minHeight: 'calc(100vh - 80px)' }}>
         <MapWrapper />
 
         {/* 顶部项目名称和介绍 */}
-        <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-10 text-center">
+        <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-20 text-center">
           <h1 className="text-4xl font-bold text-white mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
             综合性社区论坛
           </h1>
@@ -20,7 +20,7 @@ export default function MapPage() {
         </div>
 
         {/* 进入论坛按钮，固定在屏幕中间底部 */}
-        <div className="absolute left-1/2 bottom-10 transform -translate-x-1/2 z-10">
+        <div className="absolute left-1/2 bottom-10 transform -translate-x-1/2 z-20">
           <Link
             href="/"
             className="bg-primary hover:bg-primary-dark text-white font-medium py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
@@ -44,7 +44,7 @@ export default function MapPage() {
         </div>
 
         {/* 右侧功能介绍 */}
-        <div className="absolute right-10 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-dark-secondary bg-opacity-90 dark:bg-opacity-90 p-6 rounded-lg shadow-lg max-w-xs">
+        <div className="absolute right-10 top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-dark-secondary bg-opacity-90 dark:bg-opacity-90 p-6 rounded-lg shadow-lg max-w-xs">
           <h2 className="text-2xl font-bold text-neutral-800 dark:text-white mb-4">
             平台特色
           </h2>

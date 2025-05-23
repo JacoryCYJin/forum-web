@@ -93,9 +93,14 @@ export default function MapDisplay() {
     // 确保代码只在浏览器环境中执行
     if (typeof window === 'undefined') return;
 
+    // 显示加载状态
+    setIsMapLoaded(false);
+
     // 动态导入AMapLoader，避免服务器端渲染问题
     const loadMap = async () => {
       try {
+        console.log('开始加载高德地图...');
+        
         // 配置安全密钥（如果你的key是2021年12月2日后申请的，需要配置安全密钥）
         window._AMapSecurityConfig = {
           securityJsCode: '9bdea8960678552c012b993488a73203', // 请替换为你的安全密钥
@@ -105,6 +110,8 @@ export default function MapDisplay() {
         const AMapLoader = (await import('@amap/amap-jsapi-loader')).default;
         const posts = generateRandomPosts();
 
+        console.log('AMapLoader导入成功，开始加载地图API...');
+
         // 加载高德地图API
         const AMap = await AMapLoader.load({
           key: '37fc8d676413b9a955a49104a6dc6bb9', // 高德地图API密钥
@@ -112,7 +119,12 @@ export default function MapDisplay() {
           plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.ControlBar']
         });
 
-        if (!mapRef.current) return;
+        console.log('高德地图API加载成功，开始初始化地图...');
+
+        if (!mapRef.current) {
+          console.error('地图容器不存在');
+          return;
+        }
         
         // 创建地图实例
         const map = new AMap.Map(mapRef.current, {
@@ -121,12 +133,16 @@ export default function MapDisplay() {
           viewMode: '2D'
         });
         
+        console.log('地图实例创建成功，添加控件...');
+        
         // 添加控件
         map.addControl(new AMap.Scale());
         map.addControl(new AMap.ToolBar());
         
         // 保存地图实例到ref
         mapInstance.current = map;
+        
+        console.log('开始添加标记...');
         
         // 添加标记
         const markers = posts.map(post => {
@@ -166,6 +182,8 @@ export default function MapDisplay() {
           markersRef.current = markers;
         }
         
+        console.log('地图加载完成，标记添加成功');
+        
         // 地图加载完成
         setIsMapLoaded(true);
       } catch (error) {
@@ -187,7 +205,7 @@ export default function MapDisplay() {
   return (
     <div className="w-full h-full relative">
       {/* 地图容器 */}
-      <div ref={mapRef} className="w-full h-full"></div>
+      <div ref={mapRef} id="map-container" className="w-full h-full" style={{ minHeight: '500px' }}></div>
       
       {/* 地图加载中的占位显示 */}
       <div className={`absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 z-10 map-loading ${isMapLoaded ? 'hidden' : ''}`}>

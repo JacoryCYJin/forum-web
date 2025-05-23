@@ -56,12 +56,19 @@
 .map-loading {
   opacity: 1;
   transition: opacity 0.5s ease;
+  z-index: 100;
 }
 
 /* 当地图加载完成后，通过JS添加此类来隐藏加载状态 */
 .map-loading.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* 确保地图容器正确显示 */
+.amap-container {
+  width: 100%;
+  height: 100%;
 }
 
 /* 暗色模式 */
