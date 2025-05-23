@@ -28,7 +28,7 @@ export default function RootClientLayout({
           />
           <main 
             className={`flex-1 transition-all duration-300 ${
-              sidebarCollapsed ? 'ml-16' : 'ml-64'
+              sidebarCollapsed ? 'ml-10' : 'ml-60'
             }`}
           >
             <div className="container mx-auto px-4 py-6">
@@ -36,7 +36,11 @@ export default function RootClientLayout({
             </div>
           </main>
         </div>
-        <Footer />
+        <div className={`transition-all duration-300 ${
+          sidebarCollapsed ? 'ml-10' : 'ml-60'
+        }`}>
+          <Footer />
+        </div>
       </div>
     </ThemeProvider>
   );

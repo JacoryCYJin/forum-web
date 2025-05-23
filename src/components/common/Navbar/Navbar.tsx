@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/common/ThemeToggle/ThemeToggle';
-import { Search } from '@icon-park/react';
+import { Search, User } from '@icon-park/react';
+import LoginDialog from './LoginDialog';
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [loginDialogVisible, setLoginDialogVisible] = useState(false);
 
   return (
     <nav className="sticky top-0 z-50 bg-white dark:bg-dark-primary border-b border-neutral-200 dark:border-zinc-800">
@@ -40,17 +42,25 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Auth Buttons */}
-        <div className="flex items-center space-x-2">
+        {/* Avatar and Theme Toggle */}
+        <div className="flex items-center space-x-3">
           <ThemeToggle />
-          <button className="hidden sm:block px-4 py-1 text-sm font-medium text-secondary border border-secondary rounded-full hover:bg-secondary hover:text-white transition-colors">
-            登录
-          </button>
-          <button className="px-4 py-1 text-sm font-medium text-white bg-primary rounded-full hover:bg-primary-hover transition-colors">
-            注册
-          </button>
+          <div 
+            className="cursor-pointer relative"
+            onClick={() => setLoginDialogVisible(true)}
+          >
+            <div className="w-9 h-9 rounded-full bg-neutral-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden border-2 border-primary hover:border-secondary transition-colors">
+              <User theme="outline" size="22" className="text-neutral-500 dark:text-neutral-300" />
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* 登录弹窗 */}
+      <LoginDialog 
+        visible={loginDialogVisible} 
+        onClose={() => setLoginDialogVisible(false)} 
+      />
     </nav>
   );
 };

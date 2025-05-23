@@ -59,7 +59,7 @@ const Footer: React.FC = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <span>contact@example.com</span>
+                <span>chengyue.jin@outlook.com</span>
               </p>
               <p className="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,9 +102,9 @@ const Footer: React.FC = () => {
               ))}
             </div>
             
-            <Link href="/contact" className="text-secondary-500 hover:text-secondary-600 dark:hover:text-secondary-400 font-medium">
+            {/* <Link href="/contact" className="text-secondary-500 hover:text-secondary-600 dark:hover:text-secondary-400 font-medium">
               发送消息 →
-            </Link>
+            </Link> */}
           </div>
         </div>
         
