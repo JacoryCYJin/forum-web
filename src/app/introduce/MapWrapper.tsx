@@ -38,7 +38,7 @@ export default function MapWrapper() {
   }
 
   return (
-    <div className="w-full h-full" style={{ height: '100vh' }}>
+    <div className="w-full h-full fixed inset-0" style={{ height: '100vh' }}>
       <MapDisplay />
     </div>
   );

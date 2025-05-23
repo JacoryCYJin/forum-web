@@ -1,11 +1,12 @@
 import Link from "next/link";
 import MapWrapper from "./MapWrapper";
+import Footer from "@/components/common/Footer/Footer";
 
 export default function MapPage() {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col">
       {/* 地图组件占据整个屏幕 */}
-      <div className="flex-grow relative h-screen">
+      <div className="relative h-screen">
         <MapWrapper />
 
         {/* 顶部项目名称和介绍 */}
@@ -134,6 +135,32 @@ export default function MapPage() {
             </li>
           </ul>
         </div>
+        
+        {/* 向下滚动提示 */}
+        {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-20 text-white text-center animate-bounce">
+          <div className="flex flex-col items-center">
+            <span className="text-sm mb-1">向下滚动了解更多</span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+              />
+            </svg>
+          </div>
+        </div> */}
+      </div>
+      
+      {/* 页脚 - 正常布局，需要滚动才能看到 */}
+      <div className="relative z-50">
+        <Footer />
       </div>
     </div>
   );
