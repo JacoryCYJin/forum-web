@@ -1,0 +1,84 @@
+.map-marker {
+  width: 16px;
+  height: 16px;
+  background-color: var(--el-color-primary);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(var(--el-color-primary-rgb), 0.7);
+  }
+  
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(var(--el-color-primary-rgb), 0);
+  }
+  
+  100% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(var(--el-color-primary-rgb), 0);
+  }
+}
+
+.info-window {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0.75rem;
+  width: 16rem;
+}
+
+.info-window h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.info-window p {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.info-window .footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* 地图加载状态 */
+.map-loading {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+/* 当地图加载完成后，通过JS添加此类来隐藏加载状态 */
+.map-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .info-window {
+    background-color: #1a1a1a;
+  }
+  
+  .info-window h3 {
+    color: #f0f0f0;
+  }
+  
+  .info-window p {
+    color: #d0d0d0;
+  }
+  
+  .info-window .footer {
+    color: #a0a0a0;
+  }
+} 

@@ -69,6 +69,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
       icon: <Fire theme="outline" size="22" className="sidebar-icon" />,
       path: '/popular',
     },
+    {
+      name: '地图',
+      icon: <Fire theme="outline" size="22" className="sidebar-icon" />,
+      path: '/introduce',
+    },
   ];
 
   const categories: SidebarCategory[] = [

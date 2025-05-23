@@ -62,23 +62,6 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      {/* <div className="bg-gradient-to-r from-primary to-primary-light text-white p-4 rounded-lg mb-6 shadow-md">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold mb-2">实时地图</h2>
-            <p className="text-white text-opacity-90">查看用户在地图上的实时动态</p>
-          </div>
-          <Link 
-            href="/map" 
-            className="bg-white text-primary hover:bg-gray-100 px-4 py-2 rounded-full font-medium transition-colors duration-300 flex items-center"
-          >
-            <span>查看地图</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-      </div> */}
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-neutral-800 dark:text-white">热门帖子</h1>
