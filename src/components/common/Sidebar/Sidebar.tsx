@@ -125,7 +125,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
         {/* 侧边栏内容 - 使用 opacity 和 width 过渡，避免闪烁 */}
         <div 
-          className={`overflow-y-auto h-full pl-4 pr-7 mt-6 transition-all duration-300 ease-in-out ${
+          className={`overflow-y-auto h-full pl-4 pr-7 mt-4 transition-all duration-300 ease-in-out ${
             isCollapsed 
               ? 'opacity-0 invisible w-0 pl-0 pr-0' 
               : 'opacity-100 visible w-full'
