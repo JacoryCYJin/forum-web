@@ -3,16 +3,12 @@
  * @description 包含登录对话框的所有业务逻辑处理方法
  */
 
-import { AuthStep, DialogHandlersConfig, DialogHandlers } from "@/types/login";
-
-/**
- * 动画方向枚举
- */
-export enum AnimationDirection {
-  LEFT = "left",
-  RIGHT = "right",
-  NONE = "none",
-}
+import { 
+  AuthStep, 
+  AnimationDirection, 
+  DialogHandlersConfig, 
+  DialogHandlers 
+} from "@/types/LoginDialog";
 
 /**
  * 登录对话框的工具方法集合

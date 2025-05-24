@@ -1,9 +1,16 @@
 /**
- * @file 认证相关类型定义
+ * @file 登录对话框类型定义
  * @description 包含登录、注册、忘记密码等认证流程的类型定义
  */
 
-import { AnimationDirection } from "@/components/common/Navbar/LoginDialog.";
+/**
+ * 动画方向枚举
+ */
+export enum AnimationDirection {
+  LEFT = "left",
+  RIGHT = "right",
+  NONE = "none",
+}
 
 /**
  * 认证步骤枚举

@@ -18,7 +18,7 @@ export default {
           DEFAULT: "#FF4500", // Reddit橙色
           light: "#FF7043", // 浅色版本
           hover: "#FF5722", // 悬停色
-          dark: "#E64A19", // 深色版本
+          // dark: "#E64A19", // 深色版本
           50: "#FFF3E0",
           100: "#FFE0B2",
           200: "#FFCC80",

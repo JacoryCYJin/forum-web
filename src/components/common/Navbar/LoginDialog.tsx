@@ -12,19 +12,23 @@ import "./LoginDialog.css";
 import type {
   LoginDialogProps,
   AuthStep,
+  AnimationDirection,
   LogoProps,
   LoginPanelProps,
   RegisterPanelProps,
   ForgotPasswordPanelProps,
   AvatarPanelProps,
   TagsPanelProps,
-} from "@/types/login";
+} from "@/types/LoginDialog";
 
 // 导入枚举
-import { AuthStep as AuthStepEnum } from "@/types/login";
+import {
+  AuthStep as AuthStepEnum,
+  AnimationDirection as AnimationDirectionEnum,
+} from "@/types/LoginDialog";
 
 // 导入工具方法
-import { LoginDialogUtils, AnimationDirection } from "./LoginDialog.";
+import { LoginDialogUtils } from "./LoginDialog.utils";
 
 /**
  * Logo组件
@@ -56,7 +60,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
   toggleAuthMode,
   onForgotPassword,
   isSliding = false,
-  slideDirection = AnimationDirection.NONE,
+  slideDirection = AnimationDirectionEnum.NONE,
 }) => {
   return (
     <div
@@ -130,7 +134,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   handleRegister,
   toggleAuthMode,
   isSliding = false,
-  slideDirection = AnimationDirection.NONE,
+  slideDirection = AnimationDirectionEnum.NONE,
 }) => {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
@@ -239,7 +243,7 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
   handleResetPassword,
   toggleAuthMode,
   isSliding = false,
-  slideDirection = AnimationDirection.NONE,
+  slideDirection = AnimationDirectionEnum.NONE,
 }) => {
   return (
     <div
@@ -326,7 +330,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
   handleAvatarSubmit,
   skipCurrentStep,
   isSliding = false,
-  slideDirection = AnimationDirection.NONE,
+  slideDirection = AnimationDirectionEnum.NONE,
 }) => {
   return (
     <div
@@ -406,7 +410,7 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
   skipCurrentStep,
   onPreviousStep,
   isSliding = false,
-  slideDirection = AnimationDirection.NONE,
+  slideDirection = AnimationDirectionEnum.NONE,
 }) => {
   return (
     <div
@@ -422,7 +426,7 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
         {availableTags.map((tag, index) => (
           <button
             key={index}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 border-2 border-neutral-200 dark:border-neutral-700 ${
               selectedTags.includes(tag)
                 ? "bg-primary text-white shadow-sm"
                 : "bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600"
@@ -482,7 +486,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   // 动画状态
   const [isSliding, setIsSliding] = useState(false);
   const [slideDirection, setSlideDirection] = useState<AnimationDirection>(
-    AnimationDirection.NONE
+    AnimationDirectionEnum.NONE
   );
 
   // 文件输入引用
