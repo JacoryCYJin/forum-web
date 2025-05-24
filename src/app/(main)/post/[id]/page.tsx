@@ -22,9 +22,10 @@ interface Comment {
 }
 
 // 生成静态元数据
-export function generateMetadata({ params }: { params: { id: string } }): Metadata {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   // 在实际应用中，应该通过API获取帖子信息
-  const postId = parseInt(params.id, 10);
+  const { id } = await params;
+  const postId = parseInt(id, 10);
   const post = mockPosts.find(p => p.id === postId);
 
   if (!post) {
@@ -125,8 +126,9 @@ const mockComments: Record<number, Comment[]> = {
   ]
 };
 
-export default function PostPage({ params }: { params: { id: string } }) {
-  const postId = parseInt(params.id, 10);
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const postId = parseInt(id, 10);
   const post = mockPosts.find(p => p.id === postId);
   const comments = mockComments[postId] || [];
 
