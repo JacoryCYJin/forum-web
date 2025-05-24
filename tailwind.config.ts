@@ -12,6 +12,8 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        "foreground-muted": "var(--foreground-muted)",
+        "foreground-subtle": "var(--foreground-subtle)",
         primary: {
           DEFAULT: "#FF4500", // Reddit橙色
           light: "#FF7043", // 添加浅色版本

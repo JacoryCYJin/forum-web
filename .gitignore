@@ -14,6 +14,11 @@
 /.cursor
 *.mdc
 
+# prompts
+/jsdoc-guide.md
+/next-element-plus-tailwindcss.md
+/project-architecture.md
+
 # testing
 /coverage
 

@@ -5,9 +5,12 @@
 :root {
   --background: #DAE0E6;
   --foreground: #1A1A1B;
+  --foreground-muted: #666666;
+  --foreground-subtle: #999999;
   --card-bg: #FFFFFF;
   --border-color: #EDEFF1;
-  --primary-color: #FF4500;
+  --primary: #FF4500;
+  --primary-rgb: 255, 69, 0;
   --secondary-color: #0079D3;
 }
 
@@ -15,9 +18,12 @@
   :root {
     --background: #1A1A1B;
     --foreground: #D7DADC;
+    --foreground-muted: #d0d0d0;
+    --foreground-subtle: #a0a0a0;
     --card-bg: #272729;
     --border-color: #343536;
-    --primary-color: #FF4500;
+    --primary: #FF4500;
+    --primary-rgb: 255, 69, 0;
     --secondary-color: #0079D3;
   }
 }

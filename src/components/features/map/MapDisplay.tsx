@@ -11,6 +11,7 @@ declare global {
     _AMapSecurityConfig: {
       securityJsCode: string;
     };
+    AMap: any;
   }
 }
 
@@ -89,13 +90,46 @@ export default function MapDisplay() {
     const diffMinutes = Math.floor((now - created) / (1000 * 60));
     const timeAgo = diffMinutes < 1 ? '刚刚' : `${diffMinutes}分钟前`;
 
+    // 直接使用固定颜色以确保显示正确
+    const bgColor = '#FFFFFF'; // 浅色模式下的背景色
+    const textColor = '#1A1A1B'; // 浅色模式下的文本色
+    const mutedColor = '#666666'; // 浅色模式下的次要文本色
+    const subtleColor = '#999999'; // 浅色模式下的辅助文本色
+
     return `
-      <div class="info-window">
-        <h3>${post.title}</h3>
-        <p>${post.content}</p>
-        <div class="footer">
-          <span>作者: ${post.author}</span>
-          <span>${timeAgo}</span>
+      <div class="info-window" style="background-color: ${bgColor}; color: ${textColor}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
+        <h3 style="color: ${textColor}; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">${post.title}</h3>
+        <p style="color: ${mutedColor}; margin: 0 0 10px 0; font-size: 14px;">${post.content}</p>
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+          <span style="color: ${subtleColor};">作者: ${post.author}</span>
+          <span style="color: ${subtleColor};">${timeAgo}</span>
+        </div>
+      </div>
+    `;
+  };
+
+  // 创建自定义标记内容
+  const createCustomMarker = (post: MapPost): string => {
+    const opacity = calculateOpacity(post.createdAt);
+    // 使用CSS变量，从Tailwind配置中获取primary颜色
+    const primaryColor = 'var(--primary)';
+    
+    // 为每个标记生成随机动画延迟和方向，使它们看起来各不相同
+    const randomDelay = Math.random() * 2; // 0-2秒的随机延迟
+    const randomDirection = Math.random() > 0.5 ? 1 : -1; // 随机方向
+    const randomDuration = 2 + Math.random() * 2; // 2-4秒的随机动画持续时间
+    
+    return `
+      <div class="custom-marker-container" style="opacity:${opacity}">
+        <div class="custom-marker" 
+             style="animation-delay:${randomDelay}s; 
+                    animation-duration:${randomDuration}s; 
+                    --random-direction:${randomDirection}">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C12 22 19.5 16 19.5 9.5C19.5 5.35786 16.1421 2 12 2C7.85786 2 4.5 5.35786 4.5 9.5C4.5 16 12 22 12 22Z" 
+                  fill="${primaryColor}" stroke="none"/>
+            <circle cx="12" cy="9.5" r="3" fill="white" stroke="none"/>
+          </svg>
         </div>
       </div>
     `;
@@ -131,6 +165,9 @@ export default function MapDisplay() {
           version: '2.0',
           plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.ControlBar']
         });
+
+        // 保存AMap到全局，方便调试
+        window.AMap = AMap;
 
         console.log('高德地图API加载成功，开始初始化地图...');
 
@@ -168,15 +205,18 @@ export default function MapDisplay() {
           const infoWindow = new AMap.InfoWindow({
             isCustom: true,
             content: createInfoWindowContent(post),
-            offset: new AMap.Pixel(0, -30)
+            offset: new AMap.Pixel(0, -30),
+            autoMove: true,
+            closeWhenClickMap: true
           });
 
-          // 创建标记 - 使用橙色主题
+          // 创建标记 - 使用自定义图标
           const marker = new AMap.Marker({
             position: [post.longitude, post.latitude],
             title: post.title,
-            content: `<div class="map-marker" style="opacity:${opacity}"></div>`,
-            anchor: 'center'
+            content: createCustomMarker(post),
+            anchor: 'bottom-center',
+            zIndex: 100
           });
 
           // 绑定事件
