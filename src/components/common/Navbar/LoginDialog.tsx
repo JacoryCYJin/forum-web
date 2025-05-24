@@ -18,10 +18,10 @@ import type {
   ForgotPasswordPanelProps,
   AvatarPanelProps,
   TagsPanelProps,
-} from "@/types/auth.types";
+} from "@/types/login";
 
 // 导入枚举
-import { AuthStep as AuthStepEnum } from "@/types/auth.types";
+import { AuthStep as AuthStepEnum } from "@/types/login";
 
 // 导入工具方法
 import { LoginDialogUtils, AnimationDirection } from "./LoginDialog.";

@@ -3,7 +3,7 @@
  * @description 包含登录对话框的所有业务逻辑处理方法
  */
 
-import { AuthStep, DialogHandlersConfig, DialogHandlers } from "@/types/auth.types";
+import { AuthStep, DialogHandlersConfig, DialogHandlers } from "@/types/login";
 
 /**
  * 动画方向枚举
