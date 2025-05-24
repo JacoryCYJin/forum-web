@@ -40,7 +40,7 @@ export default function MapDisplay() {
     const mockPosts: MapPost[] = [];
     const topics = ['今天天气真好', '附近有什么好吃的', '有人一起去看电影吗', '刚刚看到一只可爱的小猫', '这里交通太堵了'];
     const authors = ['用户A', '用户B', '用户C', '用户D', '用户E'];
-    
+
     // 生成30个随机帖子，分布在中国各地
     for (let i = 0; i < 30; i++) {
       // 随机选择一个城市作为基准点
@@ -51,7 +51,7 @@ export default function MapDisplay() {
       const randomLat = baseLocation.lat + (Math.random() * 2 - 1) * randomOffset;
       const randomTopic = topics[Math.floor(Math.random() * topics.length)];
       const randomAuthor = authors[Math.floor(Math.random() * authors.length)];
-      
+        
       // 随机时间，从现在到30分钟前
       const randomTime = new Date(Date.now() - Math.random() * 30 * 60 * 1000).toISOString();
       
@@ -64,7 +64,7 @@ export default function MapDisplay() {
         latitude: randomLat,
         createdAt: randomTime
       });
-    }
+      }
     
     return mockPosts;
   };
@@ -261,12 +261,12 @@ export default function MapDisplay() {
       {/* 地图容器 - 占满容器空间但不再固定定位 */}
       <div ref={mapRef} id="map-container" className="w-full h-full absolute top-0 left-0" style={{ minHeight: '100vh', zIndex: 1 }}></div>
       
-      {/* 地图加载中的占位显示 */}
+        {/* 地图加载中的占位显示 */}
       <div className={`absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 z-2 map-loading ${isMapLoaded ? 'hidden' : ''}`}>
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
-          <p className="mt-2 text-gray-700">地图加载中...</p>
-        </div>
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+              <p className="mt-2 text-gray-700">地图加载中...</p>
+            </div>
       </div>
     </div>
   );
