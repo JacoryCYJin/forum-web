@@ -19,6 +19,8 @@ export interface User {
   phone: string;
   /** 头像URL */
   avatar: string;
+  /** 个人简介 */
+  bio?: string;
   /** 注册时间 */
   createdAt: Date;
   /** 最后登录时间 */

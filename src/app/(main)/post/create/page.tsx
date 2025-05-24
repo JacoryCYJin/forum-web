@@ -28,7 +28,7 @@ export default function CreatePostPage() {
   // 如果还没有选择类型，显示选择界面
   if (!selectedType) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900 py-8">
+      <div className="min-h-screen dark:bg-zinc-900">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-8">
             <h1 className="text-3xl font-bold text-center mb-8 text-neutral-800 dark:text-white">
@@ -84,7 +84,7 @@ export default function CreatePostPage() {
 
   // 根据选择的类型显示对应的编辑器
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900">
+    <div className="min-h-screen dark:bg-zinc-900">
       {selectedType === PostType.TEXT_IMAGE && (
         <PostEditorText onCancel={handleBackToSelection} />
       )}

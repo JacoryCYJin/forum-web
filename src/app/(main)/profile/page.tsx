@@ -7,12 +7,26 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
-import { UserActivity, UserActivityType } from '@/types/user.types';
+import { UserActivity, UserActivityType, PostType } from '@/types/user.types';
 
 /**
  * 标签页类型
  */
-type TabType = 'activities' | 'likes' | 'favorites';
+type TabType = 'activities' | 'posts' | 'videos' | 'likes' | 'favorites';
+
+/**
+ * 帖子/视频数据接口
+ */
+interface UserPost {
+  id: string;
+  title: string;
+  type: PostType;
+  content: string;
+  createdAt: Date;
+  upvotes: number;
+  comments: number;
+  category: string;
+}
 
 /**
  * 用户个人主页组件
@@ -23,7 +37,61 @@ export default function ProfilePage() {
   const { user, userStats } = useUserStore();
   const [activeTab, setActiveTab] = useState<TabType>('activities');
   const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [userPosts, setUserPosts] = useState<UserPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * 模拟获取用户帖子和视频
+   */
+  const fetchUserPosts = async () => {
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockPosts: UserPost[] = [
+      {
+        id: '1',
+        title: 'Next.js 15 性能优化实践',
+        type: PostType.TEXT_IMAGE,
+        content: '分享一些Next.js 15的性能优化技巧...',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
+        upvotes: 124,
+        comments: 15,
+        category: '技术'
+      },
+      {
+        id: '2',
+        title: 'React Hook最佳实践视频教程',
+        type: PostType.VIDEO,
+        content: '详细讲解React Hook的使用方法和注意事项',
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5小时前
+        upvotes: 89,
+        comments: 8,
+        category: '教程'
+      },
+      {
+        id: '3',
+        title: '前端开发工具推荐',
+        type: PostType.TEXT_IMAGE,
+        content: '推荐一些实用的前端开发工具',
+        createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12小时前
+        upvotes: 67,
+        comments: 12,
+        category: '工具'
+      },
+      {
+        id: '4',
+        title: 'TypeScript进阶技巧分享',
+        type: PostType.VIDEO,
+        content: 'TypeScript高级特性的使用技巧',
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1天前
+        upvotes: 156,
+        comments: 23,
+        category: '技术'
+      }
+    ];
+    
+    setUserPosts(mockPosts);
+  };
 
   /**
    * 模拟获取用户动态数据
@@ -31,50 +99,53 @@ export default function ProfilePage() {
   const fetchUserActivities = async () => {
     setIsLoading(true);
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 获取用户帖子
+      await fetchUserPosts();
       
-      // 模拟数据
+      // 模拟API调用
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // 基于帖子生成动态
       const mockActivities: UserActivity[] = [
         {
           id: '1',
           type: UserActivityType.POST,
           description: '发布了新帖子《Next.js 15 性能优化实践》',
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           relatedId: '1',
           relatedType: 'post'
         },
         {
           id: '2',
-          type: UserActivityType.COMMENT,
-          description: '评论了帖子《使用Element Plus构建现代UI》',
-          createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5小时前
+          type: UserActivityType.POST,
+          description: '发布了新视频《React Hook最佳实践视频教程》',
+          createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
           relatedId: '2',
-          relatedType: 'post'
+          relatedType: 'video'
         },
         {
           id: '3',
           type: UserActivityType.LIKE,
-          description: '点赞了帖子《React服务器组件最佳实践》',
-          createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12小时前
+          description: '点赞了帖子《使用Element Plus构建现代UI》',
+          createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           relatedId: '3',
           relatedType: 'post'
         },
         {
           id: '4',
-          type: UserActivityType.FAVORITE,
-          description: '收藏了帖子《前端性能优化指南》',
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1天前
-          relatedId: '4',
+          type: UserActivityType.POST,
+          description: '发布了新帖子《前端开发工具推荐》',
+          createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+          relatedId: '3',
           relatedType: 'post'
         },
         {
           id: '5',
-          type: UserActivityType.FOLLOW,
-          description: '关注了用户 @技术专家',
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2天前
-          relatedId: '5',
-          relatedType: 'user'
+          type: UserActivityType.FAVORITE,
+          description: '收藏了帖子《前端性能优化指南》',
+          createdAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
+          relatedId: '4',
+          relatedType: 'post'
         }
       ];
       
@@ -134,6 +205,24 @@ export default function ProfilePage() {
   };
 
   /**
+   * 获取帖子类型图标
+   */
+  const getPostTypeIcon = (type: PostType) => {
+    if (type === PostType.VIDEO) {
+      return (
+        <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    );
+  };
+
+  /**
    * 格式化时间显示
    */
   const formatTimeAgo = (date: Date): string => {
@@ -151,10 +240,24 @@ export default function ProfilePage() {
   };
 
   /**
+   * 获取过滤后的帖子
+   */
+  const getFilteredPosts = () => {
+    if (activeTab === 'posts') {
+      return userPosts.filter(post => post.type === PostType.TEXT_IMAGE);
+    } else if (activeTab === 'videos') {
+      return userPosts.filter(post => post.type === PostType.VIDEO);
+    }
+    return userPosts;
+  };
+
+  /**
    * 标签页配置
    */
   const tabs = [
     { key: 'activities' as TabType, label: '我的动态', count: activities.length },
+    { key: 'posts' as TabType, label: '我的帖子', count: userPosts.filter(p => p.type === PostType.TEXT_IMAGE).length },
+    { key: 'videos' as TabType, label: '我的视频', count: userPosts.filter(p => p.type === PostType.VIDEO).length },
     { key: 'likes' as TabType, label: '我的点赞', count: 0 },
     { key: 'favorites' as TabType, label: '我的收藏', count: 0 }
   ];
@@ -162,7 +265,7 @@ export default function ProfilePage() {
   // 如果用户未登录，显示提示
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-4">
             请先登录
@@ -176,7 +279,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900 py-8">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4">
         {/* 用户信息卡片 */}
         <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
@@ -269,6 +372,7 @@ export default function ProfilePage() {
 
           {/* 标签页内容 */}
           <div className="p-6">
+            {/* 我的动态 */}
             {activeTab === 'activities' && (
               <div>
                 {isLoading ? (
@@ -319,6 +423,80 @@ export default function ProfilePage() {
               </div>
             )}
 
+            {/* 我的帖子 */}
+            {(activeTab === 'posts' || activeTab === 'videos') && (
+              <div>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, index) => (
+                      <div key={index} className="animate-pulse">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-10 h-10 bg-neutral-200 dark:bg-zinc-700 rounded-full"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-3/4"></div>
+                            <div className="h-3 bg-neutral-200 dark:bg-zinc-700 rounded w-1/2"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : getFilteredPosts().length > 0 ? (
+                  <div className="space-y-4">
+                    {getFilteredPosts().map(post => (
+                      <div key={post.id} className="p-4 border border-neutral-200 dark:border-zinc-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors">
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 w-10 h-10 bg-neutral-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                            {getPostTypeIcon(post.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
+                                {post.title}
+                              </h3>
+                              <span className="px-2 py-1 bg-neutral-100 dark:bg-zinc-700 rounded-full text-xs text-neutral-600 dark:text-neutral-300">
+                                {post.category}
+                              </span>
+                            </div>
+                            <p className="text-neutral-600 dark:text-neutral-400 mb-3">
+                              {post.content}
+                            </p>
+                            <div className="flex items-center space-x-4 text-sm text-neutral-500 dark:text-neutral-400">
+                              <span className="flex items-center">
+                                <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                </svg>
+                                {post.upvotes}
+                              </span>
+                              <span className="flex items-center">
+                                <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                                </svg>
+                                {post.comments}
+                              </span>
+                              <span>{formatTimeAgo(post.createdAt)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">
+                      暂无{activeTab === 'posts' ? '帖子' : '视频'}
+                    </h3>
+                    <p className="text-neutral-500 dark:text-neutral-400">
+                      开始创作您的第一个{activeTab === 'posts' ? '帖子' : '视频'}吧
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 我的点赞 */}
             {activeTab === 'likes' && (
               <div className="text-center py-12">
                 <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -333,6 +511,7 @@ export default function ProfilePage() {
               </div>
             )}
 
+            {/* 我的收藏 */}
             {activeTab === 'favorites' && (
               <div className="text-center py-12">
                 <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

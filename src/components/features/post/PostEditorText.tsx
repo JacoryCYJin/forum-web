@@ -152,7 +152,7 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   };
 
   return (
-    <div className="py-8">
+    <div>
       <div className="max-w-4xl mx-auto px-4">
         {/* 头部 */}
         <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
