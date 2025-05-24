@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import 'element-plus/dist/index.css';
 import '../styles/element-plus-theme.css';
-import RootClientLayout from '@/components/common/Layout/RootClientLayout';
+import BaseClientLayout from '@/components/common/Layout/BaseClientLayout';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={`${inter.className}`} suppressHydrationWarning>
-        <RootClientLayout>
+        <BaseClientLayout>
           {children}
-        </RootClientLayout>
+        </BaseClientLayout>
         
         {/* 开发环境下的全局方法 */}
         {process.env.NODE_ENV === 'development' && (

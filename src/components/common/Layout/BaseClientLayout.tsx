@@ -1,3 +1,8 @@
+/**
+ * @file 基础客户端布局组件
+ * @description 包含ThemeProvider、Navbar、Sidebar和Footer的完整布局
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -6,14 +11,28 @@ import Sidebar from '../Sidebar/Sidebar';
 import Footer from '../Footer/Footer';
 import { ThemeProvider } from 'next-themes';
 
-export default function RootClientLayout({
-  children,
-}: {
+/**
+ * 基础客户端布局组件Props
+ */
+interface BaseClientLayoutProps {
+  /** 子组件 */
   children: React.ReactNode;
-}) {
+}
+
+/**
+ * 基础客户端布局组件
+ * 
+ * 提供主题、导航栏、侧边栏和页脚，适用于大部分页面的完整布局
+ * 
+ * @component
+ * @param props - 组件属性
+ */
+export default function BaseClientLayout({ children }: BaseClientLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // 侧边栏折叠状态变更的回调函数
+  /**
+   * 处理侧边栏切换
+   */
   const handleSidebarToggle = (collapsed: boolean) => {
     setSidebarCollapsed(collapsed);
   };
