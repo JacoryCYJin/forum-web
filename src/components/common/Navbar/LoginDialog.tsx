@@ -24,7 +24,7 @@ import type {
 import { AuthStep as AuthStepEnum } from "@/types/auth.types";
 
 // 导入工具方法
-import { LoginDialogUtils } from "./LoginDialog.utils";
+import { LoginDialogUtils, AnimationDirection } from "./LoginDialog.";
 
 /**
  * Logo组件
@@ -55,15 +55,21 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
   handleLogin,
   toggleAuthMode,
   onForgotPassword,
-  isSliding,
+  isSliding = false,
+  slideDirection = AnimationDirection.NONE,
 }) => {
   return (
-    <div className={`auth-panel ${isSliding ? "slide-out-right" : ""}`}>
+    <div
+      className={LoginDialogUtils.getPanelAnimationClass(
+        isSliding,
+        slideDirection
+      )}
+    >
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         登录
       </h2>
       <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-12 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           账号
         </label>
         <input
@@ -75,7 +81,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         />
       </div>
       <div className="mb-8 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-12 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           密码
         </label>
         <input
@@ -87,10 +93,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         />
       </div>
       <div className="mt-8 text-center">
-        <button
-          onClick={handleLogin}
-          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
-        >
+        <button onClick={handleLogin} className="btn-primary">
           登录
         </button>
         <div className="mt-6 text-center">
@@ -126,12 +129,18 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   setPassword,
   handleRegister,
   toggleAuthMode,
-  isSliding,
+  isSliding = false,
+  slideDirection = AnimationDirection.NONE,
 }) => {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   return (
-    <div className={`auth-panel ${isSliding ? "slide-out-left" : ""}`}>
+    <div
+      className={LoginDialogUtils.getPanelAnimationClass(
+        isSliding,
+        slideDirection
+      )}
+    >
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         注册
       </h2>
@@ -197,7 +206,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         <button
           onClick={handleRegister}
           disabled={!agreeTerms}
-          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors font-medium"
+          className="btn-primary"
         >
           注册
         </button>
@@ -229,10 +238,16 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
   handleSendCode,
   handleResetPassword,
   toggleAuthMode,
-  isSliding,
+  isSliding = false,
+  slideDirection = AnimationDirection.NONE,
 }) => {
   return (
-    <div className={`auth-panel px-8 ${isSliding ? "slide-out-right" : ""}`}>
+    <div
+      className={LoginDialogUtils.getPanelAnimationClass(
+        isSliding,
+        slideDirection
+      )}
+    >
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         忘记密码
       </h2>
@@ -281,10 +296,7 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
         />
       </div>
       <div className="mt-8 text-center">
-        <button
-          onClick={handleResetPassword}
-          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
-        >
+        <button onClick={handleResetPassword} className="btn-primary">
           重置密码
         </button>
         <div className="mt-6 text-center">
@@ -313,9 +325,16 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
   handleAvatarUpload,
   handleAvatarSubmit,
   skipCurrentStep,
+  isSliding = false,
+  slideDirection = AnimationDirection.NONE,
 }) => {
   return (
-    <div className="auth-panel py-8">
+    <div
+      className={LoginDialogUtils.getPanelAnimationClass(
+        isSliding,
+        slideDirection
+      )}
+    >
       <h2 className="text-2xl font-bold mb-4 text-center text-neutral-500 dark:text-dark-neutral">
         上传头像
       </h2>
@@ -346,7 +365,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
         <span className="text-sm text-neutral-400 mt-1">点击上传头像</span>
       </div>
       <div className="mb-4 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-12 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           昵称
         </label>
         <input
@@ -358,10 +377,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
         />
       </div>
       <div className="mt-4 text-center">
-        <button
-          onClick={handleAvatarSubmit}
-          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
-        >
+        <button onClick={handleAvatarSubmit} className="btn-primary">
           下一步
         </button>
         <div className="mt-6 text-center">
@@ -388,9 +404,17 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
   toggleTag,
   handleTagsSubmit,
   skipCurrentStep,
+  onPreviousStep,
+  isSliding = false,
+  slideDirection = AnimationDirection.NONE,
 }) => {
   return (
-    <div className="auth-panel">
+    <div
+      className={LoginDialogUtils.getPanelAnimationClass(
+        isSliding,
+        slideDirection
+      )}
+    >
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         选择喜欢的分类
       </h2>
@@ -412,11 +436,17 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
       <div className="mt-8 text-center">
         <button
           onClick={handleTagsSubmit}
-          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors mx-auto block font-medium"
+          className="btn-primary mx-auto block"
         >
           完成
         </button>
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-x-4">
+          <button
+            onClick={onPreviousStep}
+            className="text-sm text-neutral-400 hover:text-primary transition-colors"
+          >
+            上一步
+          </button>
           <button
             onClick={skipCurrentStep}
             className="text-sm text-neutral-400 hover:text-primary transition-colors"
@@ -449,43 +479,47 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  // 滑动动画状态
+  // 动画状态
   const [isSliding, setIsSliding] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<AnimationDirection>(
+    AnimationDirection.NONE
+  );
 
   // 文件输入引用
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 可选标签列表
-  const availableTags = LoginDialogUtils.getAvailableTags();
+  // 使用工具类中的方法
+  const dialogUtils = LoginDialogUtils.createDialogHandlers({
+    currentStep,
+    setCurrentStep,
+    setIsSliding,
+    setSlideDirection,
+    onClose,
+    formData: {
+      phone,
+      password,
+      nickname,
+      avatar,
+      selectedTags,
+      verificationCode,
+      newPassword,
+    },
+    setters: {
+      setPhone,
+      setPassword,
+      setNickname,
+      setAvatar,
+      setSelectedTags,
+      setVerificationCode,
+      setNewPassword,
+    },
+  });
 
   // 判断红色区域是否在左侧
   const isRedOnLeft = LoginDialogUtils.isRedOnLeft(currentStep);
 
-  // 创建包装的处理函数
-  const handleLogin = () =>
-    LoginDialogUtils.handleLogin(phone, password, onClose);
-  const handleRegister = () =>
-    LoginDialogUtils.handleRegister(phone, password, setCurrentStep);
-  const handleSendCode = () => LoginDialogUtils.handleSendCode(phone);
-  const handleResetPassword = () =>
-    LoginDialogUtils.handleResetPassword(
-      phone,
-      verificationCode,
-      newPassword,
-      setCurrentStep
-    );
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) =>
-    LoginDialogUtils.handleAvatarUpload(e, setAvatar);
-  const handleAvatarSubmit = () =>
-    LoginDialogUtils.handleAvatarSubmit(avatar, nickname, setCurrentStep);
-  const toggleTag = (tag: string) =>
-    LoginDialogUtils.toggleTag(tag, selectedTags, setSelectedTags);
-  const handleTagsSubmit = () =>
-    LoginDialogUtils.handleTagsSubmit(selectedTags, onClose);
-  const toggleAuthMode = (mode: AuthStep) =>
-    LoginDialogUtils.toggleAuthMode(mode, setIsSliding, setCurrentStep);
-  const skipCurrentStep = () =>
-    LoginDialogUtils.skipCurrentStep(currentStep, setCurrentStep, onClose);
+  // 可选标签列表
+  const availableTags = LoginDialogUtils.getAvailableTags();
 
   return (
     <div
@@ -523,17 +557,14 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
           </button>
         </div>
 
-        <div className="flex h-full relative">
-          {/* 红色区域 - 根据步骤调整位置 */}
+        <div className="dialog-container">
+          {/* 红色区域 */}
           <div
-            className={`w-1/3 bg-primary transition-transform duration-300 ease-in-out relative ${
-              isRedOnLeft ? "translate-x-0" : "translate-x-[200%]"
+            className={`red-area ${
+              isRedOnLeft ? "red-on-left" : "red-on-right"
             }`}
           >
-            {/* Logo */}
-            <Logo isOnLeft={isRedOnLeft} />
-
-            {/* 圆弧效果 */}
+            <Logo />
             <div
               className={`absolute top-1/2 transform -translate-y-1/2 w-8 h-16 bg-white dark:bg-neutral-800 ${
                 isRedOnLeft ? "right-0 rounded-l-full" : "left-0 rounded-r-full"
@@ -541,10 +572,10 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
             ></div>
           </div>
 
-          {/* 白色内容区域 - 根据步骤调整位置 */}
+          {/* 白色内容区域 */}
           <div
-            className={`w-2/3 p-6 flex items-center justify-center transition-transform duration-300 ease-in-out bg-white dark:bg-neutral-800 ${
-              isRedOnLeft ? "translate-x-0" : "-translate-x-1/2"
+            className={`white-area ${
+              isRedOnLeft ? "red-on-left" : "red-on-right"
             }`}
           >
             {currentStep === AuthStepEnum.LOGIN && (
@@ -553,12 +584,15 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 setPhone={setPhone}
                 password={password}
                 setPassword={setPassword}
-                handleLogin={handleLogin}
-                toggleAuthMode={() => toggleAuthMode(AuthStepEnum.REGISTER)}
+                handleLogin={dialogUtils.handleLogin}
+                toggleAuthMode={() =>
+                  dialogUtils.toggleAuthMode(AuthStepEnum.REGISTER)
+                }
                 onForgotPassword={() =>
-                  toggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)
+                  dialogUtils.toggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)
                 }
                 isSliding={isSliding}
+                slideDirection={slideDirection}
               />
             )}
 
@@ -568,9 +602,12 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 setPhone={setPhone}
                 password={password}
                 setPassword={setPassword}
-                handleRegister={handleRegister}
-                toggleAuthMode={() => toggleAuthMode(AuthStepEnum.LOGIN)}
+                handleRegister={dialogUtils.handleRegister}
+                toggleAuthMode={() =>
+                  dialogUtils.toggleAuthMode(AuthStepEnum.LOGIN)
+                }
                 isSliding={isSliding}
+                slideDirection={slideDirection}
               />
             )}
 
@@ -582,10 +619,13 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 setVerificationCode={setVerificationCode}
                 newPassword={newPassword}
                 setNewPassword={setNewPassword}
-                handleSendCode={handleSendCode}
-                handleResetPassword={handleResetPassword}
-                toggleAuthMode={() => toggleAuthMode(AuthStepEnum.LOGIN)}
+                handleSendCode={dialogUtils.handleSendCode}
+                handleResetPassword={dialogUtils.handleResetPassword}
+                toggleAuthMode={() =>
+                  dialogUtils.toggleAuthMode(AuthStepEnum.LOGIN)
+                }
                 isSliding={isSliding}
+                slideDirection={slideDirection}
               />
             )}
 
@@ -595,9 +635,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 setNickname={setNickname}
                 avatar={avatar}
                 fileInputRef={fileInputRef}
-                handleAvatarUpload={handleAvatarUpload}
-                handleAvatarSubmit={handleAvatarSubmit}
-                skipCurrentStep={skipCurrentStep}
+                handleAvatarUpload={dialogUtils.handleAvatarUpload}
+                handleAvatarSubmit={dialogUtils.handleAvatarSubmit}
+                skipCurrentStep={dialogUtils.skipCurrentStep}
+                isSliding={isSliding}
+                slideDirection={slideDirection}
               />
             )}
 
@@ -605,9 +647,12 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
               <TagsPanel
                 availableTags={availableTags}
                 selectedTags={selectedTags}
-                toggleTag={toggleTag}
-                handleTagsSubmit={handleTagsSubmit}
-                skipCurrentStep={skipCurrentStep}
+                toggleTag={dialogUtils.toggleTag}
+                handleTagsSubmit={dialogUtils.handleTagsSubmit}
+                skipCurrentStep={dialogUtils.skipCurrentStep}
+                onPreviousStep={dialogUtils.handlePreviousStep}
+                isSliding={isSliding}
+                slideDirection={slideDirection}
               />
             )}
           </div>

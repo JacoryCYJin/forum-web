@@ -3,6 +3,19 @@
  * @description 包含登录、注册、忘记密码等认证流程的类型定义
  */
 
+import { AnimationDirection } from "@/components/common/Navbar/LoginDialog.";
+
+/**
+ * 认证步骤枚举
+ */
+export enum AuthStep {
+  LOGIN = "login",
+  REGISTER = "register", 
+  FORGOT_PASSWORD = "forgot_password",
+  AVATAR = "avatar",
+  TAGS = "tags",
+}
+
 /**
  * 登录对话框组件Props
  */
@@ -19,49 +32,35 @@ export interface LoginDialogProps {
 }
 
 /**
- * 认证流程步骤枚举
- */
-export enum AuthStep {
-  /**
-   * 登录步骤
-   */
-  LOGIN = "login",
-  
-  /**
-   * 注册步骤
-   */
-  REGISTER = "register",
-  
-  /**
-   * 忘记密码步骤
-   */
-  FORGOT_PASSWORD = "forgot_password",
-  
-  /**
-   * 头像设置步骤
-   */
-  AVATAR = "avatar",
-  
-  /**
-   * 标签选择步骤
-   */
-  TAGS = "tags",
-}
-
-/**
  * Logo组件Props
  */
 export interface LogoProps {
   /**
-   * Logo是否在左侧
+   * 是否在左侧（已废弃，现在始终显示）
+   * @deprecated Logo现在始终显示
    */
-  isOnLeft: boolean;
+  isOnLeft?: boolean;
+}
+
+/**
+ * 基础面板Props
+ */
+interface BasePanelProps {
+  /**
+   * 是否正在滑动
+   */
+  isSliding?: boolean;
+  
+  /**
+   * 滑动方向
+   */
+  slideDirection?: AnimationDirection;
 }
 
 /**
  * 登录面板组件Props
  */
-export interface LoginPanelProps {
+export interface LoginPanelProps extends BasePanelProps {
   /**
    * 手机号
    */
@@ -70,7 +69,7 @@ export interface LoginPanelProps {
   /**
    * 设置手机号的函数
    */
-  setPhone: (value: string) => void;
+  setPhone: (phone: string) => void;
   
   /**
    * 密码
@@ -80,10 +79,10 @@ export interface LoginPanelProps {
   /**
    * 设置密码的函数
    */
-  setPassword: (value: string) => void;
+  setPassword: (password: string) => void;
   
   /**
-   * 登录处理函数
+   * 处理登录的函数
    */
   handleLogin: () => void;
   
@@ -93,20 +92,15 @@ export interface LoginPanelProps {
   toggleAuthMode: () => void;
   
   /**
-   * 忘记密码处理函数
+   * 处理忘记密码的函数
    */
   onForgotPassword: () => void;
-  
-  /**
-   * 是否正在滑动动画中
-   */
-  isSliding: boolean;
 }
 
 /**
  * 注册面板组件Props
  */
-export interface RegisterPanelProps {
+export interface RegisterPanelProps extends BasePanelProps {
   /**
    * 手机号
    */
@@ -115,7 +109,7 @@ export interface RegisterPanelProps {
   /**
    * 设置手机号的函数
    */
-  setPhone: (value: string) => void;
+  setPhone: (phone: string) => void;
   
   /**
    * 密码
@@ -125,10 +119,10 @@ export interface RegisterPanelProps {
   /**
    * 设置密码的函数
    */
-  setPassword: (value: string) => void;
+  setPassword: (password: string) => void;
   
   /**
-   * 注册处理函数
+   * 处理注册的函数
    */
   handleRegister: () => void;
   
@@ -136,17 +130,12 @@ export interface RegisterPanelProps {
    * 切换认证模式的函数
    */
   toggleAuthMode: () => void;
-  
-  /**
-   * 是否正在滑动动画中
-   */
-  isSliding: boolean;
 }
 
 /**
  * 忘记密码面板组件Props
  */
-export interface ForgotPasswordPanelProps {
+export interface ForgotPasswordPanelProps extends BasePanelProps {
   /**
    * 手机号
    */
@@ -155,7 +144,7 @@ export interface ForgotPasswordPanelProps {
   /**
    * 设置手机号的函数
    */
-  setPhone: (value: string) => void;
+  setPhone: (phone: string) => void;
   
   /**
    * 验证码
@@ -165,7 +154,7 @@ export interface ForgotPasswordPanelProps {
   /**
    * 设置验证码的函数
    */
-  setVerificationCode: (value: string) => void;
+  setVerificationCode: (code: string) => void;
   
   /**
    * 新密码
@@ -175,15 +164,15 @@ export interface ForgotPasswordPanelProps {
   /**
    * 设置新密码的函数
    */
-  setNewPassword: (value: string) => void;
+  setNewPassword: (password: string) => void;
   
   /**
-   * 发送验证码处理函数
+   * 发送验证码的函数
    */
   handleSendCode: () => void;
   
   /**
-   * 重置密码处理函数
+   * 重置密码的函数
    */
   handleResetPassword: () => void;
   
@@ -191,17 +180,12 @@ export interface ForgotPasswordPanelProps {
    * 切换认证模式的函数
    */
   toggleAuthMode: () => void;
-  
-  /**
-   * 是否正在滑动动画中
-   */
-  isSliding: boolean;
 }
 
 /**
  * 头像设置面板组件Props
  */
-export interface AvatarPanelProps {
+export interface AvatarPanelProps extends BasePanelProps {
   /**
    * 昵称
    */
@@ -210,7 +194,7 @@ export interface AvatarPanelProps {
   /**
    * 设置昵称的函数
    */
-  setNickname: (value: string) => void;
+  setNickname: (nickname: string) => void;
   
   /**
    * 头像数据
@@ -223,12 +207,12 @@ export interface AvatarPanelProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   
   /**
-   * 头像上传处理函数
+   * 处理头像上传的函数
    */
   handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   
   /**
-   * 头像提交处理函数
+   * 提交头像和昵称的函数
    */
   handleAvatarSubmit: () => void;
   
@@ -241,24 +225,24 @@ export interface AvatarPanelProps {
 /**
  * 标签选择面板组件Props
  */
-export interface TagsPanelProps {
+export interface TagsPanelProps extends BasePanelProps {
   /**
    * 可选标签列表
    */
   availableTags: string[];
   
   /**
-   * 已选择的标签列表
+   * 已选标签列表
    */
   selectedTags: string[];
   
   /**
-   * 切换标签选择状态的函数
+   * 切换标签选择的函数
    */
   toggleTag: (tag: string) => void;
   
   /**
-   * 标签提交处理函数
+   * 提交标签选择的函数
    */
   handleTagsSubmit: () => void;
   
@@ -266,4 +250,82 @@ export interface TagsPanelProps {
    * 跳过当前步骤的函数
    */
   skipCurrentStep: () => void;
+  
+  /**
+   * 返回上一步的函数
+   */
+  onPreviousStep: () => void;
+}
+
+/**
+ * 对话框处理器配置接口
+ */
+export interface DialogHandlersConfig {
+  /**
+   * 当前步骤
+   */
+  currentStep: AuthStep;
+  
+  /**
+   * 设置当前步骤的函数
+   */
+  setCurrentStep: (step: AuthStep) => void;
+  
+  /**
+   * 设置滑动状态的函数
+   */
+  setIsSliding: (sliding: boolean) => void;
+  
+  /**
+   * 设置滑动方向的函数
+   */
+  setSlideDirection: (direction: AnimationDirection) => void;
+  
+  /**
+   * 关闭对话框的回调
+   */
+  onClose: () => void;
+  
+  /**
+   * 表单数据
+   */
+  formData: {
+    phone: string;
+    password: string;
+    nickname: string;
+    avatar: string | null;
+    selectedTags: string[];
+    verificationCode: string;
+    newPassword: string;
+  };
+  
+  /**
+   * 状态设置器
+   */
+  setters: {
+    setPhone: (phone: string) => void;
+    setPassword: (password: string) => void;
+    setNickname: (nickname: string) => void;
+    setAvatar: (avatar: string) => void;
+    setSelectedTags: (tags: string[]) => void;
+    setVerificationCode: (code: string) => void;
+    setNewPassword: (password: string) => void;
+  };
+}
+
+/**
+ * 对话框处理器接口
+ */
+export interface DialogHandlers {
+  handleLogin: () => void;
+  handleRegister: () => void;
+  handleSendCode: () => void;
+  handleResetPassword: () => void;
+  handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAvatarSubmit: () => void;
+  toggleTag: (tag: string) => void;
+  handleTagsSubmit: () => void;
+  toggleAuthMode: (mode: AuthStep) => void;
+  skipCurrentStep: () => void;
+  handlePreviousStep: () => void;
 } 

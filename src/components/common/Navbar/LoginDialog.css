@@ -2,18 +2,98 @@
  * 登录对话框组件样式
  */
 
+/* 按钮公共样式 */
+.btn-primary {
+  @apply py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium;
+}
+
+.btn-primary:disabled {
+  @apply bg-neutral-300 cursor-not-allowed;
+}
+
+.btn-primary:disabled:hover {
+  @apply bg-neutral-300;
+}
+
+/* 对话框容器 */
+.dialog-container {
+  @apply flex h-full relative;
+}
+
+/* 红色区域 */
+.red-area {
+  @apply w-1/3 bg-primary relative;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 白色区域 */
+.white-area {
+  @apply w-2/3 p-6 flex items-center justify-center bg-white dark:bg-neutral-800;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 红色区域在左侧时的位置（默认：登录、忘记密码） */
+.red-area.red-on-left {
+  transform: translateX(0);
+}
+
+.white-area.red-on-left {
+  transform: translateX(0);
+}
+
+/* 红色区域在右侧时的位置（注册、头像、标签） */
+.red-area.red-on-right {
+  transform: translateX(200%);
+}
+
+.white-area.red-on-right {
+  transform: translateX(-50%);
+}
+
+/* 内容面板基础样式 */
 .auth-panel {
   width: 100%;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
   opacity: 1;
 }
 
-.slide-out-right {
+/* 内容滑动动画 - 向右滑出 */
+.auth-panel.slide-out-right {
   transform: translateX(100%);
   opacity: 0;
 }
 
-.slide-out-left {
+/* 内容滑动动画 - 向左滑出 */
+.auth-panel.slide-out-left {
   transform: translateX(-100%);
   opacity: 0;
+}
+
+/* 内容滑动动画 - 从右侧滑入 */
+.auth-panel.slide-in-right {
+  transform: translateX(100%);
+  opacity: 0;
+  animation: slideInFromRight 0.3s ease-in-out forwards;
+}
+
+/* 内容滑动动画 - 从左侧滑入 */
+.auth-panel.slide-in-left {
+  transform: translateX(-100%);
+  opacity: 0;
+  animation: slideInFromLeft 0.3s ease-in-out forwards;
+}
+
+/* 动画关键帧 */
+@keyframes slideInFromRight {
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 } 
