@@ -5,10 +5,13 @@ import Link from 'next/link';
 import ThemeToggle from '@/components/common/ThemeToggle/ThemeToggle';
 import { Search, User } from '@icon-park/react';
 import LoginDialog from './LoginDialog';
+import UserDropdownMenu from './UserDropdownMenu';
+import { useUserStore } from '@/store/userStore';
 
 const Navbar: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loginDialogVisible, setLoginDialogVisible] = useState(false);
+  const { user } = useUserStore();
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-dark-primary border-b border-neutral-200 dark:border-zinc-800 z-50">
@@ -45,14 +48,22 @@ const Navbar: React.FC = () => {
         {/* Avatar and Theme Toggle - 右侧固定宽度 */}
         <div className="flex-shrink-0 w-32 flex items-center justify-end space-x-3">
           <ThemeToggle />
-          <div 
-            className="cursor-pointer relative"
-            onClick={() => setLoginDialogVisible(true)}
-          >
-            <div className="w-9 h-9 rounded-full bg-neutral-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden border-2 border-primary hover:border-secondary transition-colors">
-              <User theme="outline" size="22" className="text-neutral-500 dark:text-neutral-300" />
+          
+          {/* 用户登录状态显示 */}
+          {user ? (
+            /* 已登录：显示用户下拉菜单 */
+            <UserDropdownMenu />
+          ) : (
+            /* 未登录：显示登录按钮 */
+            <div 
+              className="cursor-pointer relative"
+              onClick={() => setLoginDialogVisible(true)}
+            >
+              <div className="w-9 h-9 rounded-full bg-neutral-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden border-2 border-primary hover:border-secondary transition-colors">
+                <User theme="outline" size="22" className="text-neutral-500 dark:text-neutral-300" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
