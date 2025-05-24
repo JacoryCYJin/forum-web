@@ -26,7 +26,7 @@
 }
 
 .info-window {
-  z-index: 900;
+  z-index: 90; /* 降低信息窗口的z-index */
   padding: 10px;
   max-width: 250px;
   border-radius: 6px;
@@ -58,7 +58,7 @@
 .map-loading {
   opacity: 1;
   transition: opacity 0.3s ease;
-  z-index: 100;
+  z-index: 5; /* 降低加载状态的z-index */
 }
 
 /* 当地图加载完成后，通过JS添加此类来隐藏加载状态 */
@@ -71,6 +71,12 @@
 .amap-container {
   width: 100%;
   height: 100%;
+  z-index: 1; /* 设置地图容器的z-index */
+}
+
+/* 降低高德地图控件的层级 */
+.amap-control {
+  z-index: 80 !important;
 }
 
 /* 暗色模式已通过CSS变量处理，不需要额外的媒体查询 */

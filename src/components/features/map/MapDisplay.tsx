@@ -216,7 +216,7 @@ export default function MapDisplay() {
             title: post.title,
             content: createCustomMarker(post),
             anchor: 'bottom-center',
-            zIndex: 100
+            zIndex: 10 // 降低标记的z-index
           });
 
           // 绑定事件
@@ -258,11 +258,11 @@ export default function MapDisplay() {
 
   return (
     <div className="w-full h-full relative">
-      {/* 地图容器 - 占满整个空间 */}
-      <div ref={mapRef} id="map-container" className="w-full h-full" style={{ minHeight: '100vh' }}></div>
+      {/* 地图容器 - 占满容器空间但不再固定定位 */}
+      <div ref={mapRef} id="map-container" className="w-full h-full absolute top-0 left-0" style={{ minHeight: '100vh', zIndex: 1 }}></div>
       
       {/* 地图加载中的占位显示 */}
-      <div className={`absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 z-10 map-loading ${isMapLoaded ? 'hidden' : ''}`}>
+      <div className={`absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 z-2 map-loading ${isMapLoaded ? 'hidden' : ''}`}>
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
           <p className="mt-2 text-gray-700">地图加载中...</p>

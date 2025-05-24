@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="bg-white dark:bg-dark-primary text-neutral-500 dark:text-neutral-400 border-t border-neutral-200 dark:border-zinc-800 py-8 mt-10">
+    <footer className="bg-white dark:bg-dark-secondary text-neutral-500 dark:text-neutral-400 border-t border-neutral-200 dark:border-zinc-800 py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
