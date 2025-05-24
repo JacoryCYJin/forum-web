@@ -1,0 +1,19 @@
+/**
+ * 登录对话框组件样式
+ */
+
+.auth-panel {
+  width: 100%;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 1;
+}
+
+.slide-out-right {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-out-left {
+  transform: translateX(-100%);
+  opacity: 0;
+} 

@@ -6,26 +6,31 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import "./LoginDialog.css";
 
-interface LoginDialogProps {
-  visible: boolean;
-  onClose: () => void;
-}
+// 导入类型定义
+import type {
+  LoginDialogProps,
+  AuthStep,
+  LogoProps,
+  LoginPanelProps,
+  RegisterPanelProps,
+  ForgotPasswordPanelProps,
+  AvatarPanelProps,
+  TagsPanelProps,
+} from "@/types/auth.types";
 
-// 认证流程步骤
-enum AuthStep {
-  LOGIN = "login",
-  REGISTER = "register",
-  FORGOT_PASSWORD = "forgot_password",
-  AVATAR = "avatar",
-  TAGS = "tags",
-}
+// 导入枚举
+import { AuthStep as AuthStepEnum } from "@/types/auth.types";
 
-// Logo组件
-interface LogoProps {
-  isOnLeft: boolean;
-}
+// 导入工具方法
+import { LoginDialogUtils } from "./LoginDialog.utils";
 
+/**
+ * Logo组件
+ *
+ * 显示在红色区域的Logo和标题
+ */
 const Logo: React.FC<LogoProps> = () => {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
@@ -37,18 +42,11 @@ const Logo: React.FC<LogoProps> = () => {
   );
 };
 
-// 登录面板组件
-interface LoginPanelProps {
-  phone: string;
-  setPhone: (value: string) => void;
-  password: string;
-  setPassword: (value: string) => void;
-  handleLogin: () => void;
-  toggleAuthMode: () => void;
-  onForgotPassword: () => void;
-  isSliding: boolean;
-}
-
+/**
+ * 登录面板组件
+ *
+ * 用户登录表单面板
+ */
 const LoginPanel: React.FC<LoginPanelProps> = ({
   phone,
   setPhone,
@@ -65,7 +63,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         登录
       </h2>
       <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-12 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-12 flex-shrink-0 text-sm">
           账号
         </label>
         <input
@@ -77,7 +75,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         />
       </div>
       <div className="mb-8 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-12 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-12 flex-shrink-0 text-sm">
           密码
         </label>
         <input
@@ -88,10 +86,10 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      <div className="mt-8">
+      <div className="mt-8 text-center">
         <button
           onClick={handleLogin}
-          className="w-full py-3 px-4 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
+          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
         >
           登录
         </button>
@@ -116,17 +114,11 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
   );
 };
 
-// 注册面板组件
-interface RegisterPanelProps {
-  phone: string;
-  setPhone: (value: string) => void;
-  password: string;
-  setPassword: (value: string) => void;
-  handleRegister: () => void;
-  toggleAuthMode: () => void;
-  isSliding: boolean;
-}
-
+/**
+ * 注册面板组件
+ *
+ * 用户注册表单面板
+ */
 const RegisterPanel: React.FC<RegisterPanelProps> = ({
   phone,
   setPhone,
@@ -144,7 +136,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         注册
       </h2>
       <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-14 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           手机号
         </label>
         <input
@@ -156,7 +148,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         />
       </div>
       <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-14 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           密码
         </label>
         <input
@@ -201,11 +193,11 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           </span>
         </label>
       </div>
-      <div className="mt-8">
+      <div className="mt-8 text-center">
         <button
           onClick={handleRegister}
           disabled={!agreeTerms}
-          className="w-full py-3 px-4 bg-primary text-white rounded-full hover:bg-primary-hover disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors font-medium"
+          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors font-medium"
         >
           注册
         </button>
@@ -222,20 +214,11 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   );
 };
 
-// 忘记密码面板组件
-interface ForgotPasswordPanelProps {
-  phone: string;
-  setPhone: (value: string) => void;
-  verificationCode: string;
-  setVerificationCode: (value: string) => void;
-  newPassword: string;
-  setNewPassword: (value: string) => void;
-  handleSendCode: () => void;
-  handleResetPassword: () => void;
-  toggleAuthMode: () => void;
-  isSliding: boolean;
-}
-
+/**
+ * 忘记密码面板组件
+ *
+ * 密码重置表单面板
+ */
 const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
   phone,
   setPhone,
@@ -254,7 +237,7 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
         忘记密码
       </h2>
       <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-14 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           手机号
         </label>
         <input
@@ -266,7 +249,7 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
         />
       </div>
       <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-14 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           验证码
         </label>
         <div className="flex flex-1 gap-2">
@@ -286,7 +269,7 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
         </div>
       </div>
       <div className="mb-8 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-14 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           新密码
         </label>
         <input
@@ -297,10 +280,10 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
           onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
-      <div className="mt-8">
+      <div className="mt-8 text-center">
         <button
           onClick={handleResetPassword}
-          className="w-full py-2.5 px-4 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
+          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
         >
           重置密码
         </button>
@@ -317,17 +300,11 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
   );
 };
 
-// 头像设置面板组件
-interface AvatarPanelProps {
-  nickname: string;
-  setNickname: (value: string) => void;
-  avatar: string | null;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAvatarSubmit: () => void;
-  skipCurrentStep: () => void;
-}
-
+/**
+ * 头像设置面板组件
+ *
+ * 用户头像和昵称设置面板
+ */
 const AvatarPanel: React.FC<AvatarPanelProps> = ({
   nickname,
   setNickname,
@@ -369,7 +346,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
         <span className="text-sm text-neutral-400 mt-1">点击上传头像</span>
       </div>
       <div className="mb-4 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-2 w-12 flex-shrink-0 text-sm">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-12 flex-shrink-0 text-sm">
           昵称
         </label>
         <input
@@ -383,7 +360,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
       <div className="mt-4 text-center">
         <button
           onClick={handleAvatarSubmit}
-          className="py-3 px-5 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
+          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors font-medium"
         >
           下一步
         </button>
@@ -400,15 +377,11 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
   );
 };
 
-// 标签选择面板组件
-interface TagsPanelProps {
-  availableTags: string[];
-  selectedTags: string[];
-  toggleTag: (tag: string) => void;
-  handleTagsSubmit: () => void;
-  skipCurrentStep: () => void;
-}
-
+/**
+ * 标签选择面板组件
+ *
+ * 用户兴趣标签选择面板
+ */
 const TagsPanel: React.FC<TagsPanelProps> = ({
   availableTags,
   selectedTags,
@@ -436,10 +409,10 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
           </button>
         ))}
       </div>
-      <div className="mt-8">
+      <div className="mt-8 text-center">
         <button
           onClick={handleTagsSubmit}
-          className="py-2.5 px-8 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors mx-auto block font-medium"
+          className="py-3 px-10 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors mx-auto block font-medium"
         >
           完成
         </button>
@@ -456,10 +429,14 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
   );
 };
 
-// 主对话框组件
+/**
+ * 主登录对话框组件
+ *
+ * 完整的认证流程对话框，包含登录、注册、忘记密码、头像设置和标签选择
+ */
 const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   // 当前认证步骤
-  const [currentStep, setCurrentStep] = useState<AuthStep>(AuthStep.LOGIN);
+  const [currentStep, setCurrentStep] = useState<AuthStep>(AuthStepEnum.LOGIN);
 
   // 表单数据
   const [phone, setPhone] = useState("");
@@ -479,93 +456,36 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // 可选标签列表
-  const availableTags = [
-    "生活",
-    "摄影",
-    "旅游",
-    "摄影",
-    "XXXXXX",
-    "XXXXXX",
-    "XXXXXX",
-  ];
+  const availableTags = LoginDialogUtils.getAvailableTags();
 
   // 判断红色区域是否在左侧
-  const isRedOnLeft =
-    currentStep === AuthStep.LOGIN || currentStep === AuthStep.FORGOT_PASSWORD;
+  const isRedOnLeft = LoginDialogUtils.isRedOnLeft(currentStep);
 
-  // 处理登录
-  const handleLogin = () => {
-    console.log("登录信息:", { phone, password });
-    onClose();
-  };
-
-  // 处理注册
-  const handleRegister = () => {
-    console.log("注册信息:", { phone, password });
-    setCurrentStep(AuthStep.AVATAR);
-  };
-
-  // 处理发送验证码
-  const handleSendCode = () => {
-    console.log("发送验证码到:", phone);
-  };
-
-  // 处理重置密码
-  const handleResetPassword = () => {
-    console.log("重置密码:", { phone, verificationCode, newPassword });
-    setCurrentStep(AuthStep.LOGIN);
-  };
-
-  // 处理头像上传
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatar(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // 处理头像和昵称提交
-  const handleAvatarSubmit = () => {
-    console.log("头像和昵称:", { avatar, nickname });
-    setCurrentStep(AuthStep.TAGS);
-  };
-
-  // 处理标签选择
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
-  // 处理标签提交
-  const handleTagsSubmit = () => {
-    console.log("选择的标签:", selectedTags);
-    onClose();
-  };
-
-  // 切换登录/注册模式
-  const toggleAuthMode = (mode: AuthStep) => {
-    setIsSliding(true);
-    setTimeout(() => {
-      setCurrentStep(mode);
-      setIsSliding(false);
-    }, 300);
-  };
-
-  // 跳过当前步骤
-  const skipCurrentStep = () => {
-    if (currentStep === AuthStep.AVATAR) {
-      setCurrentStep(AuthStep.TAGS);
-    } else if (currentStep === AuthStep.TAGS) {
-      onClose();
-    }
-  };
+  // 创建包装的处理函数
+  const handleLogin = () =>
+    LoginDialogUtils.handleLogin(phone, password, onClose);
+  const handleRegister = () =>
+    LoginDialogUtils.handleRegister(phone, password, setCurrentStep);
+  const handleSendCode = () => LoginDialogUtils.handleSendCode(phone);
+  const handleResetPassword = () =>
+    LoginDialogUtils.handleResetPassword(
+      phone,
+      verificationCode,
+      newPassword,
+      setCurrentStep
+    );
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) =>
+    LoginDialogUtils.handleAvatarUpload(e, setAvatar);
+  const handleAvatarSubmit = () =>
+    LoginDialogUtils.handleAvatarSubmit(avatar, nickname, setCurrentStep);
+  const toggleTag = (tag: string) =>
+    LoginDialogUtils.toggleTag(tag, selectedTags, setSelectedTags);
+  const handleTagsSubmit = () =>
+    LoginDialogUtils.handleTagsSubmit(selectedTags, onClose);
+  const toggleAuthMode = (mode: AuthStep) =>
+    LoginDialogUtils.toggleAuthMode(mode, setIsSliding, setCurrentStep);
+  const skipCurrentStep = () =>
+    LoginDialogUtils.skipCurrentStep(currentStep, setCurrentStep, onClose);
 
   return (
     <div
@@ -627,34 +547,34 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
               isRedOnLeft ? "translate-x-0" : "-translate-x-1/2"
             }`}
           >
-            {currentStep === AuthStep.LOGIN && (
+            {currentStep === AuthStepEnum.LOGIN && (
               <LoginPanel
                 phone={phone}
                 setPhone={setPhone}
                 password={password}
                 setPassword={setPassword}
                 handleLogin={handleLogin}
-                toggleAuthMode={() => toggleAuthMode(AuthStep.REGISTER)}
+                toggleAuthMode={() => toggleAuthMode(AuthStepEnum.REGISTER)}
                 onForgotPassword={() =>
-                  toggleAuthMode(AuthStep.FORGOT_PASSWORD)
+                  toggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)
                 }
                 isSliding={isSliding}
               />
             )}
 
-            {currentStep === AuthStep.REGISTER && (
+            {currentStep === AuthStepEnum.REGISTER && (
               <RegisterPanel
                 phone={phone}
                 setPhone={setPhone}
                 password={password}
                 setPassword={setPassword}
                 handleRegister={handleRegister}
-                toggleAuthMode={() => toggleAuthMode(AuthStep.LOGIN)}
+                toggleAuthMode={() => toggleAuthMode(AuthStepEnum.LOGIN)}
                 isSliding={isSliding}
               />
             )}
 
-            {currentStep === AuthStep.FORGOT_PASSWORD && (
+            {currentStep === AuthStepEnum.FORGOT_PASSWORD && (
               <ForgotPasswordPanel
                 phone={phone}
                 setPhone={setPhone}
@@ -664,12 +584,12 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 setNewPassword={setNewPassword}
                 handleSendCode={handleSendCode}
                 handleResetPassword={handleResetPassword}
-                toggleAuthMode={() => toggleAuthMode(AuthStep.LOGIN)}
+                toggleAuthMode={() => toggleAuthMode(AuthStepEnum.LOGIN)}
                 isSliding={isSliding}
               />
             )}
 
-            {currentStep === AuthStep.AVATAR && (
+            {currentStep === AuthStepEnum.AVATAR && (
               <AvatarPanel
                 nickname={nickname}
                 setNickname={setNickname}
@@ -681,7 +601,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
               />
             )}
 
-            {currentStep === AuthStep.TAGS && (
+            {currentStep === AuthStepEnum.TAGS && (
               <TagsPanel
                 availableTags={availableTags}
                 selectedTags={selectedTags}
@@ -693,22 +613,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .auth-panel {
-          width: 100%;
-          transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-          opacity: 1;
-        }
-        .slide-out-right {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        .slide-out-left {
-          transform: translateX(-100%);
-          opacity: 0;
-        }
-      `}</style>
     </div>
   );
 };
