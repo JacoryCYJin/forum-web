@@ -137,25 +137,98 @@ export default function MapPage() {
         </div>
         
         {/* 向下滚动提示 */}
-        {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-20 text-white text-center animate-bounce">
-          <div className="flex flex-col items-center">
-            <span className="text-sm mb-1">向下滚动了解更多</span>
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-              />
-            </svg>
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </div>
+      
+      {/* 项目详细介绍部分 */}
+      <div className="bg-white dark:bg-dark-primary py-20 px-4 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12 text-neutral-800 dark:text-white">项目详细介绍</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="bg-gray-50 dark:bg-dark-secondary p-8 rounded-lg shadow-md">
+              <h3 className="text-2xl font-bold mb-4 text-neutral-800 dark:text-white">社区互动</h3>
+              <p className="text-neutral-700 dark:text-neutral-200 mb-6">
+                我们的平台不仅仅是一个传统的论坛，更是一个基于地理位置的社交网络。用户可以看到周围正在发生的事情，
+                参与附近的讨论，发现身边的有趣话题。这种基于位置的互动方式，让社区交流更加即时、真实和有温度。
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <div className="bg-primary rounded-full p-1 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-neutral-700 dark:text-neutral-300">实时互动与反馈</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="bg-primary rounded-full p-1 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-neutral-700 dark:text-neutral-300">基于位置的推荐系统</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="bg-primary rounded-full p-1 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-neutral-700 dark:text-neutral-300">多样化的内容形式</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-gray-50 dark:bg-dark-secondary p-8 rounded-lg shadow-md">
+              <h3 className="text-2xl font-bold mb-4 text-neutral-800 dark:text-white">技术特点</h3>
+              <p className="text-neutral-700 dark:text-neutral-200 mb-6">
+                我们采用最新的技术栈构建平台，确保用户体验流畅、安全和高效。从前端到后端，
+                每一个技术选择都经过精心考量，以提供最佳的性能和可靠性。
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <div className="bg-primary rounded-full p-1 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-neutral-700 dark:text-neutral-300">高性能地图渲染</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="bg-primary rounded-full p-1 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-neutral-700 dark:text-neutral-300">实时数据更新</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="bg-primary rounded-full p-1 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-neutral-700 dark:text-neutral-300">响应式设计适配各种设备</span>
+                </li>
+              </ul>
+            </div>
           </div>
-        </div> */}
+          
+          <div className="mt-16 bg-gray-50 dark:bg-dark-secondary p-8 rounded-lg shadow-md">
+            <h3 className="text-2xl font-bold mb-6 text-neutral-800 dark:text-white">我们的愿景</h3>
+            <p className="text-neutral-700 dark:text-neutral-200 text-lg leading-relaxed">
+              我们致力于创建一个更加智能、便捷的社区交流平台，让用户能够轻松发现身边的信息和话题，
+              建立真实的社交连接。在这个信息爆炸的时代，我们希望通过地理位置的筛选，
+              让用户获取到更加精准、有价值的内容，同时也促进线上交流向线下活动的延伸，
+              让虚拟社区与现实生活产生更多积极的互动。
+            </p>
+          </div>
+        </div>
       </div>
       
       {/* 页脚 - 正常布局，需要滚动才能看到 */}
