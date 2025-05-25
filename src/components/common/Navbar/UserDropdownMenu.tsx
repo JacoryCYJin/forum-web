@@ -172,17 +172,6 @@ export function UserDropdownMenu() {
           alt={user.nickname}
           className="h-8 w-8 rounded-full border-2 border-primary"
         />
-        <span className="hidden md:inline text-sm font-medium text-neutral-700 dark:text-neutral-300">
-          {user.nickname}
-        </span>
-        <svg 
-          className={`h-4 w-4 text-neutral-500 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
       </button>
 
       {/* 下拉菜单 */}

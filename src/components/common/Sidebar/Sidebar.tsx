@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Fire, Code, VideoOne, ActivitySource, Down } from '@icon-park/react';
+import { Home, Fire, Code, VideoOne, ActivitySource, Down, Concern, MapDraw } from '@icon-park/react';
 
 interface SidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -71,8 +71,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
     },
     {
       name: '地图',
-      icon: <Fire theme="outline" size="22" className="sidebar-icon" />,
+      icon: <MapDraw theme="outline" size="22" className="sidebar-icon" />,
       path: '/introduce',
+    },
+    {
+      name: '关注',
+      icon: <Concern theme="outline" size="22" className="sidebar-icon" />,
+      path: '/like',
     },
   ];
 
