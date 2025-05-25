@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LanguageText from "@/components/common/LanguageText/LanguageText";
 
 interface Post {
   id: number;
@@ -62,18 +63,76 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
+      {/* 语言切换测试区域 */}
+      <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold text-neutral-800 dark:text-white mb-4">
+          <LanguageText 
+            texts={{
+              'zh-CN': '🌐 语言切换测试',
+              'zh-TW': '🌐 語言切換測試',
+              'en': '🌐 Language Switch Test'
+            }}
+          />
+        </h2>
+        <div className="space-y-2 text-neutral-600 dark:text-neutral-400">
+          <p>
+            <LanguageText 
+              texts={{
+                'zh-CN': '欢迎使用我们的论坛！请在右上角切换语言来测试多语言功能。',
+                'zh-TW': '歡迎使用我們的論壇！請在右上角切換語言來測試多語言功能。',
+                'en': 'Welcome to our forum! Please switch languages in the top right corner to test the multilingual feature.'
+              }}
+            />
+          </p>
+          <p>
+            <LanguageText 
+              texts={{
+                'zh-CN': '当前支持：简体中文 🇨🇳、繁体中文 🇭🇰、英文 🇺🇸',
+                'zh-TW': '當前支持：簡體中文 🇨🇳、繁體中文 🇭🇰、英文 🇺🇸',
+                'en': 'Currently supported: Simplified Chinese 🇨🇳, Traditional Chinese 🇭🇰, English 🇺🇸'
+              }}
+            />
+          </p>
+        </div>
+      </div>
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-neutral-800 dark:text-white">热门帖子</h1>
+        <h1 className="text-2xl font-bold text-neutral-800 dark:text-white">
+          <LanguageText 
+            texts={{
+              'zh-CN': '热门帖子',
+              'zh-TW': '熱門帖子',
+              'en': 'Popular Posts'
+            }}
+          />
+        </h1>
         <div className="flex items-center space-x-2">
           <button className="bg-white dark:bg-dark-secondary text-neutral-500 dark:text-neutral-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-neutral-100 dark:hover:bg-zinc-700 focus:outline-none">
-            最新
+            <LanguageText 
+              texts={{
+                'zh-CN': '最新',
+                'zh-TW': '最新',
+                'en': 'Latest'
+              }}
+            />
           </button>
           <button className="bg-white dark:bg-dark-secondary text-neutral-500 dark:text-neutral-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-neutral-100 dark:hover:bg-zinc-700 focus:outline-none">
-            热门
+            <LanguageText 
+              texts={{
+                'zh-CN': '热门',
+                'zh-TW': '熱門',
+                'en': 'Popular'
+              }}
+            />
           </button>
           <button className="bg-white dark:bg-dark-secondary text-neutral-500 dark:text-neutral-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-neutral-100 dark:hover:bg-zinc-700 focus:outline-none">
-            上升中
+            <LanguageText 
+              texts={{
+                'zh-CN': '上升中',
+                'zh-TW': '上升中',
+                'en': 'Rising'
+              }}
+            />
           </button>
         </div>
       </div>
@@ -115,21 +174,39 @@ export default function Home() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    {post.commentCount} 评论
+                    {post.commentCount} <LanguageText 
+                      texts={{
+                        'zh-CN': '评论',
+                        'zh-TW': '評論',
+                        'en': 'comments'
+                      }}
+                    />
                   </button>
                   
                   <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
-                    分享
+                    <LanguageText 
+                      texts={{
+                        'zh-CN': '分享',
+                        'zh-TW': '分享',
+                        'en': 'Share'
+                      }}
+                    />
                   </button>
                   
                   <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
-                    收藏
+                    <LanguageText 
+                      texts={{
+                        'zh-CN': '收藏',
+                        'zh-TW': '收藏',
+                        'en': 'Save'
+                      }}
+                    />
                   </button>
                 </div>
               </div>
@@ -140,7 +217,13 @@ export default function Home() {
       
       <div className="flex justify-center mt-8">
         <button className="bg-white dark:bg-dark-secondary text-primary border border-primary px-6 py-2 rounded-full font-medium hover:bg-neutral-50 dark:hover:bg-zinc-700 focus:outline-none">
-          加载更多
+          <LanguageText 
+            texts={{
+              'zh-CN': '加载更多',
+              'zh-TW': '載入更多',
+              'en': 'Load More'
+            }}
+          />
         </button>
       </div>
     </div>

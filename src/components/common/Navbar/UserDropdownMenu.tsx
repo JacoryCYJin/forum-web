@@ -165,13 +165,15 @@ export function UserDropdownMenu() {
       {/* 头像触发器 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-zinc-700 transition-colors"
+        className="rounded-full p-1 hover:bg-neutral-100 dark:hover:bg-zinc-700 transition-colors"
       >
-        <img
-          src={user.avatar}
-          alt={user.nickname}
-          className="h-8 w-8 rounded-full border-2 border-primary"
-        />
+        <div className="h-8 w-8 rounded-full border-2 border-primary overflow-hidden bg-neutral-200 dark:bg-zinc-700">
+          <img
+            src={user.avatar}
+            alt={user.nickname}
+            className="h-full w-full object-cover"
+          />
+        </div>
       </button>
 
       {/* 下拉菜单 */}
@@ -180,11 +182,13 @@ export function UserDropdownMenu() {
           {/* 用户信息头部 */}
           <div className="px-4 py-3 border-b border-neutral-100 dark:border-zinc-700">
             <div className="flex items-center space-x-3">
-              <img
-                src={user.avatar}
-                alt={user.nickname}
-                className="h-12 w-12 rounded-full"
-              />
+              <div className="h-12 w-12 rounded-full overflow-hidden bg-neutral-200 dark:bg-zinc-700 flex-shrink-0">
+                <img
+                  src={user.avatar}
+                  alt={user.nickname}
+                  className="h-full w-full object-cover"
+                />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
                   {user.nickname}
