@@ -28,27 +28,6 @@ export default function RootLayout({
         <BaseClientLayout>
           {children}
         </BaseClientLayout>
-        
-        {/* 开发环境下的全局方法 */}
-        {process.env.NODE_ENV === 'development' && (
-          <script dangerouslySetInnerHTML={{
-            __html: `
-              // 开发环境快捷登录方法
-              if (typeof window !== 'undefined') {
-                window.mockLogin = function() {
-                  // 等待store初始化
-                  setTimeout(() => {
-                    const event = new CustomEvent('mockLogin');
-                    window.dispatchEvent(event);
-                  }, 100);
-                };
-                
-                console.log('🚀 开发模式已启用！');
-                console.log('📝 在控制台输入 mockLogin() 即可快速登录');
-              }
-            `
-          }} />
-        )}
       </body>
     </html>
   );

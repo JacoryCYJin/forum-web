@@ -9,6 +9,10 @@ import {
   DialogHandlersConfig, 
   DialogHandlers 
 } from "@/types/LoginDialog";
+import { loginUserApi } from "@/lib/api/user";
+import { useUserStore } from "@/store/userStore";
+import type { UserInfo as User } from "@/types/user.types";
+import { processAvatarPath } from "@/lib/utils/avatarUtils";
 
 /**
  * 登录对话框的工具方法集合
@@ -73,12 +77,78 @@ export class LoginDialogUtils {
       /**
        * 处理登录
        */
-      handleLogin: () => {
-        console.log("登录信息:", { 
-          phone: formData.phone, 
-          password: formData.password 
-        });
-        onClose();
+      handleLogin: async () => {
+        try {
+          // 验证输入
+          if (!formData.phone || !formData.password) {
+            alert('请输入账号和密码');
+            return;
+          }
+
+          console.log("正在登录...", { 
+            phoneOrEmail: formData.phone, 
+            password: formData.password 
+          });
+
+          // 调用登录API
+          const loginResult = await loginUserApi({
+            phoneOrEmail: formData.phone,
+            password: formData.password
+          });
+
+          console.log("登录成功:", loginResult);
+
+          // 保存登录信息到localStorage
+          localStorage.setItem('accessToken', loginResult.accessToken);
+          localStorage.setItem('tokenType', loginResult.tokenType);
+          localStorage.setItem('userInfo', JSON.stringify({
+            userId: loginResult.userId,
+            username: loginResult.username,
+            phone: loginResult.phone,
+            email: loginResult.email,
+            avatarUrl: loginResult.avatarUrl,
+            profile: loginResult.profile,
+            ctime: loginResult.ctime
+          }));
+
+          // 转换LoginVO为User格式并保存到userStore
+          const userInfo: User = {
+            id: loginResult.userId,
+            username: loginResult.username,
+            nickname: loginResult.username, // 使用username作为nickname
+            email: loginResult.email || '',
+            phone: loginResult.phone || '',
+            avatar: processAvatarPath(loginResult.avatarUrl), // 使用工具函数处理头像路径
+            bio: loginResult.profile,
+            createdAt: loginResult.ctime ? new Date(loginResult.ctime) : new Date(),
+            lastLoginAt: new Date()
+          };
+
+          // 更新userStore状态
+          const { setUser, setUserStats } = useUserStore.getState();
+          setUser(userInfo);
+          
+          // 设置默认的用户统计信息
+          setUserStats({
+            followingCount: 0,
+            followersCount: 0,
+            postsCount: 0,
+            viewsCount: 0
+          });
+
+          // 显示成功消息
+          alert('登录成功！');
+
+          // 关闭对话框
+          onClose();
+
+          // 不需要刷新页面，因为状态已经更新
+          console.log('✅ 登录成功，用户信息已更新到状态管理');
+
+        } catch (error: any) {
+          console.error("登录失败:", error);
+          alert(error.message || '登录失败，请稍后重试');
+        }
       },
 
       /**
@@ -221,238 +291,6 @@ export class LoginDialogUtils {
   }
 
   /**
-   * 处理登录
-   * 
-   * @param phone - 手机号
-   * @param password - 密码
-   * @param onClose - 关闭对话框的回调
-   */
-  static handleLogin(phone: string, password: string, onClose: () => void): void {
-    console.log("登录信息:", { phone, password });
-    onClose();
-  }
-
-  /**
-   * 处理注册
-   * 
-   * @param phone - 手机号
-   * @param password - 密码
-   * @param setCurrentStep - 设置当前步骤的函数
-   */
-  static handleRegister(
-    phone: string, 
-    password: string, 
-    setCurrentStep: (step: AuthStep) => void
-  ): void {
-    console.log("注册信息:", { phone, password });
-    setCurrentStep(AuthStep.AVATAR);
-  }
-
-  /**
-   * 处理注册（增强版）
-   * 
-   * @param phone - 手机号
-   * @param password - 密码
-   * @param currentStep - 当前步骤
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param setIsSliding - 设置滑动状态的函数
-   * @param setSlideDirection - 设置滑动方向的函数
-   */
-  static handleRegisterEnhanced(
-    phone: string,
-    password: string,
-    currentStep: AuthStep,
-    setCurrentStep: (step: AuthStep) => void,
-    setIsSliding: (sliding: boolean) => void,
-    setSlideDirection: (direction: AnimationDirection) => void
-  ): void {
-    console.log("注册信息:", { phone, password });
-    this.switchToStepWithAnimation(
-      currentStep,
-      AuthStep.AVATAR,
-      setCurrentStep,
-      setIsSliding,
-      setSlideDirection
-    );
-  }
-
-  /**
-   * 处理发送验证码
-   * 
-   * @param phone - 手机号
-   */
-  static handleSendCode(phone: string): void {
-    console.log("发送验证码到:", phone);
-  }
-
-  /**
-   * 处理重置密码
-   * 
-   * @param phone - 手机号
-   * @param verificationCode - 验证码
-   * @param newPassword - 新密码
-   * @param setCurrentStep - 设置当前步骤的函数
-   */
-  static handleResetPassword(
-    phone: string,
-    verificationCode: string,
-    newPassword: string,
-    setCurrentStep: (step: AuthStep) => void
-  ): void {
-    console.log("重置密码:", { phone, verificationCode, newPassword });
-    setCurrentStep(AuthStep.LOGIN);
-  }
-
-  /**
-   * 处理重置密码（增强版）
-   * 
-   * @param phone - 手机号
-   * @param verificationCode - 验证码
-   * @param newPassword - 新密码
-   * @param currentStep - 当前步骤
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param setIsSliding - 设置滑动状态的函数
-   * @param setSlideDirection - 设置滑动方向的函数
-   */
-  static handleResetPasswordEnhanced(
-    phone: string,
-    verificationCode: string,
-    newPassword: string,
-    currentStep: AuthStep,
-    setCurrentStep: (step: AuthStep) => void,
-    setIsSliding: (sliding: boolean) => void,
-    setSlideDirection: (direction: AnimationDirection) => void
-  ): void {
-    console.log("重置密码:", { phone, verificationCode, newPassword });
-    this.switchToStepWithAnimation(
-      currentStep,
-      AuthStep.LOGIN,
-      setCurrentStep,
-      setIsSliding,
-      setSlideDirection
-    );
-  }
-
-  /**
-   * 处理头像上传
-   * 
-   * @param e - 文件选择事件
-   * @param setAvatar - 设置头像的函数
-   */
-  static handleAvatarUpload(
-    e: React.ChangeEvent<HTMLInputElement>,
-    setAvatar: (avatar: string) => void
-  ): void {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatar(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  /**
-   * 处理头像和昵称提交
-   * 
-   * @param avatar - 头像数据
-   * @param nickname - 昵称
-   * @param setCurrentStep - 设置当前步骤的函数
-   */
-  static handleAvatarSubmit(
-    avatar: string | null,
-    nickname: string,
-    setCurrentStep: (step: AuthStep) => void
-  ): void {
-    console.log("头像和昵称:", { avatar, nickname });
-    setCurrentStep(AuthStep.TAGS);
-  }
-
-  /**
-   * 处理头像和昵称提交（增强版）
-   * 
-   * @param avatar - 头像数据
-   * @param nickname - 昵称
-   * @param currentStep - 当前步骤
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param setIsSliding - 设置滑动状态的函数
-   * @param setSlideDirection - 设置滑动方向的函数
-   */
-  static handleAvatarSubmitEnhanced(
-    avatar: string | null,
-    nickname: string,
-    currentStep: AuthStep,
-    setCurrentStep: (step: AuthStep) => void,
-    setIsSliding: (sliding: boolean) => void,
-    setSlideDirection: (direction: AnimationDirection) => void
-  ): void {
-    console.log("头像和昵称:", { avatar, nickname });
-    this.switchToStepWithAnimation(
-      currentStep,
-      AuthStep.TAGS,
-      setCurrentStep,
-      setIsSliding,
-      setSlideDirection
-    );
-  }
-
-  /**
-   * 处理标签选择切换
-   * 
-   * @param tag - 标签名
-   * @param selectedTags - 当前选中的标签列表
-   * @param setSelectedTags - 设置标签列表的函数
-   */
-  static toggleTag(
-    tag: string,
-    selectedTags: string[],
-    setSelectedTags: (tags: string[]) => void
-  ): void {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  }
-
-  /**
-   * 处理标签提交
-   * 
-   * @param selectedTags - 选中的标签列表
-   * @param onClose - 关闭对话框的回调
-   */
-  static handleTagsSubmit(selectedTags: string[], onClose: () => void): void {
-    console.log("选择的标签:", selectedTags);
-    onClose();
-  }
-
-  /**
-   * 处理上一步操作（增强版）
-   * 
-   * @param currentStep - 当前步骤
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param setIsSliding - 设置滑动状态的函数
-   * @param setSlideDirection - 设置滑动方向的函数
-   */
-  static handlePreviousStepEnhanced(
-    currentStep: AuthStep,
-    setCurrentStep: (step: AuthStep) => void,
-    setIsSliding: (sliding: boolean) => void,
-    setSlideDirection: (direction: AnimationDirection) => void
-  ): void {
-    if (currentStep === AuthStep.TAGS) {
-      this.switchToStepWithAnimation(
-        currentStep,
-        AuthStep.AVATAR,
-        setCurrentStep,
-        setIsSliding,
-        setSlideDirection
-      );
-    }
-  }
-
-  /**
    * 获取动画方向
    * 
    * @param currentStep - 当前步骤
@@ -531,79 +369,6 @@ export class LoginDialogUtils {
       }, 300);
     } else {
       setCurrentStep(targetStep);
-    }
-  }
-
-  /**
-   * 切换认证模式（增强版）
-   * 
-   * @param currentStep - 当前步骤
-   * @param targetStep - 目标步骤
-   * @param setIsSliding - 设置滑动状态的函数
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param setSlideDirection - 设置滑动方向的函数
-   */
-  static toggleAuthModeEnhanced(
-    currentStep: AuthStep,
-    targetStep: AuthStep,
-    setIsSliding: (sliding: boolean) => void,
-    setCurrentStep: (step: AuthStep) => void,
-    setSlideDirection: (direction: AnimationDirection) => void
-  ): void {
-    this.switchToStepWithAnimation(
-      currentStep,
-      targetStep,
-      setCurrentStep,
-      setIsSliding,
-      setSlideDirection
-    );
-  }
-
-  /**
-   * 跳过当前步骤
-   * 
-   * @param currentStep - 当前步骤
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param onClose - 关闭对话框的回调
-   */
-  static skipCurrentStep(
-    currentStep: AuthStep,
-    setCurrentStep: (step: AuthStep) => void,
-    onClose: () => void
-  ): void {
-    if (currentStep === AuthStep.AVATAR) {
-      setCurrentStep(AuthStep.TAGS);
-    } else if (currentStep === AuthStep.TAGS) {
-      onClose();
-    }
-  }
-
-  /**
-   * 跳过当前步骤（增强版）
-   * 
-   * @param currentStep - 当前步骤
-   * @param setCurrentStep - 设置当前步骤的函数
-   * @param setIsSliding - 设置滑动状态的函数
-   * @param setSlideDirection - 设置滑动方向的函数
-   * @param onClose - 关闭对话框的回调
-   */
-  static skipCurrentStepEnhanced(
-    currentStep: AuthStep,
-    setCurrentStep: (step: AuthStep) => void,
-    setIsSliding: (sliding: boolean) => void,
-    setSlideDirection: (direction: AnimationDirection) => void,
-    onClose: () => void
-  ): void {
-    if (currentStep === AuthStep.AVATAR) {
-      this.switchToStepWithAnimation(
-        currentStep,
-        AuthStep.TAGS,
-        setCurrentStep,
-        setIsSliding,
-        setSlideDirection
-      );
-    } else if (currentStep === AuthStep.TAGS) {
-      onClose();
     }
   }
 

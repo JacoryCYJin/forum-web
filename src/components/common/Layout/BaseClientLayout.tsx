@@ -7,6 +7,7 @@
 
 import { ThemeProvider } from 'next-themes';
 import LanguageProvider from './LanguageProvider';
+import UserStateInitializer from '@/components/common/UserStateInitializer';
 
 /**
  * 主题包装组件Props
@@ -28,6 +29,7 @@ export default function BaseClientLayout({ children }: ThemeWrapperProps) {
   return (
     <ThemeProvider attribute="class" enableSystem defaultTheme="system" disableTransitionOnChange>
       <LanguageProvider />
+      <UserStateInitializer />
       {children}
     </ThemeProvider>
   );

@@ -5,7 +5,8 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, UserStats, Notification } from '@/types/user.types';
+import { UserInfo as User, UserStats, Notification } from '@/types/user.types';
+import { processAvatarPath } from '@/lib/utils/avatarUtils';
 
 /**
  * 用户状态接口
@@ -34,10 +35,6 @@ interface UserState {
   setLoading: (loading: boolean) => void;
   /** 设置错误信息 */
   setError: (error: string | null) => void;
-  /** 用户登录 */
-  login: (credentials: { phone: string; password: string }) => Promise<void>;
-  /** 模拟登录（开发用） */
-  mockLogin: () => void;
   /** 用户登出 */
   logout: () => void;
   /** 更新用户资料 */
@@ -50,41 +47,9 @@ interface UserState {
   markAllNotificationsAsRead: () => void;
   /** 清除所有状态 */
   clearState: () => void;
+  /** 从localStorage恢复登录状态 */
+  restoreLoginState: () => void;
 }
-
-/**
- * 模拟API调用 - 用户登录
- */
-const loginUserApi = async (credentials: { phone: string; password: string }): Promise<User> => {
-  // 模拟网络延迟
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // 模拟用户数据
-  return {
-    id: '1',
-    username: 'user123',
-    nickname: '测试用户',
-    email: 'user@example.com',
-    phone: credentials.phone,
-    avatar: 'https://via.placeholder.com/100',
-    createdAt: new Date('2023-01-01'),
-    lastLoginAt: new Date()
-  };
-};
-
-/**
- * 模拟API调用 - 获取用户统计信息
- */
-const getUserStatsApi = async (): Promise<UserStats> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  return {
-    followingCount: 42,
-    followersCount: 128,
-    postsCount: 15,
-    viewsCount: 2580
-  };
-};
 
 /**
  * 模拟API调用 - 更新用户资料
@@ -162,62 +127,9 @@ export const useUserStore = create<UserState>()(
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
       
-      // 登录方法
-      login: async (credentials) => {
-        set({ isLoading: true, error: null });
-        try {
-          const user = await loginUserApi(credentials);
-          const userStats = await getUserStatsApi();
-          set({ 
-            user, 
-            userStats, 
-            isLoading: false 
-          });
-          
-          // 登录成功后获取通知
-          get().fetchNotifications();
-        } catch (err) {
-          set({ 
-            error: err instanceof Error ? err.message : '登录失败', 
-            isLoading: false 
-          });
-        }
-      },
-      
-      // 模拟登录（开发用）
-      mockLogin: () => {
-        const mockUser: User = {
-          id: 'mock-user-1',
-          username: 'testuser',
-          nickname: '测试用户',
-          email: 'test@example.com',
-          phone: '13800138000',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-          createdAt: new Date('2023-01-01'),
-          lastLoginAt: new Date()
-        };
-
-        const mockStats: UserStats = {
-          followingCount: 42,
-          followersCount: 128,
-          postsCount: 15,
-          viewsCount: 2580
-        };
-
-        set({ 
-          user: mockUser, 
-          userStats: mockStats,
-          error: null
-        });
-        
-        // 模拟获取通知
-        get().fetchNotifications();
-        
-        console.log('✅ 模拟登录成功！用户:', mockUser.nickname);
-      },
-      
       // 登出方法
       logout: () => {
+        // 清除状态
         set({ 
           user: null, 
           userStats: null, 
@@ -225,6 +137,14 @@ export const useUserStore = create<UserState>()(
           unreadNotificationCount: 0,
           error: null 
         });
+        
+        // 清除localStorage中的登录信息
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('tokenType');
+          localStorage.removeItem('userInfo');
+        }
+        
         console.log('👋 已退出登录');
       },
       
@@ -302,6 +222,52 @@ export const useUserStore = create<UserState>()(
           notifications: [],
           unreadNotificationCount: 0
         });
+      },
+      
+      // 从localStorage恢复登录状态
+      restoreLoginState: () => {
+        try {
+          const accessToken = localStorage.getItem('accessToken');
+          const userInfoStr = localStorage.getItem('userInfo');
+          
+          if (accessToken && userInfoStr) {
+            const userInfo = JSON.parse(userInfoStr);
+            
+            // 转换为User格式
+            const user: User = {
+              id: userInfo.userId,
+              username: userInfo.username,
+              nickname: userInfo.username,
+              email: userInfo.email || '',
+              phone: userInfo.phone || '',
+              avatar: processAvatarPath(userInfo.avatarUrl),
+              bio: userInfo.profile,
+              createdAt: userInfo.ctime ? new Date(userInfo.ctime) : new Date(),
+              lastLoginAt: new Date()
+            };
+            
+            // 设置用户信息
+            set({ user });
+            
+            // 设置默认统计信息
+            set({ 
+              userStats: {
+                followingCount: 0,
+                followersCount: 0,
+                postsCount: 0,
+                viewsCount: 0
+              }
+            });
+            
+            console.log('✅ 已从localStorage恢复登录状态:', user.nickname);
+          }
+        } catch (error) {
+          console.error('恢复登录状态失败:', error);
+          // 清除可能损坏的数据
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('tokenType');
+          localStorage.removeItem('userInfo');
+        }
       }
     }),
     {
@@ -314,11 +280,4 @@ export const useUserStore = create<UserState>()(
       }),
     }
   )
-);
-
-// 在浏览器环境下监听全局mockLogin事件
-if (typeof window !== 'undefined') {
-  window.addEventListener('mockLogin', () => {
-    useUserStore.getState().mockLogin();
-  });
-} 
+); 

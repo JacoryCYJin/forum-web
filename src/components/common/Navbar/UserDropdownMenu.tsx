@@ -193,9 +193,9 @@ export function UserDropdownMenu() {
                 <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
                   {user.nickname}
                 </p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                {/* <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
                   @{user.username}
-                </p>
+                </p> */}
                 {userStats && (
                   <div className="flex space-x-4 mt-2 text-xs text-neutral-500 dark:text-neutral-400">
                     <span>{userStats.followersCount} 粉丝</span>

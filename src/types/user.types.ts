@@ -1,12 +1,227 @@
 /**
  * @file 用户相关类型定义
- * @description 包含用户、发帖、文件管理等功能的类型接口
+ * @description 包含用户信息、登录响应等类型定义
  */
+
+/**
+ * 用户信息接口
+ */
+export interface User {
+  /**
+   * 用户唯一标识符
+   */
+  userId: string;
+  
+  /**
+   * 用户名
+   */
+  username: string;
+  
+  /**
+   * 手机号
+   */
+  phone?: string;
+  
+  /**
+   * 邮箱
+   */
+  email?: string;
+  
+  /**
+   * 头像URL
+   */
+  avatarUrl?: string;
+  
+  /**
+   * 个人简介
+   */
+  profile?: string;
+  
+  /**
+   * 创建时间
+   */
+  ctime?: string;
+}
+
+/**
+ * 登录响应VO（对应后端LoginVO）
+ */
+export interface LoginVO {
+  /**
+   * 用户唯一标识符
+   */
+  userId: string;
+  
+  /**
+   * 用户名
+   */
+  username: string;
+  
+  /**
+   * 手机号
+   */
+  phone?: string;
+  
+  /**
+   * 邮箱
+   */
+  email?: string;
+  
+  /**
+   * 头像URL
+   */
+  avatarUrl?: string;
+  
+  /**
+   * 个人简介
+   */
+  profile?: string;
+  
+  /**
+   * 创建时间
+   */
+  ctime?: string;
+  
+  /**
+   * JWT访问令牌
+   */
+  accessToken: string;
+  
+  /**
+   * 令牌类型（通常是Bearer）
+   */
+  tokenType: string;
+  
+  /**
+   * 令牌过期时间（秒）
+   */
+  expiresIn: number;
+}
+
+/**
+ * 登录请求参数
+ */
+export interface LoginRequest {
+  /**
+   * 手机号或邮箱
+   */
+  phoneOrEmail: string;
+  
+  /**
+   * 密码
+   */
+  password: string;
+}
+
+/**
+ * 注册请求参数
+ */
+export interface RegisterRequest {
+  /**
+   * 手机号或邮箱
+   */
+  phoneOrEmail: string;
+  
+  /**
+   * 密码
+   */
+  password: string;
+  
+  /**
+   * 确认密码
+   */
+  repassword: string;
+}
+
+/**
+ * 更新用户名请求参数
+ */
+export interface UpdateUsernameRequest {
+  /**
+   * 用户ID
+   */
+  userId: string;
+  
+  /**
+   * 新用户名
+   */
+  username: string;
+}
+
+/**
+ * 发送重置密码验证码请求参数
+ */
+export interface SendResetCodeRequest {
+  /**
+   * 邮箱地址
+   */
+  email: string;
+}
+
+/**
+ * 重置密码请求参数
+ */
+export interface ResetPasswordRequest {
+  /**
+   * 邮箱地址
+   */
+  email: string;
+  
+  /**
+   * 验证码
+   */
+  code: string;
+  
+  /**
+   * 新密码
+   */
+  newPassword: string;
+}
+
+/**
+ * 刷新令牌请求参数
+ */
+export interface RefreshTokenRequest {
+  /**
+   * 原JWT令牌
+   */
+  token: string;
+}
+
+/**
+ * 用户信息查询请求参数
+ */
+export interface GetUserInfoRequest {
+  /**
+   * 用户名
+   */
+  username: string;
+}
+
+/**
+ * API响应基础接口
+ */
+export interface ApiResponse<T = any> {
+  /**
+   * 响应状态码
+   */
+  code: number;
+  
+  /**
+   * 响应数据
+   */
+  data: T;
+  
+  /**
+   * 响应消息
+   */
+  message: string;
+}
 
 /**
  * 用户基本信息接口
  */
-export interface User {
+export interface UserInfo {
   /** 用户唯一标识符 */
   id: string;
   /** 用户名 */
@@ -64,7 +279,7 @@ export interface Post {
   /** 作者ID */
   authorId: string;
   /** 作者信息 */
-  author: Pick<User, 'id' | 'username' | 'nickname' | 'avatar'>;
+  author: Pick<UserInfo, 'id' | 'username' | 'nickname' | 'avatar'>;
   /** 创建时间 */
   createdAt: Date;
   /** 更新时间 */
