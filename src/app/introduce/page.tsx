@@ -12,11 +12,17 @@ export default function MapPage() {
 
           {/* 顶部项目名称和介绍 */}
           <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-50 text-center">
-            <h1 className="text-4xl font-bold text-white mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-              综合性社区论坛
+            <h1
+              className="text-4xl font-bold text-white mb-2"
+              style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
+            >
+              云社 · OpenShare
             </h1>
-            <p className="text-xl text-white max-w-lg px-4" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-              一个面向所有用户的互动型社区论坛，支持信息交流、资源分享与动态社交。在地图上发现身边的话题，让交流更智能、更有温度。
+            <p
+              className="text-xl text-white max-w-lg px-4"
+              style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
+            >
+              一个融合内容交流与文件分享的综合性社区平台，打造开放、便捷、安全的互动空间。
             </p>
           </div>
 
@@ -40,7 +46,7 @@ export default function MapPage() {
                   d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
                 />
               </svg>
-              进入论坛
+              进入 云社 · OpenShare
             </Link>
           </div>
 
@@ -68,7 +74,7 @@ export default function MapPage() {
                   </svg>
                 </div>
                 <span className="text-neutral-700 dark:text-neutral-200">
-                  实时地理位置发帖，帖子在地图上显示
+                  支持富文本发帖与多媒体内容交流
                 </span>
               </li>
               <li className="flex items-start">
@@ -89,7 +95,7 @@ export default function MapPage() {
                   </svg>
                 </div>
                 <span className="text-neutral-700 dark:text-neutral-200">
-                  帖子气泡随时间逐渐淡化，30分钟后消失
+                  内建文件云盘，支持上传、管理与加密分享
                 </span>
               </li>
               <li className="flex items-start">
@@ -110,7 +116,7 @@ export default function MapPage() {
                   </svg>
                 </div>
                 <span className="text-neutral-700 dark:text-neutral-200">
-                  发现身边的热门话题和有趣内容
+                  个性化标签体系，构建专属信息空间
                 </span>
               </li>
               <li className="flex items-start">
@@ -131,102 +137,192 @@ export default function MapPage() {
                   </svg>
                 </div>
                 <span className="text-neutral-700 dark:text-neutral-200">
-                  基于位置的社交互动和信息分享
+                  多端适配与深色模式，提升浏览体验
                 </span>
               </li>
             </ul>
           </div>
-          
+
           {/* 向下滚动提示 */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-white opacity-80"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
             </svg>
           </div>
         </div>
-        
+
         {/* 项目详细介绍部分 */}
         <div className="bg-white dark:bg-dark-secondary py-20 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-neutral-800 dark:text-white">项目详细介绍</h2>
-            
+            <h2 className="text-3xl font-bold text-center mb-12 text-neutral-800 dark:text-white">
+              项目详细介绍
+            </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              {/* 社区互动模块 */}
               <div className="bg-gray-50 dark:bg-dark-primary p-8 rounded-lg shadow-md">
-                <h3 className="text-2xl font-bold mb-4 text-neutral-800 dark:text-white">社区互动</h3>
+                <h3 className="text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
+                  内容交流
+                </h3>
                 <p className="text-neutral-700 dark:text-neutral-200 mb-6">
-                  我们的平台不仅仅是一个传统的论坛，更是一个基于地理位置的社交网络。用户可以看到周围正在发生的事情，
-                  参与附近的讨论，发现身边的有趣话题。这种基于位置的互动方式，让社区交流更加即时、真实和有温度。
+                  云社不仅是一个论坛，更是一个注重个性表达与话题分享的内容社区。用户可以发布文字、图片、链接等多种形式的帖子，围绕标签聚集兴趣圈层，实现高效互动与观点碰撞。
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <div className="bg-primary rounded-full p-1 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
-                    <span className="text-neutral-700 dark:text-neutral-300">实时互动与反馈</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">
+                      支持图文、链接、标签等多种发帖形式
+                    </span>
                   </li>
                   <li className="flex items-center">
                     <div className="bg-primary rounded-full p-1 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
-                    <span className="text-neutral-700 dark:text-neutral-300">基于位置的推荐系统</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">
+                      标签系统驱动内容分类与推荐
+                    </span>
                   </li>
                   <li className="flex items-center">
                     <div className="bg-primary rounded-full p-1 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
-                    <span className="text-neutral-700 dark:text-neutral-300">多样化的内容形式</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">
+                      关注与动态系统打造个性化首页
+                    </span>
                   </li>
                 </ul>
               </div>
-              
+
+              {/* 技术特点模块 */}
               <div className="bg-gray-50 dark:bg-dark-primary p-8 rounded-lg shadow-md">
-                <h3 className="text-2xl font-bold mb-4 text-neutral-800 dark:text-white">技术特点</h3>
+                <h3 className="text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
+                  文件与技术支持
+                </h3>
                 <p className="text-neutral-700 dark:text-neutral-200 mb-6">
-                  我们采用最新的技术栈构建平台，确保用户体验流畅、安全和高效。从前端到后端，
-                  每一个技术选择都经过精心考量，以提供最佳的性能和可靠性。
+                  平台内建文件云盘系统，支持用户上传、管理与分享文件资源。配合现代化前后端架构，提供稳定可靠的使用体验，满足日常社交与资源协作的双重需求。
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <div className="bg-primary rounded-full p-1 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
-                    <span className="text-neutral-700 dark:text-neutral-300">高性能地图渲染</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">
+                      云盘支持文件上传、删除与私密分享
+                    </span>
                   </li>
                   <li className="flex items-center">
                     <div className="bg-primary rounded-full p-1 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
-                    <span className="text-neutral-700 dark:text-neutral-300">实时数据更新</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">
+                      前后端分离，基于 React + Spring Boot 构建
+                    </span>
                   </li>
                   <li className="flex items-center">
                     <div className="bg-primary rounded-full p-1 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
-                    <span className="text-neutral-700 dark:text-neutral-300">响应式设计适配各种设备</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">
+                      响应式设计，适配桌面与移动端
+                    </span>
                   </li>
                 </ul>
               </div>
             </div>
-            
+
+            {/* 愿景模块 */}
             <div className="mt-16 bg-gray-50 dark:bg-dark-primary p-8 rounded-lg shadow-md">
-              <h3 className="text-2xl font-bold mb-6 text-neutral-800 dark:text-white">我们的愿景</h3>
+              <h3 className="text-2xl font-bold mb-6 text-neutral-800 dark:text-white">
+                我们的愿景
+              </h3>
               <p className="text-neutral-700 dark:text-neutral-200 text-lg leading-relaxed">
-                我们致力于创建一个更加智能、便捷的社区交流平台，让用户能够轻松发现身边的信息和话题，
-                建立真实的社交连接。在这个信息爆炸的时代，我们希望通过地理位置的筛选，
-                让用户获取到更加精准、有价值的内容，同时也促进线上交流向线下活动的延伸，
-                让虚拟社区与现实生活产生更多积极的互动。
+                我们希望打造一个真正开放而多元的社区空间，让用户不仅能交流观点，更能自由分享文件资源，在兴趣和知识中找到归属感。
+                云社致力于连接信息与人、创意与实现，成为个人表达与资源协作的聚合场所，为学习、生活与工作注入更多可能性。
               </p>
             </div>
           </div>
