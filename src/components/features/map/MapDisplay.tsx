@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ElMessage } from 'element-plus';
-import { MapPost } from '@/lib/api/posts';
+import { MapPost } from '@/lib/api/postsApi';
 import './MapDisplay.css';
 
 // 为window对象添加_AMapSecurityConfig属性

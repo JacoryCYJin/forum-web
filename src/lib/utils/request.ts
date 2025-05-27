@@ -16,21 +16,31 @@ const request: AxiosInstance = axios.create({
   }
 });
 
-// // 请求拦截器 - 处理不同类型的请求数据
-// request.interceptors.request.use(
-//   (config) => {
-//     // 如果数据是URLSearchParams，设置正确的Content-Type
-//     if (config.data instanceof URLSearchParams) {
-//       config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
+// 请求拦截器 - 自动添加JWT token和处理不同类型的请求数据
+request.interceptors.request.use(
+  (config) => {
+    // 从localStorage获取JWT token
+    const accessToken = localStorage.getItem('accessToken');
+    const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+    
+    // 如果存在token，添加到请求头
+    if (accessToken) {
+      config.headers.Authorization = `${tokenType} ${accessToken}`;
+    }
+    
+    // 如果数据是URLSearchParams，设置正确的Content-Type
+    if (config.data instanceof URLSearchParams) {
+      config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    }
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-// 响应拦截器 - 简化版
+// 响应拦截器 - 处理token过期和统一错误处理
 request.interceptors.response.use(
     (response: AxiosResponse): Promise<any> => {
       // 直接返回数据
@@ -42,7 +52,22 @@ request.interceptors.response.use(
   
       if (error.response) {
         // 服务器返回了错误状态码（如 4xx、5xx）
-        message = error.response.data?.message || error.response.statusText || `HTTP 错误 ${error.response.status}`;
+        const status = error.response.status;
+        
+        if (status === 401) {
+          // token过期或无效，清除本地存储的认证信息
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('tokenType');
+          localStorage.removeItem('userInfo');
+          
+          // 可以在这里触发重新登录逻辑
+          message = '登录已过期，请重新登录';
+          
+          // 如果需要，可以重定向到登录页面
+          // window.location.href = '/login';
+        } else {
+          message = error.response.data?.message || error.response.statusText || `HTTP 错误 ${status}`;
+        }
       } else if (error.request) {
         // 请求已发送，但没有收到响应（如网络错误、超时）
         message = '网络错误，请检查网络连接';

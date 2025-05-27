@@ -3,7 +3,7 @@
  * @description 提供用户相关的API调用函数
  */
 
-import { post } from '@/lib/util/request';
+import { post, get } from '@/lib/utils/request';
 import type {
   LoginVO,
   LoginRequest,
@@ -45,9 +45,9 @@ export async function loginUserApi(params: LoginRequest): Promise<LoginVO> {
 
     // 直接发送JSON格式数据
     const response: ApiResponse<LoginVO> = await post('/user/login', params);
-    console.log('response:', response);
+    console.log('登录响应:', response);
     
-    if (response.code == 0) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '登录失败');
@@ -61,23 +61,22 @@ export async function loginUserApi(params: LoginRequest): Promise<LoginVO> {
 /**
  * 用户注册API
  * 
- * 第一步基础信息注册
+ * 第一步基础信息注册，注册成功后直接返回登录信息
  *
  * @async
  * @param {RegisterRequest} params - 注册参数
- * @returns {Promise<User>} 注册后的用户信息
+ * @returns {Promise<LoginVO>} 注册后的登录信息（包含JWT令牌）
  * @throws {Error} 当API请求失败时抛出错误
  */
-export async function registerUserApi(params: RegisterRequest): Promise<User> {
+export async function registerUserApi(params: RegisterRequest): Promise<LoginVO> {
   try {
-    const searchParams = new URLSearchParams();
-    searchParams.append('phoneOrEmail', params.phoneOrEmail);
-    searchParams.append('password', params.password);
-    searchParams.append('repassword', params.repassword);
+    console.log('注册参数:', params);
 
-    const response: ApiResponse<User> = await post('/user/register', searchParams);
+    // 直接发送JSON格式数据
+    const response: ApiResponse<LoginVO> = await post('/user/register', params);
+    console.log('注册响应:', response);
     
-    if (response.code === 200) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '注册失败');
@@ -87,6 +86,15 @@ export async function registerUserApi(params: RegisterRequest): Promise<User> {
     throw new Error(error.message || '注册失败，请稍后重试');
   }
 }
+
+/**
+ * 注册API别名
+ * 
+ * @async
+ * @param {RegisterRequest} params - 注册参数
+ * @returns {Promise<LoginVO>} 注册后的登录信息（包含JWT令牌）
+ */
+export const registerApi = registerUserApi;
 
 /**
  * 更新用户昵称API
@@ -106,7 +114,7 @@ export async function updateUsernameApi(params: UpdateUsernameRequest): Promise<
 
     const response: ApiResponse<User> = await post('/user/update-username', searchParams);
     
-    if (response.code === 200) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '更新昵称失败');
@@ -134,7 +142,7 @@ export async function sendResetCodeApi(params: SendResetCodeRequest): Promise<st
 
     const response: ApiResponse<string> = await post('/user/send-reset-code', searchParams);
     
-    if (response.code === 200) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '发送验证码失败');
@@ -164,7 +172,7 @@ export async function resetPasswordApi(params: ResetPasswordRequest): Promise<st
 
     const response: ApiResponse<string> = await post('/user/reset-password', searchParams);
     
-    if (response.code === 200) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '重置密码失败');
@@ -187,11 +195,11 @@ export async function resetPasswordApi(params: ResetPasswordRequest): Promise<st
  */
 export async function getUserInfoApi(params: GetUserInfoRequest): Promise<User> {
   try {
-    const response: ApiResponse<User> = await post('/user/info', {
+    const response: ApiResponse<User> = await get('/user/info', {
       username: params.username,
     });
     
-    if (response.code === 200) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '获取用户信息失败');
@@ -219,7 +227,7 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
 
     const response: ApiResponse<LoginVO> = await post('/user/refresh-token', searchParams);
     
-    if (response.code === 200) {
+    if (response.code === 0) {
       return response.data;
     } else {
       throw new Error(response.message || '刷新令牌失败');
@@ -227,5 +235,70 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
   } catch (error: any) {
     console.error('刷新令牌失败:', error);
     throw new Error(error.message || '刷新令牌失败，请稍后重试');
+  }
+}
+
+/**
+ * 修改用户头像API
+ * 
+ * 通过JWT令牌验证身份并修改头像
+ * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
+ *
+ * @async
+ * @param {string} avatarUrl - 新头像URL
+ * @returns {Promise<User>} 更新后的用户信息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function updateAvatarApi(avatarUrl: string): Promise<User> {
+  try {
+    const searchParams = new URLSearchParams();
+    searchParams.append('avatarUrl', avatarUrl);
+
+    const response: ApiResponse<User> = await post('/user/update-avatar', searchParams);
+    
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '更新头像失败');
+    }
+  } catch (error: any) {
+    console.error('更新头像失败:', error);
+    throw new Error(error.message || '更新头像失败，请稍后重试');
+  }
+}
+
+/**
+ * 修改用户资料API
+ * 
+ * 通过JWT令牌验证身份并修改用户资料（昵称和头像）
+ * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
+ *
+ * @async
+ * @param {object} params - 更新参数
+ * @param {string} [params.username] - 新昵称（可选）
+ * @param {string} [params.avatarUrl] - 新头像URL（可选）
+ * @returns {Promise<User>} 更新后的用户信息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function updateAvatarAndUsernameApi(params: { username?: string; avatarUrl?: string }): Promise<User> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.username) {
+      searchParams.append('username', params.username);
+    }
+    if (params.avatarUrl) {
+      searchParams.append('avatarUrl', params.avatarUrl);
+    }
+
+    const response: ApiResponse<User> = await post('/user/update-avatar-username', searchParams);
+    
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '更新资料失败');
+    }
+  } catch (error: any) {
+    console.error('更新资料失败:', error);
+    throw new Error(error.message || '更新资料失败，请稍后重试');
   }
 }

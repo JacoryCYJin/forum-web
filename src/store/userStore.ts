@@ -25,6 +25,8 @@ interface UserState {
   notifications: Notification[];
   /** 未读通知数量 */
   unreadNotificationCount: number;
+  /** 是否已初始化 */
+  isInitialized: boolean;
   
   // 操作
   /** 设置用户信息 */
@@ -49,6 +51,8 @@ interface UserState {
   clearState: () => void;
   /** 从localStorage恢复登录状态 */
   restoreLoginState: () => void;
+  /** 初始化状态 */
+  initialize: () => void;
 }
 
 /**
@@ -120,6 +124,7 @@ export const useUserStore = create<UserState>()(
       error: null,
       notifications: [],
       unreadNotificationCount: 0,
+      isInitialized: false,
       
       // 基础设置方法
       setUser: (user) => set({ user }),
@@ -220,13 +225,16 @@ export const useUserStore = create<UserState>()(
           isLoading: false,
           error: null,
           notifications: [],
-          unreadNotificationCount: 0
+          unreadNotificationCount: 0,
+          isInitialized: false
         });
       },
       
       // 从localStorage恢复登录状态
       restoreLoginState: () => {
         try {
+          if (typeof window === 'undefined') return;
+          
           const accessToken = localStorage.getItem('accessToken');
           const userInfoStr = localStorage.getItem('userInfo');
           
@@ -264,9 +272,20 @@ export const useUserStore = create<UserState>()(
         } catch (error) {
           console.error('恢复登录状态失败:', error);
           // 清除可能损坏的数据
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('tokenType');
-          localStorage.removeItem('userInfo');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('tokenType');
+            localStorage.removeItem('userInfo');
+          }
+        }
+      },
+
+      // 初始化状态
+      initialize: () => {
+        const { isInitialized } = get();
+        if (!isInitialized) {
+          get().restoreLoginState();
+          set({ isInitialized: true });
         }
       }
     }),

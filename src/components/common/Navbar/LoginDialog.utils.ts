@@ -9,10 +9,10 @@ import {
   DialogHandlersConfig, 
   DialogHandlers 
 } from "@/types/LoginDialog";
-import { loginUserApi } from "@/lib/api/user";
+import { loginUserApi, registerApi, updateAvatarAndUsernameApi, sendResetCodeApi, resetPasswordApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import type { UserInfo as User } from "@/types/user.types";
-import { processAvatarPath } from "@/lib/utils/avatarUtils";
+import { processAvatarPath, validateAvatarFile, compressAvatar } from "@/lib/utils/avatarUtils";
 
 /**
  * 登录对话框的工具方法集合
@@ -154,43 +154,155 @@ export class LoginDialogUtils {
       /**
        * 处理注册
        */
-      handleRegister: () => {
-        console.log("注册信息:", { 
-          phone: formData.phone, 
-          password: formData.password 
-        });
-        this.switchToStepWithAnimation(
-          currentStep,
-          AuthStep.AVATAR,
-          setCurrentStep,
-          setIsSliding,
-          setSlideDirection
-        );
+      handleRegister: async () => {
+        try {
+          // 验证输入
+          if (!formData.phone || !formData.password) {
+            alert('请输入手机号和密码');
+            return;
+          }
+
+          console.log("注册信息:", { 
+            phone: formData.phone, 
+            password: formData.password 
+          });
+
+          // 调用注册API
+          const registerResult = await registerApi({
+            phoneOrEmail: formData.phone,
+            password: formData.password,
+            repassword: formData.password
+          });
+
+          console.log("注册成功:", registerResult);
+
+          // 保存登录信息到localStorage
+          localStorage.setItem('accessToken', registerResult.accessToken);
+          localStorage.setItem('tokenType', registerResult.tokenType);
+          localStorage.setItem('userInfo', JSON.stringify({
+            userId: registerResult.userId,
+            username: registerResult.username,
+            phone: registerResult.phone,
+            email: registerResult.email,
+            avatarUrl: registerResult.avatarUrl,
+            profile: registerResult.profile,
+            ctime: registerResult.ctime
+          }));
+
+          // 转换LoginVO为User格式并保存到userStore
+          const userInfo: User = {
+            id: registerResult.userId,
+            username: registerResult.username,
+            nickname: registerResult.username, // 使用username作为nickname
+            email: registerResult.email || '',
+            phone: registerResult.phone || '',
+            avatar: processAvatarPath(registerResult.avatarUrl), // 使用工具函数处理头像路径
+            bio: registerResult.profile,
+            createdAt: registerResult.ctime ? new Date(registerResult.ctime) : new Date(),
+            lastLoginAt: new Date()
+          };
+
+          // 更新userStore状态
+          const { setUser, setUserStats } = useUserStore.getState();
+          setUser(userInfo);
+          
+          // 设置默认的用户统计信息
+          setUserStats({
+            followingCount: 0,
+            followersCount: 0,
+            postsCount: 0,
+            viewsCount: 0
+          });
+
+          // 显示成功消息
+          alert('注册成功！现在可以设置头像和昵称');
+
+          // 进入头像设置步骤
+          this.switchToStepWithAnimation(
+            currentStep,
+            AuthStep.AVATAR,
+            setCurrentStep,
+            setIsSliding,
+            setSlideDirection
+          );
+
+        } catch (error: any) {
+          console.error("注册失败:", error);
+          alert(error.message || '注册失败，请稍后重试');
+        }
       },
 
       /**
        * 处理发送验证码
        */
-      handleSendCode: () => {
-        console.log("发送验证码到:", formData.phone);
+      handleSendCode: async () => {
+        try {
+          // 验证邮箱格式
+          if (!formData.phone) {
+            alert('请输入邮箱地址');
+            return;
+          }
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData.phone)) {
+            alert('请输入有效的邮箱地址');
+            return;
+          }
+
+          console.log("发送验证码到:", formData.phone);
+
+          // 调用发送验证码API
+          const result = await sendResetCodeApi({ email: formData.phone });
+          
+          console.log("验证码发送成功:", result);
+          alert('验证码已发送到您的邮箱，请查收');
+
+        } catch (error: any) {
+          console.error("发送验证码失败:", error);
+          alert(error.message || '发送验证码失败，请稍后重试');
+        }
       },
 
       /**
        * 处理重置密码
        */
-      handleResetPassword: () => {
-        console.log("重置密码:", { 
-          phone: formData.phone, 
-          verificationCode: formData.verificationCode, 
-          newPassword: formData.newPassword 
-        });
-        this.switchToStepWithAnimation(
-          currentStep,
-          AuthStep.LOGIN,
-          setCurrentStep,
-          setIsSliding,
-          setSlideDirection
-        );
+      handleResetPassword: async () => {
+        try {
+          // 验证输入
+          if (!formData.phone || !formData.verificationCode || !formData.newPassword) {
+            alert('请填写完整的重置密码信息');
+            return;
+          }
+
+          console.log("重置密码:", { 
+            email: formData.phone, 
+            verificationCode: formData.verificationCode, 
+            newPassword: formData.newPassword 
+          });
+
+          // 调用重置密码API
+          const result = await resetPasswordApi({
+            email: formData.phone,
+            code: formData.verificationCode,
+            newPassword: formData.newPassword
+          });
+
+          console.log("密码重置成功:", result);
+          alert('密码重置成功，请使用新密码登录');
+
+          // 返回登录页面
+          this.switchToStepWithAnimation(
+            currentStep,
+            AuthStep.LOGIN,
+            setCurrentStep,
+            setIsSliding,
+            setSlideDirection
+          );
+
+        } catch (error: any) {
+          console.error("重置密码失败:", error);
+          alert(error.message || '重置密码失败，请稍后重试');
+        }
       },
 
       /**
@@ -199,29 +311,80 @@ export class LoginDialogUtils {
       handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            setters.setAvatar(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
+          // 验证文件
+          const validation = validateAvatarFile(file);
+          if (!validation.valid) {
+            alert(validation.message);
+            return;
+          }
+
+          // 压缩并处理头像
+          compressAvatar(file)
+            .then((compressedDataUrl) => {
+              setters.setAvatar(compressedDataUrl);
+            })
+            .catch((error) => {
+              console.error('头像压缩失败:', error);
+              alert('头像处理失败，请重试');
+            });
         }
       },
 
       /**
-       * 处理头像和昵称提交
+       * 处理头像提交
        */
-      handleAvatarSubmit: () => {
-        console.log("头像和昵称:", { 
-          avatar: formData.avatar, 
-          nickname: formData.nickname 
-        });
-        this.switchToStepWithAnimation(
-          currentStep,
-          AuthStep.TAGS,
-          setCurrentStep,
-          setIsSliding,
-          setSlideDirection
-        );
+      handleAvatarSubmit: async () => {
+        try {
+          console.log("提交头像和昵称:", { 
+            nickname: formData.nickname, 
+            avatar: formData.avatar 
+          });
+
+          // 调用更新资料API
+          const updatedUser = await updateAvatarAndUsernameApi({
+            username: formData.nickname || undefined,
+            avatarUrl: formData.avatar || undefined
+          });
+
+          console.log("资料更新成功:", updatedUser);
+
+          // 更新userStore中的用户信息
+          const { user, setUser } = useUserStore.getState();
+          if (user) {
+            const updatedUserInfo: User = {
+              ...user,
+              username: updatedUser.username || user.username,
+              nickname: updatedUser.username || user.nickname,
+              avatar: processAvatarPath(updatedUser.avatarUrl) || user.avatar
+            };
+            setUser(updatedUserInfo);
+
+            // 同时更新localStorage中的用户信息
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (userInfoStr) {
+              const userInfo = JSON.parse(userInfoStr);
+              userInfo.username = updatedUser.username || userInfo.username;
+              userInfo.avatarUrl = updatedUser.avatarUrl || userInfo.avatarUrl;
+              localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            }
+          }
+
+          // 显示成功消息
+          alert('头像和昵称更新成功！');
+
+          // 进入标签选择步骤
+          this.switchToStepWithAnimation(
+            currentStep,
+            AuthStep.TAGS,
+            setCurrentStep,
+            setIsSliding,
+            setSlideDirection
+          );
+
+        } catch (error: any) {
+          console.error("更新资料失败:", error);
+          alert(error.message || '更新资料失败，请稍后重试');
+        }
       },
 
       /**
@@ -240,6 +403,7 @@ export class LoginDialogUtils {
        */
       handleTagsSubmit: () => {
         console.log("选择的标签:", formData.selectedTags);
+        alert('设置完成！欢迎使用我们的平台');
         onClose();
       },
 
@@ -269,6 +433,7 @@ export class LoginDialogUtils {
             setSlideDirection
           );
         } else if (currentStep === AuthStep.TAGS) {
+          alert('设置完成！欢迎使用我们的平台');
           onClose();
         }
       },

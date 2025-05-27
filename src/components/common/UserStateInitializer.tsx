@@ -16,14 +16,12 @@ import { useUserStore } from '@/store/userStore';
  * @component
  */
 export function UserStateInitializer() {
-  const { restoreLoginState } = useUserStore();
+  const initialize = useUserStore(state => state.initialize);
 
   useEffect(() => {
-    // 只在客户端执行
-    if (typeof window !== 'undefined') {
-      restoreLoginState();
-    }
-  }, [restoreLoginState]);
+    // 在客户端初始化时恢复登录状态
+    initialize();
+  }, [initialize]);
 
   // 这个组件不渲染任何内容
   return null;
