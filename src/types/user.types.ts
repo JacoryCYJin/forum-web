@@ -93,7 +93,7 @@ export interface LoginVO {
   tokenType: string;
   
   /**
-   * 令牌过期时间（秒）
+   * 令牌过期时间（秒数，注意：前端处理时需转换为毫秒）
    */
   expiresIn: number;
 }

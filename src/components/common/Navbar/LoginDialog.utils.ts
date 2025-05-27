@@ -11,6 +11,7 @@ import {
 } from "@/types/LoginDialog";
 import { loginUserApi, registerApi, updateAvatarAndUsernameApi, sendResetCodeApi, resetPasswordApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
+import { TokenManager } from "@/lib/utils/tokenManager";
 import type { UserInfo as User } from "@/types/user.types";
 import { processAvatarPath, validateAvatarFile } from "@/lib/utils/avatarUtils";
 
@@ -98,9 +99,14 @@ export class LoginDialogUtils {
 
           console.log("登录成功:", loginResult);
 
-          // 保存登录信息到localStorage
-          localStorage.setItem('accessToken', loginResult.accessToken);
-          localStorage.setItem('tokenType', loginResult.tokenType);
+          // 使用TokenManager保存令牌信息（会自动启动定时器）
+          TokenManager.saveToken({
+            accessToken: loginResult.accessToken,
+            tokenType: loginResult.tokenType,
+            expiresIn: loginResult.expiresIn
+          });
+
+          // 保存用户信息到localStorage
           localStorage.setItem('userInfo', JSON.stringify({
             userId: loginResult.userId,
             username: loginResult.username,
@@ -176,9 +182,14 @@ export class LoginDialogUtils {
 
           console.log("注册成功:", registerResult);
 
-          // 保存登录信息到localStorage
-          localStorage.setItem('accessToken', registerResult.accessToken);
-          localStorage.setItem('tokenType', registerResult.tokenType);
+          // 使用TokenManager保存令牌信息（会自动启动定时器）
+          TokenManager.saveToken({
+            accessToken: registerResult.accessToken,
+            tokenType: registerResult.tokenType,
+            expiresIn: registerResult.expiresIn
+          });
+
+          // 保存用户信息到localStorage
           localStorage.setItem('userInfo', JSON.stringify({
             userId: registerResult.userId,
             username: registerResult.username,

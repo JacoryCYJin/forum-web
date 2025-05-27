@@ -14,8 +14,8 @@
 /.cursor
 *.mdc
 
-# task
-/task
+# md
+/md
 
 # prompts
 /jsdoc-guide.md

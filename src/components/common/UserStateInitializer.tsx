@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
+import { initializeTokenManager } from '@/lib/utils/tokenManager';
 
 /**
  * 用户状态初始化组件
@@ -21,6 +22,11 @@ export function UserStateInitializer() {
   useEffect(() => {
     // 在客户端初始化时恢复登录状态
     initialize();
+    
+    // 初始化令牌管理器
+    initializeTokenManager();
+    
+    console.log('🚀 用户状态和令牌管理器已初始化');
   }, [initialize]);
 
   // 这个组件不渲染任何内容
