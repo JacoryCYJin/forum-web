@@ -114,6 +114,22 @@ export interface LoginRequest {
 }
 
 /**
+ * 更新用户头像和昵称请求参数
+ */
+export interface UpdateAvatarAndUsernameRequest {
+
+  /**
+   * 新昵称
+   */
+  username?: string;
+  
+  /**
+   * 新头像URL
+   */
+  avatarUrl?: string;
+}
+
+/**
  * 注册请求参数
  */
 export interface RegisterRequest {

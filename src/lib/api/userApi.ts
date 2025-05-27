@@ -15,6 +15,7 @@ import type {
   GetUserInfoRequest,
   User,
   ApiResponse,
+  UpdateAvatarAndUsernameRequest,
 } from '@/types/user.types';
 
 /**
@@ -280,18 +281,13 @@ export async function updateAvatarApi(avatarUrl: string): Promise<User> {
  * @returns {Promise<User>} 更新后的用户信息
  * @throws {Error} 当API请求失败时抛出错误
  */
-export async function updateAvatarAndUsernameApi(params: { username?: string; avatarUrl?: string }): Promise<User> {
+  export async function updateAvatarAndUsernameApi(params: UpdateAvatarAndUsernameRequest): Promise<User> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params.username) {
-      searchParams.append('username', params.username);
-    }
-    if (params.avatarUrl) {
-      searchParams.append('avatarUrl', params.avatarUrl);
-    }
+    console.log('更新用户头像和昵称参数:', params);
 
-    const response: ApiResponse<User> = await post('/user/update-avatar-username', searchParams);
-    
+    const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username', params);
+    console.log('更新用户头像和昵称响应:', response);
+
     if (response.code === 0) {
       return response.data;
     } else {
