@@ -209,6 +209,11 @@ export interface AvatarPanelProps extends BasePanelProps {
   avatar: string | null;
   
   /**
+   * 设置头像的函数
+   */
+  setAvatar: (avatar: string | null) => void;
+  
+  /**
    * 文件输入引用
    */
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -313,7 +318,7 @@ export interface DialogHandlersConfig {
     setPhone: (phone: string) => void;
     setPassword: (password: string) => void;
     setNickname: (nickname: string) => void;
-    setAvatar: (avatar: string) => void;
+    setAvatar: (avatar: string | null) => void;
     setSelectedTags: (tags: string[]) => void;
     setVerificationCode: (code: string) => void;
     setNewPassword: (password: string) => void;

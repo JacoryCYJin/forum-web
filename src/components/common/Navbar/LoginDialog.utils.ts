@@ -12,7 +12,7 @@ import {
 import { loginUserApi, registerApi, updateAvatarAndUsernameApi, sendResetCodeApi, resetPasswordApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import type { UserInfo as User } from "@/types/user.types";
-import { processAvatarPath, validateAvatarFile, compressAvatar } from "@/lib/utils/avatarUtils";
+import { processAvatarPath, validateAvatarFile } from "@/lib/utils/avatarUtils";
 
 /**
  * 登录对话框的工具方法集合
@@ -306,27 +306,70 @@ export class LoginDialogUtils {
       },
 
       /**
-       * 处理头像上传
+       * 处理头像上传 - 尝试获取最完整的路径信息
        */
       handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-          // 验证文件
-          const validation = validateAvatarFile(file);
-          if (!validation.valid) {
-            alert(validation.message);
-            return;
-          }
+          try {
+            // 验证文件
+            const validation = validateAvatarFile(file);
+            if (!validation.valid) {
+              alert(validation.message);
+              return;
+            }
 
-          // 压缩并处理头像
-          compressAvatar(file)
-            .then((compressedDataUrl) => {
-              setters.setAvatar(compressedDataUrl);
-            })
-            .catch((error) => {
-              console.error('头像压缩失败:', error);
-              alert('头像处理失败，请重试');
-            });
+            // 创建文件的本地预览URL（用于显示）
+            const fileURL = URL.createObjectURL(file);
+            
+            // 尝试获取文件路径信息（受浏览器安全限制）
+            const pathInfo = {
+              // 标准File API属性
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              lastModified: file.lastModified,
+              
+              // 相对路径（如果是文件夹上传）
+              webkitRelativePath: file.webkitRelativePath || '',
+              
+              // 尝试从文件名提取路径信息
+              fullName: file.name,
+              fileName: file.name.split('/').pop() || file.name,
+              directory: file.name.includes('/') ? file.name.substring(0, file.name.lastIndexOf('/')) : '',
+              
+              // 预览URL
+              previewURL: fileURL,
+              
+              // 注意：出于安全考虑，浏览器不允许获取真实的绝对路径
+              // 真实路径类似：C:\Users\Username\Documents\image.jpg
+              // 但JavaScript无法访问这些信息
+              absolutePath: '无法获取（浏览器安全限制）'
+            };
+            
+            // 如果是通过文件夹选择器上传的，webkitRelativePath可能包含部分路径
+            let pathToUse = file.name;
+            if (file.webkitRelativePath) {
+              pathToUse = file.webkitRelativePath;
+              console.log('检测到文件夹上传，相对路径:', file.webkitRelativePath);
+            }
+            
+            // 设置头像路径
+            setters.setAvatar(pathToUse);
+            
+            console.log('📁 文件路径信息:', pathInfo);
+            console.log('🎯 使用的路径:', pathToUse);
+            console.log('⚠️  注意：浏览器安全限制，无法获取文件的真实绝对路径');
+            
+            // 如果您需要绝对路径，可能需要考虑以下方案：
+            // 1. 使用Electron等桌面应用框架
+            // 2. 让用户手动输入路径
+            // 3. 使用服务器端的文件选择器
+
+          } catch (error: any) {
+            console.error('头像处理失败:', error);
+            alert(error.message || '头像处理失败，请重试');
+          }
         }
       },
 

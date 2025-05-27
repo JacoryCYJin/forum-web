@@ -325,6 +325,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
   nickname,
   setNickname,
   avatar,
+  setAvatar,
   fileInputRef,
   handleAvatarUpload,
   handleAvatarSubmit,
@@ -349,7 +350,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
         >
           {avatar ? (
             <img
-              src={avatar}
+              src={avatar.startsWith('blob:') || avatar.startsWith('http') || avatar.startsWith('/') ? avatar : `data:image/jpeg;base64,${avatar}`}
               alt="头像预览"
               className="w-full h-full object-cover"
             />
@@ -368,6 +369,25 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
         />
         <span className="text-sm text-neutral-400 mt-1">点击上传头像</span>
       </div>
+      
+      {/* 手动输入文件路径 */}
+      <div className="mb-4 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+          路径
+        </label>
+        <input
+          type="text"
+          className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
+          placeholder="或输入文件绝对路径，如：C:\Users\用户名\Pictures\avatar.jpg"
+          value={avatar || ''}
+          onChange={(e) => {
+            const path = e.target.value;
+            setAvatar(path || null);
+            console.log('手动设置头像路径:', path);
+          }}
+        />
+      </div>
+      
       <div className="mb-4 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           昵称
@@ -638,6 +658,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 nickname={nickname}
                 setNickname={setNickname}
                 avatar={avatar}
+                setAvatar={setAvatar}
                 fileInputRef={fileInputRef}
                 handleAvatarUpload={dialogUtils.handleAvatarUpload}
                 handleAvatarSubmit={dialogUtils.handleAvatarSubmit}
