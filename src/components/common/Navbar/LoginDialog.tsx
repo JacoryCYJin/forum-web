@@ -58,7 +58,6 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
   setPassword,
   handleLogin,
   toggleAuthMode,
-  onForgotPassword,
   isSliding = false,
   slideDirection = AnimationDirectionEnum.NONE,
 }) => {
@@ -72,8 +71,8 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         登录
       </h2>
-      <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           账号
         </label>
         <input
@@ -84,8 +83,8 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
           onChange={(e) => setPhone(e.target.value)}
         />
       </div>
-      <div className="mb-8 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           密码
         </label>
         <input
@@ -108,14 +107,6 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
             没有账号，注册
           </button>
         </div>
-      </div>
-      <div className="absolute bottom-4 right-4">
-        <button
-          onClick={onForgotPassword}
-          className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-        >
-          忘记密码
-        </button>
       </div>
     </div>
   );
@@ -148,8 +139,8 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         注册
       </h2>
-      <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           账号
         </label>
         <input
@@ -160,8 +151,8 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           onChange={(e) => setPhone(e.target.value)}
         />
       </div>
-      <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           密码
         </label>
         <input
@@ -206,7 +197,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           </span>
         </label>
       </div>
-      <div className="mt-8 text-center">
+      <div className="text-center">
         <button
           onClick={handleRegister}
           disabled={!agreeTerms}
@@ -498,6 +489,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [bio, setBio] = useState("");
 
   // 忘记密码相关状态
   const [verificationCode, setVerificationCode] = useState("");
@@ -527,6 +519,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       selectedTags,
       verificationCode,
       newPassword,
+      bio,
     },
     setters: {
       setPhone,
@@ -536,6 +529,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       setSelectedTags,
       setVerificationCode,
       setNewPassword,
+      setBio,
     },
   });
 
@@ -581,6 +575,18 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
           </button>
         </div>
 
+        {/* 忘记密码链接 - 只在登录页面显示 */}
+        {currentStep === AuthStepEnum.LOGIN && (
+          <div className="absolute bottom-4 right-4 z-10">
+            <button
+              onClick={() => dialogUtils.toggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)}
+              className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+            >
+              忘记密码
+            </button>
+          </div>
+        )}
+
         <div className="dialog-container">
           {/* 红色区域 */}
           <div
@@ -611,9 +617,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                 handleLogin={dialogUtils.handleLogin}
                 toggleAuthMode={() =>
                   dialogUtils.toggleAuthMode(AuthStepEnum.REGISTER)
-                }
-                onForgotPassword={() =>
-                  dialogUtils.toggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)
                 }
                 isSliding={isSliding}
                 slideDirection={slideDirection}

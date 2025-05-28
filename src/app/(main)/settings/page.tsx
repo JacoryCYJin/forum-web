@@ -58,6 +58,12 @@ export default function SettingsPage() {
     avatar: user?.avatar || '',
     bio: user?.bio || ''
   });
+  const [isEditingUser, setIsEditingUser] = useState(false);
+  const [originalUserSettings, setOriginalUserSettings] = useState({
+    nickname: user?.username || '',
+    avatar: user?.avatar || '',
+    bio: user?.bio || ''
+  });
 
   // 普通设置状态
   const [generalSettings, setGeneralSettings] = useState<PrivacySettings>({
@@ -66,7 +72,6 @@ export default function SettingsPage() {
     showFollowers: true,
     showFollowing: true
   });
-  const [isEditingGeneral, setIsEditingGeneral] = useState(false);
 
   // 安全设置状态
   const [securitySettings, setSecuritySettings] = useState({
@@ -84,6 +89,11 @@ export default function SettingsPage() {
     emailVerificationCode: ''
   });
 
+  // 安全设置编辑状态
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+
   // 验证码发送状态
   const [phoneCodeSending, setPhoneCodeSending] = useState(false);
   const [emailCodeSending, setEmailCodeSending] = useState(false);
@@ -96,6 +106,14 @@ export default function SettingsPage() {
   useEffect(() => {
     if (user) {
       fetchPrivacySettings();
+      // 更新用户设置
+      const settings = {
+        nickname: user.username || '',
+        avatar: user.avatar || '',
+        bio: user.bio || ''
+      };
+      setUserSettings(settings);
+      setOriginalUserSettings(settings);
     }
   }, [user]);
 
@@ -136,6 +154,22 @@ export default function SettingsPage() {
   }, [emailCodeCountdown]);
 
   /**
+   * 开始编辑用户设置
+   */
+  const handleStartEditUser = () => {
+    setIsEditingUser(true);
+    setOriginalUserSettings({ ...userSettings });
+  };
+
+  /**
+   * 取消编辑用户设置
+   */
+  const handleCancelEditUser = () => {
+    setIsEditingUser(false);
+    setUserSettings({ ...originalUserSettings });
+  };
+
+  /**
    * 处理用户设置保存
    */
   const handleSaveUserSettings = async () => {
@@ -169,6 +203,7 @@ export default function SettingsPage() {
         }
       }
 
+      setIsEditingUser(false);
       alert('用户设置已保存成功！');
     } catch (error: any) {
       console.error('保存用户设置失败:', error);
@@ -185,7 +220,6 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       await updatePrivacySettingsApi(generalSettings);
-      setIsEditingGeneral(false);
       alert('普通设置已保存成功！');
     } catch (error: any) {
       console.error('保存普通设置失败:', error);
@@ -217,13 +251,14 @@ export default function SettingsPage() {
         confirmPassword: securitySettings.confirmPassword
       });
       
-      // 清空密码字段
+      // 清空密码字段并关闭编辑状态
       setSecuritySettings(prev => ({
         ...prev,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       }));
+      setIsEditingPassword(false);
       
       alert('密码修改成功！');
     } catch (error: any) {
@@ -278,12 +313,13 @@ export default function SettingsPage() {
         setUser(newUserInfo);
       }
       
-      // 清空手机号字段
+      // 清空手机号字段并关闭编辑状态
       setSecuritySettings(prev => ({
         ...prev,
         newPhone: '',
         phoneVerificationCode: ''
       }));
+      setIsEditingPhone(false);
       
       alert('手机号修改成功！');
     } catch (error: any) {
@@ -338,12 +374,13 @@ export default function SettingsPage() {
         setUser(newUserInfo);
       }
       
-      // 清空邮箱字段
+      // 清空邮箱字段并关闭编辑状态
       setSecuritySettings(prev => ({
         ...prev,
         newEmail: '',
         emailVerificationCode: ''
       }));
+      setIsEditingEmail(false);
       
       alert('邮箱修改成功！');
     } catch (error: any) {
@@ -445,9 +482,19 @@ export default function SettingsPage() {
               {/* 用户设置 */}
               {activeCategory === 'user' && (
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold text-neutral-800 dark:text-white mb-6">
-                    用户设置
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-neutral-800 dark:text-white">
+                      用户设置
+                    </h2>
+                    {!isEditingUser && (
+                      <button
+                        onClick={handleStartEditUser}
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                      >
+                        修改设置
+                      </button>
+                    )}
+                  </div>
                   
                   <div className="space-y-6">
                     {/* 头像设置 */}
@@ -461,23 +508,25 @@ export default function SettingsPage() {
                           alt="头像"
                           className="w-20 h-20 rounded-full border-4 border-primary"
                         />
-                        <div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            id="avatar-upload"
-                          />
-                          <label
-                            htmlFor="avatar-upload"
-                            className="px-4 py-2 bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-zinc-600 cursor-pointer transition-colors"
-                          >
-                            更换头像
-                          </label>
-                          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                            支持 JPG、PNG 格式，文件大小不超过 5MB
-                          </p>
-                        </div>
+                        {isEditingUser && (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              id="avatar-upload"
+                            />
+                            <label
+                              htmlFor="avatar-upload"
+                              className="px-4 py-2 bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-zinc-600 cursor-pointer transition-colors"
+                            >
+                              更换头像
+                            </label>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                              支持 JPG、PNG 格式，文件大小不超过 5MB
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -486,13 +535,19 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                         昵称
                       </label>
-                      <input
-                        type="text"
-                        value={userSettings.nickname}
-                        onChange={(e) => setUserSettings(prev => ({ ...prev, nickname: e.target.value }))}
-                        className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="请输入昵称"
-                      />
+                      {isEditingUser ? (
+                        <input
+                          type="text"
+                          value={userSettings.nickname}
+                          onChange={(e) => setUserSettings(prev => ({ ...prev, nickname: e.target.value }))}
+                          className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="请输入昵称"
+                        />
+                      ) : (
+                        <div className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
+                          {userSettings.nickname || '未设置'}
+                        </div>
+                      )}
                     </div>
 
                     {/* 个人简介 */}
@@ -500,29 +555,43 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                         个人简介
                       </label>
-                      <textarea
-                        value={userSettings.bio}
-                        onChange={(e) => setUserSettings(prev => ({ ...prev, bio: e.target.value }))}
-                        rows={4}
-                        className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="请输入个人简介"
-                      />
+                      {isEditingUser ? (
+                        <textarea
+                          value={userSettings.bio}
+                          onChange={(e) => setUserSettings(prev => ({ ...prev, bio: e.target.value }))}
+                          rows={4}
+                          className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="请输入个人简介"
+                        />
+                      ) : (
+                        <div className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300 min-h-[100px]">
+                          {userSettings.bio || '未设置'}
+                        </div>
+                      )}
                     </div>
 
-                    {/* 保存按钮 */}
-                    <div className="flex justify-end">
-                      <button
-                        onClick={handleSaveUserSettings}
-                        disabled={isLoading}
-                        className={`px-6 py-3 rounded-lg transition-colors ${
-                          isLoading
-                            ? 'bg-neutral-400 cursor-not-allowed'
-                            : 'bg-primary hover:bg-primary-hover'
-                        } text-white`}
-                      >
-                        {isLoading ? '保存中...' : '保存更改'}
-                      </button>
-                    </div>
+                    {/* 保存/取消按钮 */}
+                    {isEditingUser && (
+                      <div className="flex justify-end space-x-4">
+                        <button
+                          onClick={handleCancelEditUser}
+                          className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
+                        >
+                          取消
+                        </button>
+                        <button
+                          onClick={handleSaveUserSettings}
+                          disabled={isLoading}
+                          className={`px-6 py-3 rounded-lg transition-colors ${
+                            isLoading
+                              ? 'bg-neutral-400 cursor-not-allowed'
+                              : 'bg-primary hover:bg-primary-hover'
+                          } text-white`}
+                        >
+                          {isLoading ? '保存中...' : '保存更改'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -530,19 +599,9 @@ export default function SettingsPage() {
               {/* 普通设置 */}
               {activeCategory === 'general' && (
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-neutral-800 dark:text-white">
-                      普通设置
-                    </h2>
-                    {!isEditingGeneral && (
-                      <button
-                        onClick={() => setIsEditingGeneral(true)}
-                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
-                      >
-                        修改资料
-                      </button>
-                    )}
-                  </div>
+                  <h2 className="text-xl font-semibold text-neutral-800 dark:text-white mb-6">
+                    普通设置
+                  </h2>
                   
                   <div className="space-y-6">
                     <div>
@@ -569,10 +628,9 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showCollections}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showCollections: e.target.checked }))}
-                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary`}></div>
                           </label>
                         </div>
 
@@ -591,10 +649,9 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showLikes}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showLikes: e.target.checked }))}
-                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary`}></div>
                           </label>
                         </div>
 
@@ -613,10 +670,9 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showFollowers}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showFollowers: e.target.checked }))}
-                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary`}></div>
                           </label>
                         </div>
 
@@ -635,40 +691,28 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showFollowing}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showFollowing: e.target.checked }))}
-                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary`}></div>
                           </label>
                         </div>
                       </div>
                     </div>
 
-                    {/* 保存/取消按钮 */}
-                    {isEditingGeneral && (
-                      <div className="flex justify-end space-x-4">
-                        <button
-                          onClick={() => {
-                            setIsEditingGeneral(false);
-                            fetchPrivacySettings(); // 重新获取设置，恢复原始值
-                          }}
-                          className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
-                        >
-                          取消
-                        </button>
-                        <button
-                          onClick={handleSaveGeneralSettings}
-                          disabled={isLoading}
-                          className={`px-6 py-3 rounded-lg transition-colors ${
-                            isLoading
-                              ? 'bg-neutral-400 cursor-not-allowed'
-                              : 'bg-primary hover:bg-primary-hover'
-                          } text-white`}
-                        >
-                          {isLoading ? '保存中...' : '保存更改'}
-                        </button>
-                      </div>
-                    )}
+                    {/* 保存按钮 */}
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleSaveGeneralSettings}
+                        disabled={isLoading}
+                        className={`px-6 py-3 rounded-lg transition-colors ${
+                          isLoading
+                            ? 'bg-neutral-400 cursor-not-allowed'
+                            : 'bg-primary hover:bg-primary-hover'
+                        } text-white`}
+                      >
+                        {isLoading ? '保存中...' : '保存设置'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -683,194 +727,292 @@ export default function SettingsPage() {
                   <div className="space-y-8">
                     {/* 密码修改 */}
                     <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-6">
-                      <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
-                        修改密码
-                      </h3>
-                      <div className="space-y-4 max-w-md">
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            当前密码
-                          </label>
-                          <input
-                            type="password"
-                            value={securitySettings.currentPassword}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, currentPassword: e.target.value }))}
-                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请输入当前密码"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            新密码
-                          </label>
-                          <input
-                            type="password"
-                            value={securitySettings.newPassword}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPassword: e.target.value }))}
-                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请输入新密码"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            确认新密码
-                          </label>
-                          <input
-                            type="password"
-                            value={securitySettings.confirmPassword}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请再次输入新密码"
-                          />
-                        </div>
-                        <div className="pt-2">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
+                          登录密码
+                        </h3>
+                        {!isEditingPassword && (
                           <button
-                            onClick={handleChangePassword}
-                            disabled={isLoading}
-                            className={`px-6 py-3 rounded-lg transition-colors ${
-                              isLoading
-                                ? 'bg-neutral-400 cursor-not-allowed'
-                                : 'bg-primary hover:bg-primary-hover'
-                            } text-white`}
+                            onClick={() => setIsEditingPassword(true)}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
                           >
-                            {isLoading ? '修改中...' : '修改密码'}
+                            修改密码
                           </button>
-                        </div>
+                        )}
                       </div>
+                      
+                      {!isEditingPassword ? (
+                        <div className="text-neutral-600 dark:text-neutral-400">
+                          <p>为了您的账户安全，建议定期更换密码</p>
+                          <p className="text-sm mt-1">上次修改时间：2024年1月1日</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4 max-w-md">
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              当前密码
+                            </label>
+                            <input
+                              type="password"
+                              value={securitySettings.currentPassword}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, currentPassword: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入当前密码"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              新密码
+                            </label>
+                            <input
+                              type="password"
+                              value={securitySettings.newPassword}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPassword: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入新密码"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              确认新密码
+                            </label>
+                            <input
+                              type="password"
+                              value={securitySettings.confirmPassword}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请再次输入新密码"
+                            />
+                          </div>
+                          <div className="flex space-x-4 pt-2">
+                            <button
+                              onClick={() => {
+                                setIsEditingPassword(false);
+                                setSecuritySettings(prev => ({
+                                  ...prev,
+                                  currentPassword: '',
+                                  newPassword: '',
+                                  confirmPassword: ''
+                                }));
+                              }}
+                              className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
+                            >
+                              取消
+                            </button>
+                            <button
+                              onClick={handleChangePassword}
+                              disabled={isLoading}
+                              className={`px-6 py-3 rounded-lg transition-colors ${
+                                isLoading
+                                  ? 'bg-neutral-400 cursor-not-allowed'
+                                  : 'bg-primary hover:bg-primary-hover'
+                              } text-white`}
+                            >
+                              {isLoading ? '修改中...' : '确认修改'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* 手机号修改 */}
                     <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-6">
-                      <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
-                        修改手机号
-                      </h3>
-                      <div className="space-y-4 max-w-md">
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            当前手机号
-                          </label>
-                          <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-                            {user?.phone ? maskText(user.phone, 3, 4) : '未绑定'}
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
+                          绑定手机号
+                        </h3>
+                        {!isEditingPhone && (
+                          <button
+                            onClick={() => setIsEditingPhone(true)}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                          >
+                            修改手机号
+                          </button>
+                        )}
+                      </div>
+                      
+                      {!isEditingPhone ? (
+                        <div className="space-y-2">
+                          <div className="text-neutral-600 dark:text-neutral-400">
+                            <p>当前绑定手机号：{user?.phone ? maskText(user.phone, 3, 4) : '未绑定'}</p>
+                            <p className="text-sm mt-1">手机号用于登录和找回密码</p>
                           </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            新手机号
-                          </label>
-                          <input
-                            type="tel"
-                            value={securitySettings.newPhone}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPhone: e.target.value }))}
-                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请输入新手机号"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            验证码
-                          </label>
-                          <div className="flex space-x-2">
+                      ) : (
+                        <div className="space-y-4 max-w-md">
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              当前手机号
+                            </label>
+                            <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
+                              {user?.phone ? maskText(user.phone, 3, 4) : '未绑定'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              新手机号
+                            </label>
                             <input
-                              type="text"
-                              value={securitySettings.phoneVerificationCode}
-                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, phoneVerificationCode: e.target.value }))}
-                              className="flex-1 px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                              placeholder="请输入验证码"
+                              type="tel"
+                              value={securitySettings.newPhone}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPhone: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入新手机号"
                             />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              验证码
+                            </label>
+                            <div className="flex space-x-2">
+                              <input
+                                type="text"
+                                value={securitySettings.phoneVerificationCode}
+                                onChange={(e) => setSecuritySettings(prev => ({ ...prev, phoneVerificationCode: e.target.value }))}
+                                className="flex-1 px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="请输入验证码"
+                              />
+                              <button
+                                onClick={handleSendPhoneCode}
+                                disabled={phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone}
+                                className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
+                                  phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone
+                                    ? 'bg-neutral-400 cursor-not-allowed'
+                                    : 'bg-primary hover:bg-primary-hover'
+                                } text-white`}
+                              >
+                                {phoneCodeCountdown > 0 ? `${phoneCodeCountdown}s` : phoneCodeSending ? '发送中...' : '发送验证码'}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex space-x-4 pt-2">
                             <button
-                              onClick={handleSendPhoneCode}
-                              disabled={phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone}
-                              className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
-                                phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone
+                              onClick={() => {
+                                setIsEditingPhone(false);
+                                setSecuritySettings(prev => ({
+                                  ...prev,
+                                  newPhone: '',
+                                  phoneVerificationCode: ''
+                                }));
+                              }}
+                              className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
+                            >
+                              取消
+                            </button>
+                            <button
+                              onClick={handleChangePhone}
+                              disabled={isLoading}
+                              className={`px-6 py-3 rounded-lg transition-colors ${
+                                isLoading
                                   ? 'bg-neutral-400 cursor-not-allowed'
                                   : 'bg-primary hover:bg-primary-hover'
                               } text-white`}
                             >
-                              {phoneCodeCountdown > 0 ? `${phoneCodeCountdown}s` : phoneCodeSending ? '发送中...' : '发送验证码'}
+                              {isLoading ? '修改中...' : '确认修改'}
                             </button>
                           </div>
                         </div>
-                        <div className="pt-2">
-                          <button
-                            onClick={handleChangePhone}
-                            disabled={isLoading}
-                            className={`px-6 py-3 rounded-lg transition-colors ${
-                              isLoading
-                                ? 'bg-neutral-400 cursor-not-allowed'
-                                : 'bg-primary hover:bg-primary-hover'
-                            } text-white`}
-                          >
-                            {isLoading ? '修改中...' : '修改手机号'}
-                          </button>
-                        </div>
-                      </div>
+                      )}
                     </div>
 
                     {/* 邮箱修改 */}
                     <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-6">
-                      <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
-                        修改邮箱
-                      </h3>
-                      <div className="space-y-4 max-w-md">
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            当前邮箱
-                          </label>
-                          <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-                            {user?.email ? maskText(user.email, 3, 4) : '未绑定'}
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
+                          绑定邮箱
+                        </h3>
+                        {!isEditingEmail && (
+                          <button
+                            onClick={() => setIsEditingEmail(true)}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                          >
+                            修改邮箱
+                          </button>
+                        )}
+                      </div>
+                      
+                      {!isEditingEmail ? (
+                        <div className="space-y-2">
+                          <div className="text-neutral-600 dark:text-neutral-400">
+                            <p>当前绑定邮箱：{user?.email ? maskText(user.email, 3, 4) : '未绑定'}</p>
+                            <p className="text-sm mt-1">邮箱用于登录和接收重要通知</p>
                           </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            新邮箱
-                          </label>
-                          <input
-                            type="email"
-                            value={securitySettings.newEmail}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, newEmail: e.target.value }))}
-                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请输入新邮箱"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            验证码
-                          </label>
-                          <div className="flex space-x-2">
+                      ) : (
+                        <div className="space-y-4 max-w-md">
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              当前邮箱
+                            </label>
+                            <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
+                              {user?.email ? maskText(user.email, 3, 4) : '未绑定'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              新邮箱
+                            </label>
                             <input
-                              type="text"
-                              value={securitySettings.emailVerificationCode}
-                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, emailVerificationCode: e.target.value }))}
-                              className="flex-1 px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                              placeholder="请输入验证码"
+                              type="email"
+                              value={securitySettings.newEmail}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, newEmail: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入新邮箱"
                             />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                              验证码
+                            </label>
+                            <div className="flex space-x-2">
+                              <input
+                                type="text"
+                                value={securitySettings.emailVerificationCode}
+                                onChange={(e) => setSecuritySettings(prev => ({ ...prev, emailVerificationCode: e.target.value }))}
+                                className="flex-1 px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="请输入验证码"
+                              />
+                              <button
+                                onClick={handleSendEmailCode}
+                                disabled={emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail}
+                                className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
+                                  emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail
+                                    ? 'bg-neutral-400 cursor-not-allowed'
+                                    : 'bg-primary hover:bg-primary-hover'
+                                } text-white`}
+                              >
+                                {emailCodeCountdown > 0 ? `${emailCodeCountdown}s` : emailCodeSending ? '发送中...' : '发送验证码'}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex space-x-4 pt-2">
                             <button
-                              onClick={handleSendEmailCode}
-                              disabled={emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail}
-                              className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
-                                emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail
+                              onClick={() => {
+                                setIsEditingEmail(false);
+                                setSecuritySettings(prev => ({
+                                  ...prev,
+                                  newEmail: '',
+                                  emailVerificationCode: ''
+                                }));
+                              }}
+                              className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
+                            >
+                              取消
+                            </button>
+                            <button
+                              onClick={handleChangeEmail}
+                              disabled={isLoading}
+                              className={`px-6 py-3 rounded-lg transition-colors ${
+                                isLoading
                                   ? 'bg-neutral-400 cursor-not-allowed'
                                   : 'bg-primary hover:bg-primary-hover'
                               } text-white`}
                             >
-                              {emailCodeCountdown > 0 ? `${emailCodeCountdown}s` : emailCodeSending ? '发送中...' : '发送验证码'}
+                              {isLoading ? '修改中...' : '确认修改'}
                             </button>
                           </div>
                         </div>
-                        <div className="pt-2">
-                          <button
-                            onClick={handleChangeEmail}
-                            disabled={isLoading}
-                            className={`px-6 py-3 rounded-lg transition-colors ${
-                              isLoading
-                                ? 'bg-neutral-400 cursor-not-allowed'
-                                : 'bg-primary hover:bg-primary-hover'
-                            } text-white`}
-                          >
-                            {isLoading ? '修改中...' : '修改邮箱'}
-                          </button>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>

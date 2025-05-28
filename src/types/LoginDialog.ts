@@ -99,9 +99,9 @@ export interface LoginPanelProps extends BasePanelProps {
   toggleAuthMode: () => void;
   
   /**
-   * 处理忘记密码的函数
+   * 处理忘记密码的函数（可选，已移到右下角）
    */
-  onForgotPassword: () => void;
+  onForgotPassword?: () => void;
 }
 
 /**

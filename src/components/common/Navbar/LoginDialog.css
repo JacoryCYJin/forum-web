@@ -17,7 +17,7 @@
 
 /* 对话框容器 */
 .dialog-container {
-  @apply flex h-full relative;
+  @apply flex h-full relative overflow-hidden;
 }
 
 /* 红色区域 */
@@ -28,7 +28,7 @@
 
 /* 白色区域 */
 .white-area {
-  @apply w-2/3 p-6 flex items-center justify-center bg-white dark:bg-neutral-800;
+  @apply w-2/3 p-6 flex items-center justify-center bg-white dark:bg-neutral-800 relative overflow-hidden;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -53,32 +53,34 @@
 /* 内容面板基础样式 */
 .auth-panel {
   width: 100%;
+  max-width: 100%;
+  position: relative;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
   opacity: 1;
 }
 
 /* 内容滑动动画 - 向右滑出 */
 .auth-panel.slide-out-right {
-  transform: translateX(100%);
+  transform: translateX(50%);
   opacity: 0;
 }
 
 /* 内容滑动动画 - 向左滑出 */
 .auth-panel.slide-out-left {
-  transform: translateX(-100%);
+  transform: translateX(-50%);
   opacity: 0;
 }
 
 /* 内容滑动动画 - 从右侧滑入 */
 .auth-panel.slide-in-right {
-  transform: translateX(100%);
+  transform: translateX(50%);
   opacity: 0;
   animation: slideInFromRight 0.3s ease-in-out forwards;
 }
 
 /* 内容滑动动画 - 从左侧滑入 */
 .auth-panel.slide-in-left {
-  transform: translateX(-100%);
+  transform: translateX(-50%);
   opacity: 0;
   animation: slideInFromLeft 0.3s ease-in-out forwards;
 }
