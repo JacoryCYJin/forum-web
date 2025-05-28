@@ -67,10 +67,23 @@ export default function SettingsPage() {
       const newUserInfo = {
         ...user,
         username: updatedUser.username || user.username,
+        nickname: updatedUser.username || user.nickname,
         avatar: updatedUser.avatarUrl || user.avatar,
         bio: updatedUser.profile || user.bio
       };
       setUser(newUserInfo);
+
+      // 同时更新localStorage中的用户信息
+      if (typeof window !== 'undefined') {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (userInfoStr) {
+          const userInfo = JSON.parse(userInfoStr);
+          userInfo.username = updatedUser.username || userInfo.username;
+          userInfo.avatarUrl = updatedUser.avatarUrl || userInfo.avatarUrl;
+          userInfo.profile = updatedUser.profile || userInfo.profile;
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        }
+      }
 
       alert('用户设置已保存成功！');
     } catch (error: any) {

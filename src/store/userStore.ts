@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserInfo as User, UserStats, Notification } from '@/types/userType';
 import { processAvatarPath } from '@/lib/utils/avatarUtils';
+import { updateAvatarAndUsernameAndProfileApi } from '@/lib/api/userApi';
 
 /**
  * 用户状态接口
@@ -56,26 +57,8 @@ interface UserState {
 }
 
 /**
- * 模拟API调用 - 更新用户资料
- */
-const updateUserProfileApi = async (userId: string, data: Partial<User>): Promise<User> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // 返回更新后的用户信息（模拟）
-  return {
-    id: userId,
-    username: data.username || 'user123',
-    nickname: data.nickname || '测试用户',
-    email: data.email || 'user@example.com',
-    phone: data.phone || '13800138000',
-    avatar: data.avatar || 'https://via.placeholder.com/100',
-    createdAt: new Date('2023-01-01'),
-    lastLoginAt: new Date()
-  };
-};
-
-/**
  * 模拟API调用 - 获取通知列表
+ * TODO: 等后端提供通知API后替换为真实API
  */
 const fetchNotificationsApi = async (): Promise<Notification[]> => {
   await new Promise(resolve => setTimeout(resolve, 600));
@@ -160,11 +143,40 @@ export const useUserStore = create<UserState>()(
         
         set({ isLoading: true, error: null });
         try {
-          const updatedUser = await updateUserProfileApi(user.id, data);
+          // 调用真实的后端API更新用户资料
+          const updatedUserData = await updateAvatarAndUsernameAndProfileApi({
+            username: data.username,
+            avatarUrl: data.avatar,
+            profile: data.bio // 前端的bio字段映射到后端的profile字段
+          });
+          
+          // 将后端返回的数据转换为UserInfo格式
+          const updatedUser: User = {
+            ...user,
+            username: updatedUserData.username || user.username,
+            nickname: updatedUserData.username || user.nickname,
+            avatar: processAvatarPath(updatedUserData.avatarUrl) || user.avatar,
+            bio: updatedUserData.profile || user.bio,
+            email: updatedUserData.email || user.email,
+            phone: updatedUserData.phone || user.phone
+          };
+          
           set({ 
             user: updatedUser, 
             isLoading: false 
           });
+          
+          // 同时更新localStorage中的用户信息
+          if (typeof window !== 'undefined') {
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (userInfoStr) {
+              const userInfo = JSON.parse(userInfoStr);
+              userInfo.username = updatedUserData.username || userInfo.username;
+              userInfo.avatarUrl = updatedUserData.avatarUrl || userInfo.avatarUrl;
+              userInfo.profile = updatedUserData.profile || userInfo.profile;
+              localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            }
+          }
         } catch (err) {
           set({ 
             error: err instanceof Error ? err.message : '更新资料失败', 
@@ -249,7 +261,7 @@ export const useUserStore = create<UserState>()(
               email: userInfo.email || '',
               phone: userInfo.phone || '',
               avatar: processAvatarPath(userInfo.avatarUrl),
-              bio: userInfo.profile,
+              bio: userInfo.profile || '',
               createdAt: userInfo.ctime ? new Date(userInfo.ctime) : new Date(),
               lastLoginAt: new Date()
             };
@@ -267,7 +279,7 @@ export const useUserStore = create<UserState>()(
               }
             });
             
-            console.log('✅ 已从localStorage恢复登录状态:', user.nickname);
+            console.log('✅ 已从localStorage恢复登录状态:', user.nickname, '个人简介:', user.bio);
           }
         } catch (error) {
           console.error('恢复登录状态失败:', error);

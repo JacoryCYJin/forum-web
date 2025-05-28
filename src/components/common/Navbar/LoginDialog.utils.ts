@@ -410,17 +410,21 @@ export class LoginDialogUtils {
               ...user,
               username: updatedUser.username || user.username,
               nickname: updatedUser.username || user.nickname,
-              avatar: processAvatarPath(updatedUser.avatarUrl) || user.avatar
+              avatar: processAvatarPath(updatedUser.avatarUrl) || user.avatar,
+              bio: updatedUser.profile || user.bio
             };
             setUser(updatedUserInfo);
 
             // 同时更新localStorage中的用户信息
-            const userInfoStr = localStorage.getItem('userInfo');
-            if (userInfoStr) {
-              const userInfo = JSON.parse(userInfoStr);
-              userInfo.username = updatedUser.username || userInfo.username;
-              userInfo.avatarUrl = updatedUser.avatarUrl || userInfo.avatarUrl;
-              localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            if (typeof window !== 'undefined') {
+              const userInfoStr = localStorage.getItem('userInfo');
+              if (userInfoStr) {
+                const userInfo = JSON.parse(userInfoStr);
+                userInfo.username = updatedUser.username || userInfo.username;
+                userInfo.avatarUrl = updatedUser.avatarUrl || userInfo.avatarUrl;
+                userInfo.profile = updatedUser.profile || userInfo.profile;
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+              }
             }
           }
 

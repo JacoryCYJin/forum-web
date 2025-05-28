@@ -29,15 +29,18 @@ export class TokenManager {
   private static readonly SLIDING_REFRESH_THRESHOLD = 24 * 60 * 60 * 1000;
 
   /**
-   * 保存令牌信息
-   * 
-   * @param tokenData - 令牌数据
+   * 保存令牌信息到localStorage
    */
   static saveToken(tokenData: {
     accessToken: string;
     tokenType: string;
     expiresIn: number; // 后端返回的过期时间（秒）
   }): void {
+    // 检查是否在客户端环境
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     const issuedAt = Date.now();
     
     localStorage.setItem(this.TOKEN_KEY, tokenData.accessToken);
@@ -57,6 +60,11 @@ export class TokenManager {
    */
   static getTokenInfo(): TokenInfo | null {
     try {
+      // 检查是否在客户端环境
+      if (typeof window === 'undefined') {
+        return null;
+      }
+      
       const accessToken = localStorage.getItem(this.TOKEN_KEY);
       const tokenType = localStorage.getItem(this.TOKEN_TYPE_KEY);
       const expiresIn = localStorage.getItem(this.EXPIRES_IN_KEY);
@@ -170,11 +178,13 @@ export class TokenManager {
       });
 
       // 更新localStorage中的用户信息
-      const userInfoStr = localStorage.getItem('userInfo');
-      if (userInfoStr) {
-        const userInfo = JSON.parse(userInfoStr);
-        userInfo.accessToken = refreshResult.accessToken;
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      if (typeof window !== 'undefined') {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (userInfoStr) {
+          const userInfo = JSON.parse(userInfoStr);
+          userInfo.accessToken = refreshResult.accessToken;
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        }
       }
 
       console.log('✅ 令牌刷新成功');
@@ -198,6 +208,11 @@ export class TokenManager {
    * 清除令牌信息
    */
   static clearToken(): void {
+    // 检查是否在客户端环境
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.TOKEN_TYPE_KEY);
     localStorage.removeItem(this.EXPIRES_IN_KEY);
