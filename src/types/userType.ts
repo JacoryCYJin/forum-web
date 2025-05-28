@@ -467,3 +467,123 @@ export interface UserActivity {
   /** 相关对象类型 */
   relatedType: string;
 }
+
+/**
+ * 修改密码请求参数
+ */
+export interface ChangePasswordRequest {
+  /**
+   * 当前密码
+   */
+  currentPassword: string;
+  
+  /**
+   * 新密码
+   */
+  newPassword: string;
+  
+  /**
+   * 确认新密码
+   */
+  confirmPassword: string;
+}
+
+/**
+ * 修改手机号请求参数
+ */
+export interface ChangePhoneRequest {
+  /**
+   * 新手机号
+   */
+  newPhone: string;
+  
+  /**
+   * 验证码
+   */
+  verificationCode: string;
+}
+
+/**
+ * 修改邮箱请求参数
+ */
+export interface ChangeEmailRequest {
+  /**
+   * 新邮箱
+   */
+  newEmail: string;
+  
+  /**
+   * 验证码
+   */
+  verificationCode: string;
+}
+
+/**
+ * 发送手机验证码请求参数
+ */
+export interface SendPhoneCodeRequest {
+  /**
+   * 手机号
+   */
+  phone: string;
+}
+
+/**
+ * 发送邮箱验证码请求参数
+ */
+export interface SendEmailCodeRequest {
+  /**
+   * 邮箱地址
+   */
+  email: string;
+}
+
+/**
+ * 更新隐私设置请求参数
+ */
+export interface UpdatePrivacySettingsRequest {
+  /**
+   * 是否展示收藏
+   */
+  showCollections?: boolean;
+  
+  /**
+   * 是否展示点赞
+   */
+  showLikes?: boolean;
+  
+  /**
+   * 是否展示粉丝
+   */
+  showFollowers?: boolean;
+  
+  /**
+   * 是否展示关注
+   */
+  showFollowing?: boolean;
+}
+
+/**
+ * 隐私设置响应数据
+ */
+export interface PrivacySettings {
+  /**
+   * 是否展示收藏
+   */
+  showCollections: boolean;
+  
+  /**
+   * 是否展示点赞
+   */
+  showLikes: boolean;
+  
+  /**
+   * 是否展示粉丝
+   */
+  showFollowers: boolean;
+  
+  /**
+   * 是否展示关注
+   */
+  showFollowing: boolean;
+}

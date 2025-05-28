@@ -16,6 +16,13 @@ import type {
   User,
   ApiResponse,
   UpdateAvatarAndUsernameAndProfileRequest,
+  ChangePasswordRequest,
+  ChangePhoneRequest,
+  ChangeEmailRequest,
+  SendPhoneCodeRequest,
+  SendEmailCodeRequest,
+  UpdatePrivacySettingsRequest,
+  PrivacySettings,
 } from '@/types/userType';
 
 /**
@@ -233,7 +240,7 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
  * @returns {Promise<User>} 更新后的用户信息
  * @throws {Error} 当API请求失败时抛出错误
  */
-  export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarAndUsernameAndProfileRequest): Promise<User> {
+export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarAndUsernameAndProfileRequest): Promise<User> {
   try {
     console.log('更新用户资料参数:', params);
 
@@ -248,5 +255,204 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
   } catch (error: any) {
     console.error('更新资料失败:', error);
     throw new Error(error.message || '更新资料失败，请稍后重试');
+  }
+}
+
+/**
+ * 修改密码API
+ * 
+ * 通过JWT令牌验证身份并修改用户密码
+ *
+ * @async
+ * @param {ChangePasswordRequest} params - 修改密码参数
+ * @returns {Promise<string>} 修改结果消息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function changePasswordApi(params: ChangePasswordRequest): Promise<string> {
+  try {
+    console.log('修改密码参数:', { ...params, currentPassword: '***', newPassword: '***', confirmPassword: '***' });
+
+    const response: ApiResponse<string> = await post('/user/change-password', params);
+    console.log('修改密码响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '修改密码失败');
+    }
+  } catch (error: any) {
+    console.error('修改密码失败:', error);
+    throw new Error(error.message || '修改密码失败，请稍后重试');
+  }
+}
+
+/**
+ * 修改手机号API
+ * 
+ * 通过JWT令牌验证身份并修改用户手机号
+ *
+ * @async
+ * @param {ChangePhoneRequest} params - 修改手机号参数
+ * @returns {Promise<string>} 修改结果消息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function changePhoneApi(params: ChangePhoneRequest): Promise<string> {
+  try {
+    console.log('修改手机号参数:', params);
+
+    const response: ApiResponse<string> = await post('/user/change-phone', params);
+    console.log('修改手机号响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '修改手机号失败');
+    }
+  } catch (error: any) {
+    console.error('修改手机号失败:', error);
+    throw new Error(error.message || '修改手机号失败，请稍后重试');
+  }
+}
+
+/**
+ * 修改邮箱API
+ * 
+ * 通过JWT令牌验证身份并修改用户邮箱
+ *
+ * @async
+ * @param {ChangeEmailRequest} params - 修改邮箱参数
+ * @returns {Promise<string>} 修改结果消息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function changeEmailApi(params: ChangeEmailRequest): Promise<string> {
+  try {
+    console.log('修改邮箱参数:', params);
+
+    const response: ApiResponse<string> = await post('/user/change-email', params);
+    console.log('修改邮箱响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '修改邮箱失败');
+    }
+  } catch (error: any) {
+    console.error('修改邮箱失败:', error);
+    throw new Error(error.message || '修改邮箱失败，请稍后重试');
+  }
+}
+
+/**
+ * 发送手机验证码API
+ * 
+ * 向指定手机号发送验证码
+ *
+ * @async
+ * @param {SendPhoneCodeRequest} params - 发送手机验证码参数
+ * @returns {Promise<string>} 发送结果消息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function sendPhoneCodeApi(params: SendPhoneCodeRequest): Promise<string> {
+  try {
+    console.log('发送手机验证码参数:', params);
+
+    const searchParams = new URLSearchParams();
+    searchParams.append('phone', params.phone);
+
+    const response: ApiResponse<string> = await post('/user/send-phone-code', searchParams);
+    console.log('发送手机验证码响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '发送验证码失败');
+    }
+  } catch (error: any) {
+    console.error('发送手机验证码失败:', error);
+    throw new Error(error.message || '发送验证码失败，请稍后重试');
+  }
+}
+
+/**
+ * 发送邮箱验证码API
+ * 
+ * 向指定邮箱发送验证码
+ *
+ * @async
+ * @param {SendEmailCodeRequest} params - 发送邮箱验证码参数
+ * @returns {Promise<string>} 发送结果消息
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function sendEmailCodeApi(params: SendEmailCodeRequest): Promise<string> {
+  try {
+    console.log('发送邮箱验证码参数:', params);
+
+    const searchParams = new URLSearchParams();
+    searchParams.append('email', params.email);
+
+    const response: ApiResponse<string> = await post('/user/send-email-code', searchParams);
+    console.log('发送邮箱验证码响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '发送验证码失败');
+    }
+  } catch (error: any) {
+    console.error('发送邮箱验证码失败:', error);
+    throw new Error(error.message || '发送验证码失败，请稍后重试');
+  }
+}
+
+/**
+ * 更新隐私设置API
+ * 
+ * 通过JWT令牌验证身份并更新用户隐私设置
+ *
+ * @async
+ * @param {UpdatePrivacySettingsRequest} params - 更新隐私设置参数
+ * @returns {Promise<PrivacySettings>} 更新后的隐私设置
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function updatePrivacySettingsApi(params: UpdatePrivacySettingsRequest): Promise<PrivacySettings> {
+  try {
+    console.log('更新隐私设置参数:', params);
+
+    const response: ApiResponse<PrivacySettings> = await post('/user/update-privacy-settings', params);
+    console.log('更新隐私设置响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '更新隐私设置失败');
+    }
+  } catch (error: any) {
+    console.error('更新隐私设置失败:', error);
+    throw new Error(error.message || '更新隐私设置失败，请稍后重试');
+  }
+}
+
+/**
+ * 获取隐私设置API
+ * 
+ * 获取当前用户的隐私设置
+ *
+ * @async
+ * @returns {Promise<PrivacySettings>} 隐私设置数据
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function getPrivacySettingsApi(): Promise<PrivacySettings> {
+  try {
+    const response: ApiResponse<PrivacySettings> = await get('/user/privacy-settings');
+    console.log('获取隐私设置响应:', response);
+
+    if (response.code === 0) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '获取隐私设置失败');
+    }
+  } catch (error: any) {
+    console.error('获取隐私设置失败:', error);
+    throw new Error(error.message || '获取隐私设置失败，请稍后重试');
   }
 }

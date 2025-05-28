@@ -5,14 +5,42 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
-import { updateAvatarAndUsernameAndProfileApi } from '@/lib/api/userApi';
+import { 
+  updateAvatarAndUsernameAndProfileApi, 
+  updatePrivacySettingsApi,
+  getPrivacySettingsApi,
+  changePasswordApi,
+  changePhoneApi,
+  changeEmailApi,
+  sendPhoneCodeApi,
+  sendEmailCodeApi
+} from '@/lib/api/userApi';
+import type { PrivacySettings } from '@/types/userType';
 
 /**
  * 设置分类类型
  */
 type SettingCategory = 'user' | 'general' | 'security';
+
+/**
+ * 加密显示文本
+ * 
+ * @param text - 原始文本
+ * @param showStart - 显示开头字符数
+ * @param showEnd - 显示结尾字符数
+ * @returns 加密后的文本
+ */
+function maskText(text: string, showStart: number = 3, showEnd: number = 4): string {
+  if (!text || text.length <= showStart + showEnd) {
+    return text;
+  }
+  const start = text.substring(0, showStart);
+  const end = text.substring(text.length - showEnd);
+  const middle = '*'.repeat(Math.min(text.length - showStart - showEnd, 6));
+  return start + middle + end;
+}
 
 /**
  * 设置页面组件
@@ -32,21 +60,80 @@ export default function SettingsPage() {
   });
 
   // 普通设置状态
-  const [generalSettings, setGeneralSettings] = useState({
+  const [generalSettings, setGeneralSettings] = useState<PrivacySettings>({
     showCollections: true,
     showLikes: true,
     showFollowers: true,
     showFollowing: true
   });
+  const [isEditingGeneral, setIsEditingGeneral] = useState(false);
 
   // 安全设置状态
   const [securitySettings, setSecuritySettings] = useState({
+    // 密码修改
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    phone: user?.phone || '',
-    email: user?.email || ''
+    
+    // 手机号修改
+    newPhone: '',
+    phoneVerificationCode: '',
+    
+    // 邮箱修改
+    newEmail: '',
+    emailVerificationCode: ''
   });
+
+  // 验证码发送状态
+  const [phoneCodeSending, setPhoneCodeSending] = useState(false);
+  const [emailCodeSending, setEmailCodeSending] = useState(false);
+  const [phoneCodeCountdown, setPhoneCodeCountdown] = useState(0);
+  const [emailCodeCountdown, setEmailCodeCountdown] = useState(0);
+
+  /**
+   * 初始化时获取隐私设置数据
+   */
+  useEffect(() => {
+    if (user) {
+      fetchPrivacySettings();
+    }
+  }, [user]);
+
+  /**
+   * 获取隐私设置
+   */
+  const fetchPrivacySettings = async () => {
+    try {
+      const settings = await getPrivacySettingsApi();
+      setGeneralSettings(settings);
+    } catch (error: any) {
+      console.error('获取隐私设置失败:', error);
+      // 使用默认设置
+    }
+  };
+
+  /**
+   * 验证码倒计时
+   */
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (phoneCodeCountdown > 0) {
+      interval = setInterval(() => {
+        setPhoneCodeCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [phoneCodeCountdown]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (emailCodeCountdown > 0) {
+      interval = setInterval(() => {
+        setEmailCodeCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [emailCodeCountdown]);
 
   /**
    * 处理用户设置保存
@@ -56,14 +143,12 @@ export default function SettingsPage() {
     
     setIsLoading(true);
     try {
-      // 调用API更新用户资料
       const updatedUser = await updateAvatarAndUsernameAndProfileApi({
         username: userSettings.nickname || undefined,
         avatarUrl: userSettings.avatar || undefined,
         profile: userSettings.bio || undefined
       });
 
-      // 更新userStore中的用户信息
       const newUserInfo = {
         ...user,
         username: updatedUser.username || user.username,
@@ -73,7 +158,6 @@ export default function SettingsPage() {
       };
       setUser(newUserInfo);
 
-      // 同时更新localStorage中的用户信息
       if (typeof window !== 'undefined') {
         const userInfoStr = localStorage.getItem('userInfo');
         if (userInfoStr) {
@@ -97,23 +181,177 @@ export default function SettingsPage() {
   /**
    * 处理普通设置保存
    */
-  const handleSaveGeneralSettings = () => {
-    // 这里应该调用API保存普通设置
-    console.log('保存普通设置:', generalSettings);
-    alert('普通设置已保存');
+  const handleSaveGeneralSettings = async () => {
+    setIsLoading(true);
+    try {
+      await updatePrivacySettingsApi(generalSettings);
+      setIsEditingGeneral(false);
+      alert('普通设置已保存成功！');
+    } catch (error: any) {
+      console.error('保存普通设置失败:', error);
+      alert(error.message || '保存普通设置失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
-   * 处理安全设置保存
+   * 处理密码修改
    */
-  const handleSaveSecuritySettings = () => {
+  const handleChangePassword = async () => {
+    if (!securitySettings.currentPassword || !securitySettings.newPassword) {
+      alert('请输入当前密码和新密码');
+      return;
+    }
+    
     if (securitySettings.newPassword !== securitySettings.confirmPassword) {
       alert('新密码和确认密码不匹配');
       return;
     }
-    // 这里应该调用API保存安全设置
-    console.log('保存安全设置:', securitySettings);
-    alert('安全设置已保存');
+
+    setIsLoading(true);
+    try {
+      await changePasswordApi({
+        currentPassword: securitySettings.currentPassword,
+        newPassword: securitySettings.newPassword,
+        confirmPassword: securitySettings.confirmPassword
+      });
+      
+      // 清空密码字段
+      setSecuritySettings(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+      
+      alert('密码修改成功！');
+    } catch (error: any) {
+      console.error('修改密码失败:', error);
+      alert(error.message || '修改密码失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * 发送手机验证码
+   */
+  const handleSendPhoneCode = async () => {
+    if (!securitySettings.newPhone) {
+      alert('请输入新手机号');
+      return;
+    }
+
+    setPhoneCodeSending(true);
+    try {
+      await sendPhoneCodeApi({ phone: securitySettings.newPhone });
+      setPhoneCodeCountdown(60);
+      alert('验证码已发送到您的手机');
+    } catch (error: any) {
+      console.error('发送手机验证码失败:', error);
+      alert(error.message || '发送验证码失败，请稍后重试');
+    } finally {
+      setPhoneCodeSending(false);
+    }
+  };
+
+  /**
+   * 处理手机号修改
+   */
+  const handleChangePhone = async () => {
+    if (!securitySettings.newPhone || !securitySettings.phoneVerificationCode) {
+      alert('请输入新手机号和验证码');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await changePhoneApi({
+        newPhone: securitySettings.newPhone,
+        verificationCode: securitySettings.phoneVerificationCode
+      });
+      
+      // 更新用户信息
+      if (user) {
+        const newUserInfo = { ...user, phone: securitySettings.newPhone };
+        setUser(newUserInfo);
+      }
+      
+      // 清空手机号字段
+      setSecuritySettings(prev => ({
+        ...prev,
+        newPhone: '',
+        phoneVerificationCode: ''
+      }));
+      
+      alert('手机号修改成功！');
+    } catch (error: any) {
+      console.error('修改手机号失败:', error);
+      alert(error.message || '修改手机号失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * 发送邮箱验证码
+   */
+  const handleSendEmailCode = async () => {
+    if (!securitySettings.newEmail) {
+      alert('请输入新邮箱地址');
+      return;
+    }
+
+    setEmailCodeSending(true);
+    try {
+      await sendEmailCodeApi({ email: securitySettings.newEmail });
+      setEmailCodeCountdown(60);
+      alert('验证码已发送到您的邮箱');
+    } catch (error: any) {
+      console.error('发送邮箱验证码失败:', error);
+      alert(error.message || '发送验证码失败，请稍后重试');
+    } finally {
+      setEmailCodeSending(false);
+    }
+  };
+
+  /**
+   * 处理邮箱修改
+   */
+  const handleChangeEmail = async () => {
+    if (!securitySettings.newEmail || !securitySettings.emailVerificationCode) {
+      alert('请输入新邮箱地址和验证码');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await changeEmailApi({
+        newEmail: securitySettings.newEmail,
+        verificationCode: securitySettings.emailVerificationCode
+      });
+      
+      // 更新用户信息
+      if (user) {
+        const newUserInfo = { ...user, email: securitySettings.newEmail };
+        setUser(newUserInfo);
+      }
+      
+      // 清空邮箱字段
+      setSecuritySettings(prev => ({
+        ...prev,
+        newEmail: '',
+        emailVerificationCode: ''
+      }));
+      
+      alert('邮箱修改成功！');
+    } catch (error: any) {
+      console.error('修改邮箱失败:', error);
+      alert(error.message || '修改邮箱失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
@@ -292,9 +530,19 @@ export default function SettingsPage() {
               {/* 普通设置 */}
               {activeCategory === 'general' && (
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold text-neutral-800 dark:text-white mb-6">
-                    普通设置
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-neutral-800 dark:text-white">
+                      普通设置
+                    </h2>
+                    {!isEditingGeneral && (
+                      <button
+                        onClick={() => setIsEditingGeneral(true)}
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                      >
+                        修改资料
+                      </button>
+                    )}
+                  </div>
                   
                   <div className="space-y-6">
                     <div>
@@ -321,9 +569,10 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showCollections}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showCollections: e.target.checked }))}
+                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
                           </label>
                         </div>
 
@@ -342,9 +591,10 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showLikes}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showLikes: e.target.checked }))}
+                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
                           </label>
                         </div>
 
@@ -363,9 +613,10 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showFollowers}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showFollowers: e.target.checked }))}
+                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
                           </label>
                         </div>
 
@@ -384,23 +635,40 @@ export default function SettingsPage() {
                               type="checkbox"
                               checked={generalSettings.showFollowing}
                               onChange={(e) => setGeneralSettings(prev => ({ ...prev, showFollowing: e.target.checked }))}
+                              disabled={!isEditingGeneral}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            <div className={`w-11 h-6 bg-neutral-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary ${!isEditingGeneral ? 'opacity-60 cursor-not-allowed' : ''}`}></div>
                           </label>
                         </div>
                       </div>
                     </div>
 
-                    {/* 保存按钮 */}
-                    <div className="flex justify-end">
-                      <button
-                        onClick={handleSaveGeneralSettings}
-                        className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
-                      >
-                        保存更改
-                      </button>
-                    </div>
+                    {/* 保存/取消按钮 */}
+                    {isEditingGeneral && (
+                      <div className="flex justify-end space-x-4">
+                        <button
+                          onClick={() => {
+                            setIsEditingGeneral(false);
+                            fetchPrivacySettings(); // 重新获取设置，恢复原始值
+                          }}
+                          className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
+                        >
+                          取消
+                        </button>
+                        <button
+                          onClick={handleSaveGeneralSettings}
+                          disabled={isLoading}
+                          className={`px-6 py-3 rounded-lg transition-colors ${
+                            isLoading
+                              ? 'bg-neutral-400 cursor-not-allowed'
+                              : 'bg-primary hover:bg-primary-hover'
+                          } text-white`}
+                        >
+                          {isLoading ? '保存中...' : '保存更改'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -414,7 +682,7 @@ export default function SettingsPage() {
                   
                   <div className="space-y-8">
                     {/* 密码修改 */}
-                    <div>
+                    <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-6">
                       <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
                         修改密码
                       </h3>
@@ -455,50 +723,154 @@ export default function SettingsPage() {
                             placeholder="请再次输入新密码"
                           />
                         </div>
+                        <div className="pt-2">
+                          <button
+                            onClick={handleChangePassword}
+                            disabled={isLoading}
+                            className={`px-6 py-3 rounded-lg transition-colors ${
+                              isLoading
+                                ? 'bg-neutral-400 cursor-not-allowed'
+                                : 'bg-primary hover:bg-primary-hover'
+                            } text-white`}
+                          >
+                            {isLoading ? '修改中...' : '修改密码'}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    {/* 联系方式 */}
-                    <div>
+                    {/* 手机号修改 */}
+                    <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-6">
                       <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
-                        联系方式
+                        修改手机号
                       </h3>
                       <div className="space-y-4 max-w-md">
                         <div>
                           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            手机号
+                            当前手机号
+                          </label>
+                          <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
+                            {user?.phone ? maskText(user.phone, 3, 4) : '未绑定'}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                            新手机号
                           </label>
                           <input
                             type="tel"
-                            value={securitySettings.phone}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, phone: e.target.value }))}
+                            value={securitySettings.newPhone}
+                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPhone: e.target.value }))}
                             className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请输入手机号"
+                            placeholder="请输入新手机号"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            邮箱
+                            验证码
                           </label>
-                          <input
-                            type="email"
-                            value={securitySettings.email}
-                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, email: e.target.value }))}
-                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="请输入邮箱"
-                          />
+                          <div className="flex space-x-2">
+                            <input
+                              type="text"
+                              value={securitySettings.phoneVerificationCode}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, phoneVerificationCode: e.target.value }))}
+                              className="flex-1 px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入验证码"
+                            />
+                            <button
+                              onClick={handleSendPhoneCode}
+                              disabled={phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone}
+                              className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
+                                phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone
+                                  ? 'bg-neutral-400 cursor-not-allowed'
+                                  : 'bg-primary hover:bg-primary-hover'
+                              } text-white`}
+                            >
+                              {phoneCodeCountdown > 0 ? `${phoneCodeCountdown}s` : phoneCodeSending ? '发送中...' : '发送验证码'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="pt-2">
+                          <button
+                            onClick={handleChangePhone}
+                            disabled={isLoading}
+                            className={`px-6 py-3 rounded-lg transition-colors ${
+                              isLoading
+                                ? 'bg-neutral-400 cursor-not-allowed'
+                                : 'bg-primary hover:bg-primary-hover'
+                            } text-white`}
+                          >
+                            {isLoading ? '修改中...' : '修改手机号'}
+                          </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* 保存按钮 */}
-                    <div className="flex justify-end">
-                      <button
-                        onClick={handleSaveSecuritySettings}
-                        className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
-                      >
-                        保存更改
-                      </button>
+                    {/* 邮箱修改 */}
+                    <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-4">
+                        修改邮箱
+                      </h3>
+                      <div className="space-y-4 max-w-md">
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                            当前邮箱
+                          </label>
+                          <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
+                            {user?.email ? maskText(user.email, 3, 4) : '未绑定'}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                            新邮箱
+                          </label>
+                          <input
+                            type="email"
+                            value={securitySettings.newEmail}
+                            onChange={(e) => setSecuritySettings(prev => ({ ...prev, newEmail: e.target.value }))}
+                            className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="请输入新邮箱"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                            验证码
+                          </label>
+                          <div className="flex space-x-2">
+                            <input
+                              type="text"
+                              value={securitySettings.emailVerificationCode}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, emailVerificationCode: e.target.value }))}
+                              className="flex-1 px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入验证码"
+                            />
+                            <button
+                              onClick={handleSendEmailCode}
+                              disabled={emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail}
+                              className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
+                                emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail
+                                  ? 'bg-neutral-400 cursor-not-allowed'
+                                  : 'bg-primary hover:bg-primary-hover'
+                              } text-white`}
+                            >
+                              {emailCodeCountdown > 0 ? `${emailCodeCountdown}s` : emailCodeSending ? '发送中...' : '发送验证码'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="pt-2">
+                          <button
+                            onClick={handleChangeEmail}
+                            disabled={isLoading}
+                            className={`px-6 py-3 rounded-lg transition-colors ${
+                              isLoading
+                                ? 'bg-neutral-400 cursor-not-allowed'
+                                : 'bg-primary hover:bg-primary-hover'
+                            } text-white`}
+                          >
+                            {isLoading ? '修改中...' : '修改邮箱'}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

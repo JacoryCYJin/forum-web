@@ -603,6 +603,7 @@ export class LoginDialogUtils {
    * @returns 是否在左侧
    */
   static isRedOnLeft(currentStep: AuthStep): boolean {
+    // 登录和忘记密码都保持红色区域在左侧，避免红色区域移动
     return currentStep === AuthStep.LOGIN || currentStep === AuthStep.FORGOT_PASSWORD;
   }
 
