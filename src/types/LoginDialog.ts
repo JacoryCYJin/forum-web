@@ -137,6 +137,21 @@ export interface RegisterPanelProps extends BasePanelProps {
    * 切换认证模式的函数
    */
   toggleAuthMode: () => void;
+  
+  /**
+   * 是否同意协议
+   */
+  agreeTerms: boolean;
+  
+  /**
+   * 设置同意协议状态的函数
+   */
+  setAgreeTerms: (agree: boolean) => void;
+  
+  /**
+   * 显示协议弹窗的函数
+   */
+  onShowTermsDialog: () => void;
 }
 
 /**

@@ -5,8 +5,11 @@
 
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./LoginDialog.css";
+
+// 导入协议弹窗组件
+import TermsDialog from "@/components/common/TermsDialog/TermsDialog";
 
 // 导入类型定义
 import type {
@@ -39,8 +42,8 @@ const Logo: React.FC<LogoProps> = () => {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="text-white text-center">
-        <div className="text-3xl font-bold mb-2">LOGO</div>
-        <div className="text-sm opacity-80">论坛名称</div>
+        <div className="text-3xl font-bold mb-2">云社</div>
+        <div className="text-sm opacity-80">OpenShare</div>
       </div>
     </div>
   );
@@ -126,8 +129,19 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   toggleAuthMode,
   isSliding = false,
   slideDirection = AnimationDirectionEnum.NONE,
+  agreeTerms,
+  setAgreeTerms,
+  onShowTermsDialog,
 }) => {
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  /**
+   * 处理注册
+   */
+  const handleRegisterWithTerms = () => {
+    if (!agreeTerms) {
+      return;
+    }
+    handleRegister();
+  };
 
   return (
     <div
@@ -193,13 +207,20 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
             )}
           </div>
           <span className="text-sm text-neutral-500 dark:text-dark-neutral">
-            同意协议
+            同意
+            <button
+              type="button"
+              onClick={onShowTermsDialog}
+              className="text-primary hover:text-primary-hover underline mx-1"
+            >
+              协议
+            </button>
           </span>
         </label>
       </div>
       <div className="text-center">
         <button
-          onClick={handleRegister}
+          onClick={handleRegisterWithTerms}
           disabled={!agreeTerms}
           className="btn-primary"
         >
@@ -495,6 +516,10 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  // 协议相关状态
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
+
   // 动画状态
   const [isSliding, setIsSliding] = useState(false);
   const [slideDirection, setSlideDirection] = useState<AnimationDirection>(
@@ -504,13 +529,67 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   // 文件输入引用
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * 重置所有表单数据
+   */
+  const resetFormData = () => {
+    setPhone("");
+    setPassword("");
+    setNickname("");
+    setAvatar(null);
+    setSelectedTags([]);
+    setBio("");
+    setVerificationCode("");
+    setNewPassword("");
+    setAgreeTerms(false);
+  };
+
+  /**
+   * 自定义关闭处理函数
+   */
+  const handleClose = () => {
+    // 重置到登录步骤
+    setCurrentStep(AuthStepEnum.LOGIN);
+    // 清空表单数据
+    resetFormData();
+    // 关闭协议弹窗
+    setShowTermsDialog(false);
+    // 调用原始关闭函数
+    onClose();
+  };
+
+  /**
+   * 处理同意协议
+   */
+  const handleAgreeTerms = () => {
+    setAgreeTerms(true);
+    setShowTermsDialog(false);
+  };
+
+  /**
+   * 显示协议弹窗
+   */
+  const handleShowTermsDialog = () => {
+    setShowTermsDialog(true);
+  };
+
+  /**
+   * 监听弹窗可见性变化，重置状态
+   */
+  useEffect(() => {
+    if (visible) {
+      // 弹窗打开时重置到登录状态
+      setCurrentStep(AuthStepEnum.LOGIN);
+    }
+  }, [visible]);
+
   // 使用工具类中的方法
   const dialogUtils = LoginDialogUtils.createDialogHandlers({
     currentStep,
     setCurrentStep,
     setIsSliding,
     setSlideDirection,
-    onClose,
+    onClose: handleClose,
     formData: {
       phone,
       password,
@@ -533,6 +612,22 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
     },
   });
 
+  // 创建自定义切换函数，在切换时清空输入框
+  const customToggleAuthMode = (targetStep: AuthStep) => {
+    // 如果从登录页面切换，清空登录表单
+    if (currentStep === AuthStepEnum.LOGIN) {
+      setPhone("");
+      setPassword("");
+    }
+    // 如果切换到登录页面，清空其他表单数据
+    if (targetStep === AuthStepEnum.LOGIN) {
+      setVerificationCode("");
+      setNewPassword("");
+    }
+    
+    dialogUtils.toggleAuthMode(targetStep);
+  };
+
   // 判断红色区域是否在左侧
   const isRedOnLeft = LoginDialogUtils.isRedOnLeft(currentStep);
 
@@ -540,153 +635,165 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const availableTags = LoginDialogUtils.getAvailableTags();
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${
-        visible ? "block" : "hidden"
-      }`}
-    >
+    <>
       <div
-        className="fixed inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      ></div>
-      <div
-        className="bg-white dark:bg-neutral-800 shadow-xl relative z-10 overflow-hidden"
-        style={{ width: "600px", height: "400px", borderRadius: "16px" }}
+        className={`fixed inset-0 z-50 flex items-center justify-center ${
+          visible ? "block" : "hidden"
+        }`}
       >
-        <div className="absolute top-4 right-4 z-10">
-          <button
-            onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* 忘记密码链接 - 只在登录页面显示 */}
-        {currentStep === AuthStepEnum.LOGIN && (
-          <div className="absolute bottom-4 right-4 z-10">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50"
+          onClick={handleClose}
+        ></div>
+        <div
+          className="bg-white dark:bg-neutral-800 shadow-xl relative z-10 overflow-hidden"
+          style={{ width: "600px", height: "400px", borderRadius: "16px" }}
+        >
+          <div className="absolute top-4 right-4 z-10">
             <button
-              onClick={() => dialogUtils.toggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)}
-              className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+              onClick={handleClose}
+              className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
             >
-              忘记密码
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
           </div>
-        )}
 
-        <div className="dialog-container">
-          {/* 红色区域 */}
-          <div
-            className={`red-area ${
-              isRedOnLeft ? "red-on-left" : "red-on-right"
-            }`}
-          >
-            <Logo />
+          {/* 忘记密码链接 - 只在登录页面显示 */}
+          {currentStep === AuthStepEnum.LOGIN && (
+            <div className="absolute bottom-4 right-4 z-10">
+              <button
+                onClick={() => customToggleAuthMode(AuthStepEnum.FORGOT_PASSWORD)}
+                className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+              >
+                忘记密码
+              </button>
+            </div>
+          )}
+
+          <div className="dialog-container">
+            {/* 红色区域 */}
             <div
-              className={`absolute top-1/2 transform -translate-y-1/2 w-8 h-16 bg-white dark:bg-neutral-800 ${
-                isRedOnLeft ? "right-0 rounded-l-full" : "left-0 rounded-r-full"
+              className={`red-area ${
+                isRedOnLeft ? "red-on-left" : "red-on-right"
               }`}
-            ></div>
-          </div>
+            >
+              <Logo />
+              <div
+                className={`absolute top-1/2 transform -translate-y-1/2 w-8 h-16 bg-white dark:bg-neutral-800 ${
+                  isRedOnLeft ? "right-0 rounded-l-full" : "left-0 rounded-r-full"
+                }`}
+              ></div>
+            </div>
 
-          {/* 白色内容区域 */}
-          <div
-            className={`white-area ${
-              isRedOnLeft ? "red-on-left" : "red-on-right"
-            }`}
-          >
-            {currentStep === AuthStepEnum.LOGIN && (
-              <LoginPanel
-                phone={phone}
-                setPhone={setPhone}
-                password={password}
-                setPassword={setPassword}
-                handleLogin={dialogUtils.handleLogin}
-                toggleAuthMode={() =>
-                  dialogUtils.toggleAuthMode(AuthStepEnum.REGISTER)
-                }
-                isSliding={isSliding}
-                slideDirection={slideDirection}
-              />
-            )}
+            {/* 白色内容区域 */}
+            <div
+              className={`white-area ${
+                isRedOnLeft ? "red-on-left" : "red-on-right"
+              }`}
+            >
+              {currentStep === AuthStepEnum.LOGIN && (
+                <LoginPanel
+                  phone={phone}
+                  setPhone={setPhone}
+                  password={password}
+                  setPassword={setPassword}
+                  handleLogin={dialogUtils.handleLogin}
+                  toggleAuthMode={() =>
+                    customToggleAuthMode(AuthStepEnum.REGISTER)
+                  }
+                  isSliding={isSliding}
+                  slideDirection={slideDirection}
+                />
+              )}
 
-            {currentStep === AuthStepEnum.REGISTER && (
-              <RegisterPanel
-                phone={phone}
-                setPhone={setPhone}
-                password={password}
-                setPassword={setPassword}
-                handleRegister={dialogUtils.handleRegister}
-                toggleAuthMode={() =>
-                  dialogUtils.toggleAuthMode(AuthStepEnum.LOGIN)
-                }
-                isSliding={isSliding}
-                slideDirection={slideDirection}
-              />
-            )}
+              {currentStep === AuthStepEnum.REGISTER && (
+                <RegisterPanel
+                  phone={phone}
+                  setPhone={setPhone}
+                  password={password}
+                  setPassword={setPassword}
+                  handleRegister={dialogUtils.handleRegister}
+                  toggleAuthMode={() =>
+                    customToggleAuthMode(AuthStepEnum.LOGIN)
+                  }
+                  isSliding={isSliding}
+                  slideDirection={slideDirection}
+                  agreeTerms={agreeTerms}
+                  setAgreeTerms={setAgreeTerms}
+                  onShowTermsDialog={handleShowTermsDialog}
+                />
+              )}
 
-            {currentStep === AuthStepEnum.FORGOT_PASSWORD && (
-              <ForgotPasswordPanel
-                phone={phone}
-                setPhone={setPhone}
-                verificationCode={verificationCode}
-                setVerificationCode={setVerificationCode}
-                newPassword={newPassword}
-                setNewPassword={setNewPassword}
-                handleSendCode={dialogUtils.handleSendCode}
-                handleResetPassword={dialogUtils.handleResetPassword}
-                toggleAuthMode={() =>
-                  dialogUtils.toggleAuthMode(AuthStepEnum.LOGIN)
-                }
-                isSliding={isSliding}
-                slideDirection={slideDirection}
-              />
-            )}
+              {currentStep === AuthStepEnum.FORGOT_PASSWORD && (
+                <ForgotPasswordPanel
+                  phone={phone}
+                  setPhone={setPhone}
+                  verificationCode={verificationCode}
+                  setVerificationCode={setVerificationCode}
+                  newPassword={newPassword}
+                  setNewPassword={setNewPassword}
+                  handleSendCode={dialogUtils.handleSendCode}
+                  handleResetPassword={dialogUtils.handleResetPassword}
+                  toggleAuthMode={() =>
+                    customToggleAuthMode(AuthStepEnum.LOGIN)
+                  }
+                  isSliding={isSliding}
+                  slideDirection={slideDirection}
+                />
+              )}
 
-            {currentStep === AuthStepEnum.AVATAR && (
-              <AvatarPanel
-                nickname={nickname}
-                setNickname={setNickname}
-                avatar={avatar}
-                setAvatar={setAvatar}
-                fileInputRef={fileInputRef}
-                handleAvatarUpload={dialogUtils.handleAvatarUpload}
-                handleAvatarSubmit={dialogUtils.handleAvatarSubmit}
-                skipCurrentStep={dialogUtils.skipCurrentStep}
-                isSliding={isSliding}
-                slideDirection={slideDirection}
-              />
-            )}
+              {currentStep === AuthStepEnum.AVATAR && (
+                <AvatarPanel
+                  nickname={nickname}
+                  setNickname={setNickname}
+                  avatar={avatar}
+                  setAvatar={setAvatar}
+                  fileInputRef={fileInputRef}
+                  handleAvatarUpload={dialogUtils.handleAvatarUpload}
+                  handleAvatarSubmit={dialogUtils.handleAvatarSubmit}
+                  skipCurrentStep={dialogUtils.skipCurrentStep}
+                  isSliding={isSliding}
+                  slideDirection={slideDirection}
+                />
+              )}
 
-            {currentStep === AuthStepEnum.TAGS && (
-              <TagsPanel
-                availableTags={availableTags}
-                selectedTags={selectedTags}
-                toggleTag={dialogUtils.toggleTag}
-                handleTagsSubmit={dialogUtils.handleTagsSubmit}
-                skipCurrentStep={dialogUtils.skipCurrentStep}
-                onPreviousStep={dialogUtils.handlePreviousStep}
-                isSliding={isSliding}
-                slideDirection={slideDirection}
-              />
-            )}
+              {currentStep === AuthStepEnum.TAGS && (
+                <TagsPanel
+                  availableTags={availableTags}
+                  selectedTags={selectedTags}
+                  toggleTag={dialogUtils.toggleTag}
+                  handleTagsSubmit={dialogUtils.handleTagsSubmit}
+                  skipCurrentStep={dialogUtils.skipCurrentStep}
+                  onPreviousStep={dialogUtils.handlePreviousStep}
+                  isSliding={isSliding}
+                  slideDirection={slideDirection}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* 协议弹窗 - 渲染在最高层级，不受父容器限制 */}
+      <TermsDialog
+        visible={showTermsDialog}
+        onClose={() => setShowTermsDialog(false)}
+        onAgree={handleAgreeTerms}
+      />
+    </>
   );
 };
 
