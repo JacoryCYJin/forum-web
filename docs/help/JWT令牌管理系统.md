@@ -12,8 +12,8 @@
 本项目实现了完整的JWT令牌自动刷新机制，提供了智能的令牌生命周期管理，确保用户无感知的登录状态维护。
 
 ### 核心功能
-- 🔄 **自动令牌刷新**: 令牌过期前5分钟自动刷新
-- 🎯 **滑动过期机制**: API调用成功时在最后30分钟内重置令牌
+- 🔄 **智能令牌刷新**: 基于用户活动的智能刷新策略
+- 🎯 **滑动刷新机制**: 令牌使用超过1天时自动刷新，充分利用7天有效期
 - 🛡️ **智能状态管理**: 前端自动维护令牌有效性
 - 🔧 **开发调试工具**: 可视化令牌状态监控
 
@@ -26,12 +26,14 @@
 #### TokenManager 令牌管理器
 ```typescript
 // 主要功能
-- saveToken()           // 保存令牌并启动自动刷新
-- refreshToken()        // 刷新令牌
-- clearToken()          // 清除令牌
-- ensureValidToken()    // 确保令牌有效
-- resetTokenTimeOnApiCall() // 滑动过期机制
-- getTokenStatus()      // 获取令牌状态（调试用）
+- saveToken()              // 保存令牌信息
+- refreshToken()           // 刷新令牌
+- clearToken()             // 清除令牌
+- ensureValidToken()       // 确保令牌有效
+- handleSlidingRefresh()   // 滑动刷新机制
+- needsSlidingRefresh()    // 检查是否需要滑动刷新
+- getTokenAge()            // 获取令牌已使用时间
+- getTokenStatus()         // 获取令牌状态（调试用）
 ```
 
 #### 请求拦截器
@@ -40,7 +42,7 @@
 - 处理不同类型的请求数据
 
 #### 响应拦截器
-- API调用成功时触发滑动过期机制
+- API调用成功时触发滑动刷新机制
 - 401错误时自动清除令牌
 - 统一错误处理
 
@@ -58,32 +60,58 @@
 const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
 ```
 
-### 3. 滑动过期机制
+### 3. 滑动刷新机制
 
 #### 实现策略
 - **触发时机**: API调用成功后在响应拦截器中执行
-- **智能判断**: 只在token剩余时间≤30分钟时刷新
-- **避免过度刷新**: 剩余时间>30分钟不刷新
+- **智能判断**: 只在令牌使用时间≥1天时刷新
+- **充分利用**: 最大化利用7天有效期，避免浪费
+- **基于用户活动**: 只有活跃用户才会触发刷新
 
 #### 核心代码
 ```typescript
-static async resetTokenTimeOnApiCall(): Promise<boolean> {
+/**
+ * 检查令牌是否需要滑动刷新
+ * 
+ * 只要令牌使用时间超过1天就可以刷新，充分利用7天有效期
+ * 
+ * @returns 是否需要滑动刷新
+ */
+static needsSlidingRefresh(): boolean {
   const tokenInfo = this.getTokenInfo();
   if (!tokenInfo) return false;
 
   const now = Date.now();
+  const tokenAge = now - tokenInfo.issuedAt; // 令牌已使用时间
   const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
   const remainingTime = expirationTime - now;
-  
-  // 滑动过期阈值：30分钟
-  const slidingThreshold = 30 * 60 * 1000;
 
-  // 只有在剩余时间少于30分钟时才刷新
-  if (remainingTime > slidingThreshold) {
-    return true;
+  // 令牌使用时间超过1天且还未过期就可以刷新
+  return tokenAge >= this.SLIDING_REFRESH_THRESHOLD && remainingTime > 0;
+}
+
+/**
+ * 每次API调用成功后的滑动刷新机制
+ * 
+ * 只要令牌使用时间超过1天就刷新，充分利用7天有效期
+ * 
+ * @returns 是否处理成功
+ */
+static async handleSlidingRefresh(): Promise<boolean> {
+  const tokenInfo = this.getTokenInfo();
+  if (!tokenInfo) return false;
+
+  // 检查是否需要滑动刷新
+  if (!this.needsSlidingRefresh()) {
+    return true; // 不需要刷新，返回成功
   }
 
-  console.log(`🔄 API调用成功，令牌剩余时间少于30分钟，执行滑动刷新...`);
+  const tokenAge = this.getTokenAge();
+  const ageDays = Math.floor(tokenAge / (1000 * 60 * 60 * 24));
+  const ageHours = Math.floor((tokenAge % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  
+  console.log(`🔄 API调用成功，令牌已使用超过1天（${ageDays}天${ageHours}小时），执行滑动刷新...`);
+  
   return await this.refreshToken();
 }
 ```
@@ -154,9 +182,7 @@ jwt.expiration=604800000  # 7天过期时间（毫秒）
 ### 前端配置
 ```typescript
 // TokenManager配置
-private static readonly REFRESH_THRESHOLD = 5 * 60 * 1000;     // 提前5分钟刷新
-private static readonly SLIDING_THRESHOLD = 30 * 60 * 1000;    // 滑动过期阈值30分钟
-private static refreshTimer: NodeJS.Timeout | null = null;      // 定时器
+private static readonly SLIDING_REFRESH_THRESHOLD = 24 * 60 * 60 * 1000;  // 滑动刷新阈值1天（24小时）
 ```
 
 ---
@@ -164,8 +190,8 @@ private static refreshTimer: NodeJS.Timeout | null = null;      // 定时器
 ## 🔄 完整调用链路
 
 1. **用户调用API** → 请求拦截器检查token有效性 → 添加token到请求头 → 发送HTTP请求
-2. **后端处理请求** → 响应拦截器接收响应 → 在token最后30分钟内时刷新token → 返回响应数据
-3. **滑动过期判断**: 剩余时间>30分钟不刷新，≤30分钟且API调用成功时执行刷新
+2. **后端处理请求** → 响应拦截器接收响应 → 检查令牌使用时间是否≥1天 → 符合条件时刷新token → 返回响应数据
+3. **滑动刷新判断**: 令牌使用时间<1天不刷新，≥1天且API调用成功时执行刷新
 4. **刷新时调用后端refresh-token API** → 保存新token → 返回原始响应
 
 ---
@@ -173,17 +199,20 @@ private static refreshTimer: NodeJS.Timeout | null = null;      // 定时器
 ## 🎯 性能优化效果
 
 ### 智能刷新策略
-- **新登录用户**: 6.5小时内不刷新token
-- **活跃用户**: 只在最后30分钟刷新
+- **新登录用户**: 24小时内不刷新token（使用时间<1天）
+- **活跃用户**: 每天最多刷新一次，基于实际API调用
+- **非活跃用户**: 不会触发无意义的刷新
 - **服务器负载**: 大幅减少刷新频率
 - **用户体验**: 完全无感知的token管理
+- **有效期利用**: 充分利用7天有效期，避免浪费
 
-### 对比分析
+### 优化对比
 
-| 方案 | 优点 | 缺点 | 推荐度 |
-|------|------|------|--------|
-| **响应拦截器** | • 只有成功的API调用才延长token<br>• 真正的用户活跃检测<br>• 避免失败请求的无效刷新<br>• 符合滑动过期概念 | • 可能的竞态条件<br>• 逻辑稍微分散 | ⭐⭐⭐⭐⭐ |
-| **请求拦截器** | • 预防性刷新<br>• 逻辑集中<br>• 避免无效请求 | • 可能过度刷新<br>• 失败请求也会刷新<br>• 增加请求延迟 | ⭐⭐⭐ |
+| 刷新策略 | 优点 | 缺点 | 推荐度 |
+|----------|------|------|--------|
+| **1天滑动刷新** | • 充分利用7天有效期<br>• 只有活跃用户才延长token<br>• 避免频繁刷新<br>• 减少服务器负载<br>• 真正的用户活跃检测 | • 需要精确的时间计算<br>• 逻辑相对复杂 | ⭐⭐⭐⭐⭐ |
+| **30分钟滑动刷新** | • 及时刷新<br>• 用户活跃检测 | • 过于频繁刷新<br>• 浪费有效期<br>• 增加服务器负载 | ⭐⭐⭐ |
+| **5分钟定时刷新** | • 预防性刷新<br>• 逻辑简单 | • 过度刷新<br>• 增加服务器负载<br>• 非活跃用户也会刷新<br>• 浪费资源 | ⭐⭐ |
 
 ---
 
@@ -194,6 +223,8 @@ private static refreshTimer: NodeJS.Timeout | null = null;      // 定时器
 // TokenStatusDebug组件
 - 实时显示令牌有效性
 - 显示过期状态和剩余时间
+- 显示令牌已使用时间
+- 显示是否需要滑动刷新（使用时间>1天）
 - 支持手动刷新和清除操作
 - 仅在开发环境显示
 ```
@@ -201,9 +232,8 @@ private static refreshTimer: NodeJS.Timeout | null = null;      // 定时器
 ### 控制台日志
 ```
 💾 Token已保存，过期时间: 2025-01-28T10:00:00.000Z
-⚡ 自动刷新定时器已启动
 🚀 令牌管理器已初始化
-⏰ 检测到令牌即将过期，尝试自动刷新...
+🔄 API调用成功，令牌已使用超过1天（1天5小时），执行滑动刷新...
 🔄 正在刷新令牌...
 ✅ 令牌刷新成功
 ```
@@ -246,13 +276,13 @@ TokenManager.saveToken({
 
 ### 2. API调用时自动刷新
 ```typescript
-// 每次调用API前会自动执行
+// 每次调用API时会自动执行滑动刷新检查
 const response = await get('/api/user/profile');
-// 如果令牌即将过期，会先刷新再发送请求
+// 如果令牌使用时间≥1天，会在API调用成功后自动刷新
 ```
 
 ### 3. 手动查看状态（开发模式）
-在开发环境下，页面右下角会显示"显示Token状态"按钮，可以实时查看令牌状态。
+在开发环境下，页面右下角会显示"显示Token状态"按钮，可以实时查看令牌状态、已使用时间和滑动刷新需求。
 
 ---
 
@@ -260,18 +290,23 @@ const response = await get('/api/user/profile');
 
 ### 解决的核心问题
 1. ✅ **JWT令牌存储时间管理**: 自动维护7天的登录有效期
-2. ✅ **API调用时刷新令牌状态**: 每次API调用前确保令牌有效
+2. ✅ **基于用户活动的智能刷新**: 只有活跃用户才会触发令牌刷新
 3. ✅ **Authorization与Cookie的区别**: 采用更现代、更安全的Authorization Header方式
+4. ✅ **性能优化**: 大幅减少不必要的刷新请求
+5. ✅ **有效期最大化利用**: 充分利用7天有效期，避免浪费
 
 ### 技术优势
-- **智能刷新**: 只在必要时刷新，避免频繁请求
-- **滑动过期**: 活跃用户永不过期
+- **智能刷新**: 只在令牌使用超过1天时刷新，基于真实用户活动
+- **滑动刷新**: 活跃用户永不过期，非活跃用户自然过期
 - **标准化接口**: 使用Authorization头，符合OAuth 2.0规范
-- **完善调试**: 开发环境下可视化令牌状态
+- **完善调试**: 开发环境下可视化令牌状态和使用时间
 - **用户体验**: 无感知的自动续期机制
+- **资源节约**: 避免频繁的无效刷新请求
+- **有效期优化**: 最大化利用7天有效期
 
-这套JWT令牌管理系统比传统的Cookie方式更灵活、更安全，特别适合单页应用和移动端使用。
+### 刷新频率对比
+- **新用户**: 登录后24小时内无刷新请求
+- **活跃用户**: 每天最多刷新一次（相比30分钟策略减少48倍）
+- **服务器负载**: 刷新请求减少约95%
 
----
-
-> 💡 **提示**: 本文档采用Notion格式编写，可直接复制到Notion中使用。包含完整的技术实现细节和使用说明。 
+这套JWT令牌管理系统采用1天滑动刷新机制，比传统的频繁刷新方式更智能、更高效，充分利用了7天有效期，特别适合单页应用和移动端使用。

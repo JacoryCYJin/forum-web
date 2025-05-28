@@ -25,11 +25,8 @@ export class TokenManager {
   private static readonly EXPIRES_IN_KEY = 'expiresIn';
   private static readonly ISSUED_AT_KEY = 'issuedAt';
   
-  // 提前刷新时间（5分钟，单位：毫秒）
-  private static readonly REFRESH_THRESHOLD = 5 * 60 * 1000;
-  
-  // 自动刷新定时器
-  private static refreshTimer: NodeJS.Timeout | null = null;
+  // 滑动刷新阈值：1天（24小时，单位：毫秒）
+  private static readonly SLIDING_REFRESH_THRESHOLD = 24 * 60 * 60 * 1000;
 
   /**
    * 保存令牌信息
@@ -51,9 +48,6 @@ export class TokenManager {
     // 注意：expiresIn是秒数，需要转换为毫秒
     const expirationTime = issuedAt + (tokenData.expiresIn * 1000);
     console.log('💾 Token已保存，过期时间:', new Date(expirationTime));
-    
-    // 启动自动刷新定时器
-    this.startAutoRefresh();
   }
 
   /**
@@ -85,20 +79,23 @@ export class TokenManager {
   }
 
   /**
-   * 检查令牌是否即将过期
+   * 检查令牌是否需要滑动刷新
    * 
-   * @returns 是否即将过期
+   * 只要令牌使用时间超过1天就可以刷新，充分利用7天有效期
+   * 
+   * @returns 是否需要滑动刷新
    */
-  static isTokenExpiringSoon(): boolean {
+  static needsSlidingRefresh(): boolean {
     const tokenInfo = this.getTokenInfo();
-    if (!tokenInfo) return true;
+    if (!tokenInfo) return false;
 
     const now = Date.now();
-    // 注意：expiresIn是秒数，需要转换为毫秒
+    const tokenAge = now - tokenInfo.issuedAt; // 令牌已使用时间
     const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
-    const timeUntilExpiry = expirationTime - now;
+    const remainingTime = expirationTime - now;
 
-    return timeUntilExpiry <= this.REFRESH_THRESHOLD;
+    // 令牌使用时间超过1天且还未过期就可以刷新
+    return tokenAge >= this.SLIDING_REFRESH_THRESHOLD && remainingTime > 0;
   }
 
   /**
@@ -111,7 +108,6 @@ export class TokenManager {
     if (!tokenInfo) return true;
 
     const now = Date.now();
-    // 注意：expiresIn是秒数，需要转换为毫秒
     const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
 
     return now >= expirationTime;
@@ -127,11 +123,23 @@ export class TokenManager {
     if (!tokenInfo) return 0;
 
     const now = Date.now();
-    // 注意：expiresIn是秒数，需要转换为毫秒
     const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
     const remaining = expirationTime - now;
 
     return Math.max(0, remaining);
+  }
+
+  /**
+   * 获取令牌已使用时间
+   * 
+   * @returns 已使用时间（毫秒）
+   */
+  static getTokenAge(): number {
+    const tokenInfo = this.getTokenInfo();
+    if (!tokenInfo) return 0;
+
+    const now = Date.now();
+    return now - tokenInfo.issuedAt;
   }
 
   /**
@@ -196,44 +204,11 @@ export class TokenManager {
     localStorage.removeItem(this.ISSUED_AT_KEY);
     localStorage.removeItem('userInfo');
     
-    // 停止自动刷新定时器
-    this.stopAutoRefresh();
-    
     console.log('🗑️ 令牌信息已清除');
   }
 
   /**
-   * 启动自动刷新定时器
-   */
-  static startAutoRefresh(): void {
-    // 先停止现有定时器
-    this.stopAutoRefresh();
-    
-    const checkInterval = 60 * 1000; // 每分钟检查一次
-    
-    this.refreshTimer = setInterval(async () => {
-      if (this.isTokenExpiringSoon()) {
-        console.log('⏰ 检测到令牌即将过期，尝试自动刷新...');
-        await this.refreshToken();
-      }
-    }, checkInterval);
-    
-    console.log('⚡ 自动刷新定时器已启动');
-  }
-
-  /**
-   * 停止自动刷新定时器
-   */
-  static stopAutoRefresh(): void {
-    if (this.refreshTimer) {
-      clearInterval(this.refreshTimer);
-      this.refreshTimer = null;
-      console.log('⏹️ 自动刷新定时器已停止');
-    }
-  }
-
-  /**
-   * 每次API调用前检查并刷新令牌
+   * 每次API调用前检查令牌有效性
    * 
    * @returns 是否可以继续API调用
    */
@@ -250,12 +225,6 @@ export class TokenManager {
       return await this.refreshToken();
     }
 
-    // 如果即将过期，主动刷新
-    if (this.isTokenExpiringSoon()) {
-      console.log('⏰ 令牌即将过期，主动刷新...');
-      return await this.refreshToken();
-    }
-
     return true;
   }
 
@@ -265,55 +234,61 @@ export class TokenManager {
   static getTokenStatus(): {
     hasToken: boolean;
     isExpired: boolean;
-    isExpiringSoon: boolean;
+    needsSlidingRefresh: boolean;
     remainingTime: number;
     remainingTimeFormatted: string;
+    tokenAge: number;
+    tokenAgeFormatted: string;
   } {
     const hasToken = !!this.getTokenInfo();
     const isExpired = this.isTokenExpired();
-    const isExpiringSoon = this.isTokenExpiringSoon();
+    const needsSlidingRefresh = this.needsSlidingRefresh();
     const remainingTime = this.getRemainingTime();
+    const tokenAge = this.getTokenAge();
     
     // 格式化剩余时间
-    const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-    const remainingTimeFormatted = `${hours}小时${minutes}分钟`;
+    const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
+    const remainingMinutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+    const remainingTimeFormatted = `${remainingHours}小时${remainingMinutes}分钟`;
+
+    // 格式化已使用时间
+    const ageHours = Math.floor(tokenAge / (1000 * 60 * 60));
+    const ageMinutes = Math.floor((tokenAge % (1000 * 60 * 60)) / (1000 * 60));
+    const tokenAgeFormatted = `${ageHours}小时${ageMinutes}分钟`;
 
     return {
       hasToken,
       isExpired,
-      isExpiringSoon,
+      needsSlidingRefresh,
       remainingTime,
-      remainingTimeFormatted
+      remainingTimeFormatted,
+      tokenAge,
+      tokenAgeFormatted
     };
   }
 
   /**
-   * 每次API调用成功后重置令牌时间（滑动过期机制）
+   * 每次API调用成功后的滑动刷新机制
    * 
-   * 只在令牌剩余时间少于30分钟时才刷新，避免频繁刷新
+   * 只要令牌使用时间超过1天就刷新，充分利用7天有效期
    * 
-   * @returns 是否重置成功
+   * @returns 是否处理成功
    */
-  static async resetTokenTimeOnApiCall(): Promise<boolean> {
+  static async handleSlidingRefresh(): Promise<boolean> {
     const tokenInfo = this.getTokenInfo();
     if (!tokenInfo) return false;
 
-    const now = Date.now();
-    // 注意：expiresIn是秒数，需要转换为毫秒
-    const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
-    const remainingTime = expirationTime - now;
-    
-    // 滑动过期阈值：30分钟（毫秒）
-    const slidingThreshold = 30 * 60 * 1000;
-
-    // 只有在剩余时间少于30分钟时才刷新
-    if (remainingTime > slidingThreshold) {
-      // 剩余时间充足，不需要刷新
-      return true;
+    // 检查是否需要滑动刷新
+    if (!this.needsSlidingRefresh()) {
+      return true; // 不需要刷新，返回成功
     }
 
-    console.log(`🔄 API调用成功，令牌剩余时间少于30分钟（${Math.floor(remainingTime / (1000 * 60))}分钟），执行滑动刷新...`);
+    const tokenAge = this.getTokenAge();
+    const ageDays = Math.floor(tokenAge / (1000 * 60 * 60 * 24));
+    const ageHours = Math.floor((tokenAge % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    
+    console.log(`🔄 API调用成功，令牌已使用超过1天（${ageDays}天${ageHours}小时），执行滑动刷新...`);
+    
     return await this.refreshToken();
   }
 }
@@ -325,7 +300,6 @@ export function initializeTokenManager(): void {
   if (typeof window !== 'undefined') {
     const tokenInfo = TokenManager.getTokenInfo();
     if (tokenInfo) {
-      TokenManager.startAutoRefresh();
       console.log('🚀 令牌管理器已初始化');
     }
   }

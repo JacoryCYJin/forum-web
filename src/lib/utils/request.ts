@@ -52,12 +52,12 @@ request.interceptors.request.use(
 // 响应拦截器 - 处理token过期和统一错误处理
 request.interceptors.response.use(
     async (response: AxiosResponse): Promise<any> => {
-      // 🔄 API调用成功，在token最后30分钟内时重置令牌时间（滑动过期机制）
+      // 🔄 API调用成功，执行滑动刷新机制（令牌使用超过1天时刷新）
       try {
-        await TokenManager.resetTokenTimeOnApiCall();
+        await TokenManager.handleSlidingRefresh();
       } catch (error) {
-        // 重置令牌时间失败不影响正常响应
-        console.warn('⚠️ 重置令牌时间失败:', error);
+        // 滑动刷新失败不影响正常响应
+        console.warn('⚠️ 滑动刷新失败:', error);
       }
       
       // 直接返回数据

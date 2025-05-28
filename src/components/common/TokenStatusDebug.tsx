@@ -78,13 +78,20 @@ export function TokenStatusDebug() {
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">即将过期:</span>
+                  <span className="text-gray-600 dark:text-gray-400">需要滑动刷新:</span>
                   <span className={`font-medium ${
-                    tokenStatus.isExpiringSoon 
+                    tokenStatus.needsSlidingRefresh 
                       ? 'text-yellow-600 dark:text-yellow-400' 
                       : 'text-green-600 dark:text-green-400'
                   }`}>
-                    {tokenStatus.isExpiringSoon ? '⚠️ 是' : '✅ 否'}
+                    {tokenStatus.needsSlidingRefresh ? '⚠️ 是（已使用>1天）' : '✅ 否（使用<1天）'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">已使用时间:</span>
+                  <span className="font-medium text-purple-600 dark:text-purple-400">
+                    {tokenStatus.tokenAgeFormatted}
                   </span>
                 </div>
 
