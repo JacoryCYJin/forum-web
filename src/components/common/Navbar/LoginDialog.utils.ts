@@ -9,10 +9,10 @@ import {
   DialogHandlersConfig, 
   DialogHandlers 
 } from "@/types/LoginDialog";
-import { loginUserApi, registerApi, updateAvatarAndUsernameApi, sendResetCodeApi, resetPasswordApi } from "@/lib/api/userApi";
+import { loginUserApi, registerApi, updateAvatarAndUsernameAndProfileApi, sendResetCodeApi, resetPasswordApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
-import type { UserInfo as User } from "@/types/user.types";
+import type { UserInfo as User } from "@/types/userType";
 import { processAvatarPath, validateAvatarFile } from "@/lib/utils/avatarUtils";
 
 /**
@@ -395,9 +395,10 @@ export class LoginDialogUtils {
           });
 
           // 调用更新资料API
-          const updatedUser = await updateAvatarAndUsernameApi({
+          const updatedUser = await updateAvatarAndUsernameAndProfileApi({
             username: formData.nickname || undefined,
-            avatarUrl: formData.avatar || undefined
+            avatarUrl: formData.avatar || undefined,
+            profile: formData.bio || undefined
           });
 
           console.log("资料更新成功:", updatedUser);

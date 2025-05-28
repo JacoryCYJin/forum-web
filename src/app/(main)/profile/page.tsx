@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
-import { UserActivity, UserActivityType, PostType } from '@/types/user.types';
+import { UserActivity, UserActivityType, PostType } from '@/types/userType';
 
 /**
  * 标签页类型

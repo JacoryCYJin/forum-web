@@ -309,6 +309,7 @@ export interface DialogHandlersConfig {
     selectedTags: string[];
     verificationCode: string;
     newPassword: string;
+    bio: string;
   };
   
   /**
@@ -322,6 +323,7 @@ export interface DialogHandlersConfig {
     setSelectedTags: (tags: string[]) => void;
     setVerificationCode: (code: string) => void;
     setNewPassword: (password: string) => void;
+    setBio: (bio: string) => void;
   };
 }
 

@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { useUserStore } from '@/store/userStore';
+import { updateAvatarAndUsernameAndProfileApi } from '@/lib/api/userApi';
 
 /**
  * 设置分类类型
@@ -19,12 +20,13 @@ type SettingCategory = 'user' | 'general' | 'security';
  * @component
  */
 export default function SettingsPage() {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const [activeCategory, setActiveCategory] = useState<SettingCategory>('user');
+  const [isLoading, setIsLoading] = useState(false);
   
   // 用户设置状态
   const [userSettings, setUserSettings] = useState({
-    nickname: user?.nickname || '',
+    nickname: user?.username || '',
     avatar: user?.avatar || '',
     bio: user?.bio || ''
   });
@@ -49,10 +51,34 @@ export default function SettingsPage() {
   /**
    * 处理用户设置保存
    */
-  const handleSaveUserSettings = () => {
-    // 这里应该调用API保存用户设置
-    console.log('保存用户设置:', userSettings);
-    alert('用户设置已保存');
+  const handleSaveUserSettings = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      // 调用API更新用户资料
+      const updatedUser = await updateAvatarAndUsernameAndProfileApi({
+        username: userSettings.nickname || undefined,
+        avatarUrl: userSettings.avatar || undefined,
+        profile: userSettings.bio || undefined
+      });
+
+      // 更新userStore中的用户信息
+      const newUserInfo = {
+        ...user,
+        username: updatedUser.username || user.username,
+        avatar: updatedUser.avatarUrl || user.avatar,
+        bio: updatedUser.profile || user.bio
+      };
+      setUser(newUserInfo);
+
+      alert('用户设置已保存成功！');
+    } catch (error: any) {
+      console.error('保存用户设置失败:', error);
+      alert(error.message || '保存用户设置失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
@@ -75,22 +101,6 @@ export default function SettingsPage() {
     // 这里应该调用API保存安全设置
     console.log('保存安全设置:', securitySettings);
     alert('安全设置已保存');
-  };
-
-  /**
-   * 处理头像上传
-   */
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // 这里应该上传文件到服务器并获取URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setUserSettings(prev => ({ ...prev, avatar: result }));
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   /**
@@ -204,7 +214,6 @@ export default function SettingsPage() {
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={handleAvatarUpload}
                             className="hidden"
                             id="avatar-upload"
                           />
@@ -253,9 +262,14 @@ export default function SettingsPage() {
                     <div className="flex justify-end">
                       <button
                         onClick={handleSaveUserSettings}
-                        className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                        disabled={isLoading}
+                        className={`px-6 py-3 rounded-lg transition-colors ${
+                          isLoading
+                            ? 'bg-neutral-400 cursor-not-allowed'
+                            : 'bg-primary hover:bg-primary-hover'
+                        } text-white`}
                       >
-                        保存更改
+                        {isLoading ? '保存中...' : '保存更改'}
                       </button>
                     </div>
                   </div>

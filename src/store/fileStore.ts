@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import { FileInfo, FolderInfo, FileType } from '@/types/user.types';
+import { FileInfo, FolderInfo, FileType } from '@/types/userType';
 
 /**
  * 排序类型

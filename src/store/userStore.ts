@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserInfo as User, UserStats, Notification } from '@/types/user.types';
+import { UserInfo as User, UserStats, Notification } from '@/types/userType';
 import { processAvatarPath } from '@/lib/utils/avatarUtils';
 
 /**

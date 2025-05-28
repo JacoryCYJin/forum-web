@@ -9,15 +9,14 @@ import type {
   LoginVO,
   LoginRequest,
   RegisterRequest,
-  UpdateUsernameRequest,
   SendResetCodeRequest,
   ResetPasswordRequest,
   RefreshTokenRequest,
   GetUserInfoRequest,
   User,
   ApiResponse,
-  UpdateAvatarAndUsernameRequest,
-} from '@/types/user.types';
+  UpdateAvatarAndUsernameAndProfileRequest,
+} from '@/types/userType';
 
 /**
  * 用户登录API
@@ -97,35 +96,6 @@ export async function registerUserApi(params: RegisterRequest): Promise<LoginVO>
  * @returns {Promise<LoginVO>} 注册后的登录信息（包含JWT令牌）
  */
 export const registerApi = registerUserApi;
-
-/**
- * 更新用户昵称API
- * 
- * 注册第二步或后续修改昵称
- *
- * @async
- * @param {UpdateUsernameRequest} params - 更新参数
- * @returns {Promise<User>} 更新后的用户信息
- * @throws {Error} 当API请求失败时抛出错误
- */
-export async function updateUsernameApi(params: UpdateUsernameRequest): Promise<User> {
-  try {
-    const searchParams = new URLSearchParams();
-    searchParams.append('userId', params.userId);
-    searchParams.append('username', params.username);
-
-    const response: ApiResponse<User> = await post('/user/update-username', searchParams);
-    
-    if (response.code === 0) {
-      return response.data;
-    } else {
-      throw new Error(response.message || '更新昵称失败');
-    }
-  } catch (error: any) {
-    console.error('更新昵称失败:', error);
-    throw new Error(error.message || '更新昵称失败，请稍后重试');
-  }
-}
 
 /**
  * 发送密码重置验证码API
@@ -250,53 +220,25 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
 }
 
 /**
- * 修改用户头像API
- * 
- * 通过JWT令牌验证身份并修改头像
- * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
- *
- * @async
- * @param {string} avatarUrl - 新头像URL
- * @returns {Promise<User>} 更新后的用户信息
- * @throws {Error} 当API请求失败时抛出错误
- */
-export async function updateAvatarApi(avatarUrl: string): Promise<User> {
-  try {
-    const searchParams = new URLSearchParams();
-    searchParams.append('avatarUrl', avatarUrl);
-
-    const response: ApiResponse<User> = await post('/user/update-avatar', searchParams);
-    
-    if (response.code === 0) {
-      return response.data;
-    } else {
-      throw new Error(response.message || '更新头像失败');
-    }
-  } catch (error: any) {
-    console.error('更新头像失败:', error);
-    throw new Error(error.message || '更新头像失败，请稍后重试');
-  }
-}
-
-/**
  * 修改用户资料API
  * 
- * 通过JWT令牌验证身份并修改用户资料（昵称和头像）
+ * 通过JWT令牌验证身份并修改用户资料（昵称、头像和个人简介）
  * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
  *
  * @async
- * @param {object} params - 更新参数
+ * @param {UpdateAvatarAndUsernameRequest} params - 更新参数
  * @param {string} [params.username] - 新昵称（可选）
  * @param {string} [params.avatarUrl] - 新头像URL（可选）
+ * @param {string} [params.profile] - 新个人简介（可选）
  * @returns {Promise<User>} 更新后的用户信息
  * @throws {Error} 当API请求失败时抛出错误
  */
-export async function updateAvatarAndUsernameApi(params: UpdateAvatarAndUsernameRequest): Promise<User> {
+  export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarAndUsernameAndProfileRequest): Promise<User> {
   try {
-    console.log('更新用户头像和昵称参数:', params);
+    console.log('更新用户资料参数:', params);
 
-    const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username', params);
-    console.log('更新用户头像和昵称响应:', response);
+    const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username-profile', params);
+    console.log('更新用户资料响应:', response);
 
     if (response.code === 0) {
       return response.data;
