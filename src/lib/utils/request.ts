@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { TokenManager } from '@/lib/utils/tokenManager';
+import { TokenManager } from './tokenManager';
 
 // 定义接口返回数据的类型
 interface ResponseData<T = any> {
@@ -51,7 +51,15 @@ request.interceptors.request.use(
 
 // 响应拦截器 - 处理token过期和统一错误处理
 request.interceptors.response.use(
-    (response: AxiosResponse): Promise<any> => {
+    async (response: AxiosResponse): Promise<any> => {
+      // 🔄 API调用成功，在token最后30分钟内时重置令牌时间（滑动过期机制）
+      try {
+        await TokenManager.resetTokenTimeOnApiCall();
+      } catch (error) {
+        // 重置令牌时间失败不影响正常响应
+        console.warn('⚠️ 重置令牌时间失败:', error);
+      }
+      
       // 直接返回数据
       return Promise.resolve(response.data);
     },

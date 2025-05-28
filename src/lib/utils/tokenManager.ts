@@ -287,6 +287,35 @@ export class TokenManager {
       remainingTimeFormatted
     };
   }
+
+  /**
+   * 每次API调用成功后重置令牌时间（滑动过期机制）
+   * 
+   * 只在令牌剩余时间少于30分钟时才刷新，避免频繁刷新
+   * 
+   * @returns 是否重置成功
+   */
+  static async resetTokenTimeOnApiCall(): Promise<boolean> {
+    const tokenInfo = this.getTokenInfo();
+    if (!tokenInfo) return false;
+
+    const now = Date.now();
+    // 注意：expiresIn是秒数，需要转换为毫秒
+    const expirationTime = tokenInfo.issuedAt + (tokenInfo.expiresIn * 1000);
+    const remainingTime = expirationTime - now;
+    
+    // 滑动过期阈值：30分钟（毫秒）
+    const slidingThreshold = 30 * 60 * 1000;
+
+    // 只有在剩余时间少于30分钟时才刷新
+    if (remainingTime > slidingThreshold) {
+      // 剩余时间充足，不需要刷新
+      return true;
+    }
+
+    console.log(`🔄 API调用成功，令牌剩余时间少于30分钟（${Math.floor(remainingTime / (1000 * 60))}分钟），执行滑动刷新...`);
+    return await this.refreshToken();
+  }
 }
 
 /**

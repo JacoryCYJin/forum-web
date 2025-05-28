@@ -150,12 +150,12 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       </h2>
       <div className="mb-6 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
-          手机号
+          账号
         </label>
         <input
           type="tel"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder="请输入手机号"
+          placeholder="请输入手机号/邮箱"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -262,7 +262,7 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
         <input
           type="tel"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder="请输入手机号"
+          placeholder="请输入手机号/邮箱"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -325,7 +325,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
   nickname,
   setNickname,
   avatar,
-  setAvatar,
+  // setAvatar,
   fileInputRef,
   handleAvatarUpload,
   handleAvatarSubmit,
@@ -371,7 +371,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
       </div>
       
       {/* 手动输入文件路径 */}
-      <div className="mb-4 flex items-center">
+      {/* <div className="mb-4 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
           路径
         </label>
@@ -386,7 +386,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
             console.log('手动设置头像路径:', path);
           }}
         />
-      </div>
+      </div> */}
       
       <div className="mb-4 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">

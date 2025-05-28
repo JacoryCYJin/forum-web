@@ -4,6 +4,7 @@
  */
 
 import { post, get } from '@/lib/utils/request';
+import request from '@/lib/utils/request';
 import type {
   LoginVO,
   LoginRequest,
@@ -215,6 +216,7 @@ export async function getUserInfoApi(params: GetUserInfoRequest): Promise<User> 
  * 刷新JWT令牌API
  * 
  * 使用现有令牌获取新的JWT令牌
+ * 注意：此方法需要特殊处理，避免循环调用
  *
  * @async
  * @param {RefreshTokenRequest} params - 刷新令牌参数
@@ -223,19 +225,27 @@ export async function getUserInfoApi(params: GetUserInfoRequest): Promise<User> 
  */
 export async function refreshTokenApi(params: RefreshTokenRequest): Promise<LoginVO> {
   try {
-    const searchParams = new URLSearchParams();
-    searchParams.append('token', params.token);
+    // 创建一个临时的axios实例，绕过拦截器
+    const tempAxios = request.create({
+      baseURL: 'http://localhost:8080',
+      timeout: 15000,
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+        'Authorization': `Bearer ${params.token}`
+      }
+    });
 
-    const response: ApiResponse<LoginVO> = await post('/user/refresh-token', searchParams);
+    const response = await tempAxios.post('/user/refresh-token', {});
+    const result: ApiResponse<LoginVO> = response.data;
     
-    if (response.code === 0) {
-      return response.data;
+    if (result.code === 0) {
+      return result.data;
     } else {
-      throw new Error(response.message || '刷新令牌失败');
+      throw new Error(result.message || '刷新令牌失败');
     }
   } catch (error: any) {
     console.error('刷新令牌失败:', error);
-    throw new Error(error.message || '刷新令牌失败，请稍后重试');
+    throw new Error(error.response?.data?.message || error.message || '刷新令牌失败，请稍后重试');
   }
 }
 
@@ -281,7 +291,7 @@ export async function updateAvatarApi(avatarUrl: string): Promise<User> {
  * @returns {Promise<User>} 更新后的用户信息
  * @throws {Error} 当API请求失败时抛出错误
  */
-  export async function updateAvatarAndUsernameApi(params: UpdateAvatarAndUsernameRequest): Promise<User> {
+export async function updateAvatarAndUsernameApi(params: UpdateAvatarAndUsernameRequest): Promise<User> {
   try {
     console.log('更新用户头像和昵称参数:', params);
 

@@ -15,7 +15,7 @@
 *.mdc
 
 # md
-/md
+/md/task
 
 # prompts
 /jsdoc-guide.md
