@@ -341,7 +341,7 @@ export default function SettingsPage() {
 
     setEmailCodeSending(true);
     try {
-      await sendEmailCodeApi({ email: securitySettings.newEmail });
+      await sendEmailCodeApi(securitySettings.newEmail);
       setEmailCodeCountdown(60);
       alert('验证码已发送到您的邮箱');
     } catch (error: any) {

@@ -20,7 +20,6 @@ import type {
   ChangePhoneRequest,
   ChangeEmailRequest,
   SendPhoneCodeRequest,
-  SendEmailCodeRequest,
   UpdatePrivacySettingsRequest,
   PrivacySettings,
 } from '@/types/userType';
@@ -328,7 +327,11 @@ export async function changeEmailApi(params: ChangeEmailRequest): Promise<string
   try {
     console.log('修改邮箱参数:', params);
 
-    const response: ApiResponse<string> = await post('/user/change-email', params);
+    const searchParams = new URLSearchParams();
+    searchParams.append('email', params.newEmail);
+    searchParams.append('verificationCode', params.verificationCode);
+
+    const response: ApiResponse<string> = await post('/user/change-email', searchParams);
     console.log('修改邮箱响应:', response);
 
     if (response.code === 0) {
@@ -379,18 +382,15 @@ export async function sendPhoneCodeApi(params: SendPhoneCodeRequest): Promise<st
  * 向指定邮箱发送验证码
  *
  * @async
- * @param {SendEmailCodeRequest} params - 发送邮箱验证码参数
+ * @param {String} param - 发送邮箱验证码参数
  * @returns {Promise<string>} 发送结果消息
  * @throws {Error} 当API请求失败时抛出错误
  */
-export async function sendEmailCodeApi(params: SendEmailCodeRequest): Promise<string> {
+export async function sendEmailCodeApi(param: string): Promise<string> {
   try {
-    console.log('发送邮箱验证码参数:', params);
+    console.log('发送邮箱验证码参数:', param);
 
-    const searchParams = new URLSearchParams();
-    searchParams.append('email', params.email);
-
-    const response: ApiResponse<string> = await post('/user/send-email-code', searchParams);
+    const response: ApiResponse<string> = await post('/user/send-email-code', { email: param });
     console.log('发送邮箱验证码响应:', response);
 
     if (response.code === 0) {

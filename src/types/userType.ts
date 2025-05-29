@@ -529,16 +529,6 @@ export interface SendPhoneCodeRequest {
 }
 
 /**
- * 发送邮箱验证码请求参数
- */
-export interface SendEmailCodeRequest {
-  /**
-   * 邮箱地址
-   */
-  email: string;
-}
-
-/**
  * 更新隐私设置请求参数
  */
 export interface UpdatePrivacySettingsRequest {
