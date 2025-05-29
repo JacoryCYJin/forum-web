@@ -15,7 +15,7 @@ import {
   changePhoneApi,
   changeEmailApi,
   sendPhoneCodeApi,
-  sendEmailCodeApi
+  sendUnifiedEmailCodeApi
 } from '@/lib/api/userApi';
 import type { PrivacySettings } from '@/types/userType';
 
@@ -85,6 +85,7 @@ export default function SettingsPage() {
     phoneVerificationCode: '',
     
     // 邮箱修改
+    currentEmail: '',
     newEmail: '',
     emailVerificationCode: ''
   });
@@ -334,16 +335,30 @@ export default function SettingsPage() {
    * 发送邮箱验证码
    */
   const handleSendEmailCode = async () => {
-    if (!securitySettings.newEmail) {
-      alert('请输入新邮箱地址');
+    if (!securitySettings.currentEmail || !securitySettings.newEmail) {
+      alert('请输入当前邮箱和新邮箱地址');
+      return;
+    }
+
+    // 验证当前邮箱是否与用户邮箱匹配
+    if (securitySettings.currentEmail !== user?.email) {
+      console.log("securitySettings.currentEmail:", securitySettings.currentEmail);
+      console.log("user?.email:", user?.email);
+      alert('当前邮箱不正确，请重新输入');
+      return;
+    }
+
+    // 验证新邮箱不能与当前邮箱相同
+    if (securitySettings.currentEmail === securitySettings.newEmail) {
+      alert('新邮箱不能与当前邮箱相同');
       return;
     }
 
     setEmailCodeSending(true);
     try {
-      await sendEmailCodeApi(securitySettings.newEmail);
+      await sendUnifiedEmailCodeApi(securitySettings.newEmail, 3);
       setEmailCodeCountdown(60);
-      alert('验证码已发送到您的邮箱');
+      alert('验证码已发送到您的新邮箱');
     } catch (error: any) {
       console.error('发送邮箱验证码失败:', error);
       alert(error.message || '发送验证码失败，请稍后重试');
@@ -356,8 +371,20 @@ export default function SettingsPage() {
    * 处理邮箱修改
    */
   const handleChangeEmail = async () => {
-    if (!securitySettings.newEmail || !securitySettings.emailVerificationCode) {
-      alert('请输入新邮箱地址和验证码');
+    if (!securitySettings.currentEmail || !securitySettings.newEmail || !securitySettings.emailVerificationCode) {
+      alert('请输入当前邮箱、新邮箱地址和验证码');
+      return;
+    }
+
+    // 再次验证当前邮箱是否与用户邮箱匹配
+    if (securitySettings.currentEmail !== user?.email) {
+      alert('当前邮箱不正确，请重新输入');
+      return;
+    }
+
+    // 验证新邮箱不能与当前邮箱相同
+    if (securitySettings.currentEmail === securitySettings.newEmail) {
+      alert('新邮箱不能与当前邮箱相同');
       return;
     }
 
@@ -377,6 +404,7 @@ export default function SettingsPage() {
       // 清空邮箱字段并关闭编辑状态
       setSecuritySettings(prev => ({
         ...prev,
+        currentEmail: '',
         newEmail: '',
         emailVerificationCode: ''
       }));
@@ -942,11 +970,18 @@ export default function SettingsPage() {
                         <div className="space-y-4 max-w-md">
                           <div>
                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                              当前邮箱
+                              当前邮箱验证
                             </label>
-                            <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-                              {user?.email ? maskText(user.email, 3, 4) : '未绑定'}
-                            </div>
+                            <input
+                              type="email"
+                              value={securitySettings.currentEmail}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, currentEmail: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入当前完整邮箱地址进行验证"
+                            />
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                              为了安全起见，请完整输入您当前的邮箱地址
+                            </p>
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
@@ -974,9 +1009,9 @@ export default function SettingsPage() {
                               />
                               <button
                                 onClick={handleSendEmailCode}
-                                disabled={emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail}
+                                disabled={emailCodeSending || emailCodeCountdown > 0 || !securitySettings.currentEmail || !securitySettings.newEmail}
                                 className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
-                                  emailCodeSending || emailCodeCountdown > 0 || !securitySettings.newEmail
+                                  emailCodeSending || emailCodeCountdown > 0 || !securitySettings.currentEmail || !securitySettings.newEmail
                                     ? 'bg-neutral-400 cursor-not-allowed'
                                     : 'bg-primary hover:bg-primary-hover'
                                 } text-white`}
@@ -984,6 +1019,9 @@ export default function SettingsPage() {
                                 {emailCodeCountdown > 0 ? `${emailCodeCountdown}s` : emailCodeSending ? '发送中...' : '发送验证码'}
                               </button>
                             </div>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                              验证码将发送到您的新邮箱地址
+                            </p>
                           </div>
                           <div className="flex space-x-4 pt-2">
                             <button
@@ -991,6 +1029,7 @@ export default function SettingsPage() {
                                 setIsEditingEmail(false);
                                 setSecuritySettings(prev => ({
                                   ...prev,
+                                  currentEmail: '',
                                   newEmail: '',
                                   emailVerificationCode: ''
                                 }));

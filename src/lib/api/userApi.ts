@@ -9,7 +9,7 @@ import type {
   LoginVO,
   LoginRequest,
   RegisterRequest,
-  SendResetCodeRequest,
+  RegisterWithCodeRequest,
   ResetPasswordRequest,
   RefreshTokenRequest,
   GetUserInfoRequest,
@@ -104,21 +104,31 @@ export async function registerUserApi(params: RegisterRequest): Promise<LoginVO>
 export const registerApi = registerUserApi;
 
 /**
- * 发送密码重置验证码API
+ * 统一发送邮箱验证码API
  * 
- * 向用户邮箱发送重置密码的验证码
+ * 根据类型发送不同用途的邮箱验证码
  *
  * @async
- * @param {SendResetCodeRequest} params - 发送验证码参数
+ * @param {string} email - 邮箱地址
+ * @param {number} type - 验证码类型：1-注册，2-重置密码，3-修改邮箱
  * @returns {Promise<string>} 发送结果消息
  * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 发送注册验证码
+ * await sendUnifiedEmailCodeApi('user@example.com', 1);
+ * 
+ * // 发送密码重置验证码
+ * await sendUnifiedEmailCodeApi('user@example.com', 2);
+ * 
+ * // 发送邮箱修改验证码
+ * await sendUnifiedEmailCodeApi('user@example.com', 3);
  */
-export async function sendResetCodeApi(params: SendResetCodeRequest): Promise<string> {
+export async function sendUnifiedEmailCodeApi(email: string, type: number): Promise<string> {
   try {
-    const searchParams = new URLSearchParams();
-    searchParams.append('email', params.email);
+    console.log('发送统一邮箱验证码参数:', { email, type });
 
-    const response: ApiResponse<string> = await post('/user/send-reset-code', searchParams);
+    const response: ApiResponse<string> = await post('/user/send-unified-email-code', { email, type });
+    console.log('发送统一邮箱验证码响应:', response);
     
     if (response.code === 0) {
       return response.data;
@@ -126,7 +136,7 @@ export async function sendResetCodeApi(params: SendResetCodeRequest): Promise<st
       throw new Error(response.message || '发送验证码失败');
     }
   } catch (error: any) {
-    console.error('发送验证码失败:', error);
+    console.error('发送统一邮箱验证码失败:', error);
     throw new Error(error.message || '发送验证码失败，请稍后重试');
   }
 }
@@ -143,12 +153,10 @@ export async function sendResetCodeApi(params: SendResetCodeRequest): Promise<st
  */
 export async function resetPasswordApi(params: ResetPasswordRequest): Promise<string> {
   try {
-    const searchParams = new URLSearchParams();
-    searchParams.append('email', params.email);
-    searchParams.append('code', params.code);
-    searchParams.append('newPassword', params.newPassword);
+    console.log('重置密码参数:', { ...params, newPassword: '***' }); // 隐藏密码信息
 
-    const response: ApiResponse<string> = await post('/user/reset-password', searchParams);
+    const response: ApiResponse<string> = await post('/user/reset-password', { email: params.email, code: params.code, newPassword: params.newPassword });
+    console.log('重置密码响应:', response);
     
     if (response.code === 0) {
       return response.data;
@@ -377,30 +385,32 @@ export async function sendPhoneCodeApi(params: SendPhoneCodeRequest): Promise<st
 }
 
 /**
- * 发送邮箱验证码API
+ * 带验证码的用户注册API
  * 
- * 向指定邮箱发送验证码
+ * 使用邮箱验证码进行用户注册
  *
  * @async
- * @param {String} param - 发送邮箱验证码参数
- * @returns {Promise<string>} 发送结果消息
+ * @param {RegisterWithCodeRequest} params - 注册参数（包含验证码）
+ * @returns {Promise<LoginVO>} 注册后的登录信息（包含JWT令牌）
  * @throws {Error} 当API请求失败时抛出错误
  */
-export async function sendEmailCodeApi(param: string): Promise<string> {
+export async function registerWithCodeApi(params: RegisterWithCodeRequest): Promise<LoginVO> {
   try {
-    console.log('发送邮箱验证码参数:', param);
+    console.log('带验证码注册参数:', params);
 
-    const response: ApiResponse<string> = await post('/user/send-email-code', { email: param });
-    console.log('发送邮箱验证码响应:', response);
-
+    // 注意：这里假设后端注册接口已经支持验证码参数
+    // 如果后端还未支持，需要修改后端接口
+    const response: ApiResponse<LoginVO> = await post('/user/register', params);
+    console.log('带验证码注册响应:', response);
+    
     if (response.code === 0) {
       return response.data;
     } else {
-      throw new Error(response.message || '发送验证码失败');
+      throw new Error(response.message || '注册失败');
     }
   } catch (error: any) {
-    console.error('发送邮箱验证码失败:', error);
-    throw new Error(error.message || '发送验证码失败，请稍后重试');
+    console.error('带验证码注册失败:', error);
+    throw new Error(error.message || '注册失败，请稍后重试');
   }
 }
 

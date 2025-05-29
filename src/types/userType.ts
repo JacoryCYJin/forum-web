@@ -154,6 +154,41 @@ export interface RegisterRequest {
 }
 
 /**
+ * 带验证码的注册请求参数
+ */
+export interface RegisterWithCodeRequest {
+  /**
+   * 手机号或邮箱
+   */
+  phoneOrEmail: string;
+  
+  /**
+   * 密码
+   */
+  password: string;
+  
+  /**
+   * 确认密码
+   */
+  repassword: string;
+  
+  /**
+   * 验证码
+   */
+  verificationCode: string;
+}
+
+/**
+ * 发送注册验证码请求参数
+ */
+export interface SendRegisterCodeRequest {
+  /**
+   * 邮箱地址
+   */
+  email: string;
+}
+
+/**
  * 更新用户名请求参数
  */
 export interface UpdateUsernameRequest {

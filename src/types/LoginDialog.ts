@@ -152,6 +152,21 @@ export interface RegisterPanelProps extends BasePanelProps {
    * 显示协议弹窗的函数
    */
   onShowTermsDialog: () => void;
+  
+  /**
+   * 验证码
+   */
+  verificationCode: string;
+  
+  /**
+   * 设置验证码的函数
+   */
+  setVerificationCode: (code: string) => void;
+  
+  /**
+   * 发送注册验证码的函数
+   */
+  handleSendRegisterCode: () => void;
 }
 
 /**
@@ -325,6 +340,7 @@ export interface DialogHandlersConfig {
     verificationCode: string;
     newPassword: string;
     bio: string;
+    registerVerificationCode: string;
   };
   
   /**
@@ -339,6 +355,7 @@ export interface DialogHandlersConfig {
     setVerificationCode: (code: string) => void;
     setNewPassword: (password: string) => void;
     setBio: (bio: string) => void;
+    setRegisterVerificationCode: (code: string) => void;
   };
 }
 
@@ -357,4 +374,5 @@ export interface DialogHandlers {
   toggleAuthMode: (mode: AuthStep) => void;
   skipCurrentStep: () => void;
   handlePreviousStep: () => void;
+  handleSendRegisterCode: () => void;
 } 

@@ -34,6 +34,53 @@ import {
 import { LoginDialogUtils } from "./LoginDialog.utils";
 
 /**
+ * 验证码倒计时Hook
+ * @param initialTime 初始倒计时时间（秒）
+ * @returns [倒计时秒数, 开始倒计时函数, 重置倒计时函数]
+ */
+const useCountdown = (initialTime: number = 60) => {
+  const [countdown, setCountdown] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startCountdown = () => {
+    if (countdown > 0) return; // 如果已经在倒计时，不重复开始
+    
+    setCountdown(initialTime);
+    intervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const resetCountdown = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setCountdown(0);
+  };
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  return [countdown, startCountdown, resetCountdown] as const;
+};
+
+/**
  * Logo组件
  *
  * 显示在红色区域的Logo和标题
@@ -132,7 +179,27 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   agreeTerms,
   setAgreeTerms,
   onShowTermsDialog,
+  verificationCode,
+  setVerificationCode,
+  handleSendRegisterCode,
 }) => {
+  // 添加倒计时Hook
+  const [registerCountdown, startRegisterCountdown] = useCountdown(60);
+
+  /**
+   * 处理发送注册验证码
+   */
+  const handleSendCode = async () => {
+    try {
+      await handleSendRegisterCode();
+      // 发送成功后开始倒计时
+      startRegisterCountdown();
+    } catch (error) {
+      console.error('发送验证码失败:', error);
+      // 发送失败不开始倒计时
+    }
+  };
+
   /**
    * 处理注册
    */
@@ -142,6 +209,11 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
     }
     handleRegister();
   };
+
+  /**
+   * 检查是否为邮箱
+   */
+  const isEmail = phone.includes('@');
 
   return (
     <div
@@ -165,6 +237,36 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           onChange={(e) => setPhone(e.target.value)}
         />
       </div>
+      
+      {/* 邮箱验证码字段 - 只在输入邮箱时显示 */}
+      {isEmail && (
+        <div className="mb-6 mx-3 flex items-center">
+          <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
+            验证码
+          </label>
+          <div className="flex flex-1 gap-2">
+            <input
+              type="text"
+              className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
+              placeholder="请输入验证码"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+            />
+            <button
+              onClick={handleSendCode}
+              disabled={registerCountdown > 0}
+              className={`px-4 py-3 rounded-md whitespace-nowrap text-sm font-medium transition-colors ${
+                registerCountdown > 0
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                  : 'bg-primary text-white hover:bg-primary-hover'
+              }`}
+            >
+              {registerCountdown > 0 ? `${registerCountdown}秒后重试` : '发送验证码'}
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="mb-6 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           密码
@@ -257,6 +359,23 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
   isSliding = false,
   slideDirection = AnimationDirectionEnum.NONE,
 }) => {
+  // 添加倒计时Hook
+  const [forgotCountdown, startForgotCountdown] = useCountdown(60);
+
+  /**
+   * 处理发送验证码
+   */
+  const handleSendCodeWithCountdown = async () => {
+    try {
+      await handleSendCode();
+      // 发送成功后开始倒计时
+      startForgotCountdown();
+    } catch (error) {
+      console.error('发送验证码失败:', error);
+      // 发送失败不开始倒计时
+    }
+  };
+
   return (
     <div
       className={LoginDialogUtils.getPanelAnimationClass(
@@ -267,20 +386,20 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
       <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
         忘记密码
       </h2>
-      <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
-          手机号
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
+          邮箱
         </label>
         <input
-          type="tel"
+          type="email"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder="请输入手机号/邮箱"
+          placeholder="请输入邮箱地址"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
       </div>
-      <div className="mb-6 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           验证码
         </label>
         <div className="flex flex-1 gap-2">
@@ -292,15 +411,20 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
             onChange={(e) => setVerificationCode(e.target.value)}
           />
           <button
-            onClick={handleSendCode}
-            className="px-4 py-3 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors whitespace-nowrap text-sm font-medium"
+            onClick={handleSendCodeWithCountdown}
+            disabled={forgotCountdown > 0}
+            className={`px-4 py-3 rounded-md whitespace-nowrap text-sm font-medium transition-colors ${
+              forgotCountdown > 0
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                : 'bg-primary text-white hover:bg-primary-hover'
+            }`}
           >
-            发送验证码
+            {forgotCountdown > 0 ? `${forgotCountdown}秒后重试` : '发送验证码'}
           </button>
         </div>
       </div>
-      <div className="mb-8 flex items-center">
-        <label className="text-neutral-500 dark:text-dark-neutral mr-3 w-14 flex-shrink-0 text-sm">
+      <div className="mb-8 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           新密码
         </label>
         <input
@@ -516,6 +640,9 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  // 注册验证码相关状态
+  const [registerVerificationCode, setRegisterVerificationCode] = useState("");
+
   // 协议相关状态
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
@@ -599,6 +726,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       verificationCode,
       newPassword,
       bio,
+      registerVerificationCode,
     },
     setters: {
       setPhone,
@@ -609,6 +737,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       setVerificationCode,
       setNewPassword,
       setBio,
+      setRegisterVerificationCode,
     },
   });
 
@@ -734,6 +863,9 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                   agreeTerms={agreeTerms}
                   setAgreeTerms={setAgreeTerms}
                   onShowTermsDialog={handleShowTermsDialog}
+                  verificationCode={registerVerificationCode}
+                  setVerificationCode={setRegisterVerificationCode}
+                  handleSendRegisterCode={dialogUtils.handleSendRegisterCode}
                 />
               )}
 

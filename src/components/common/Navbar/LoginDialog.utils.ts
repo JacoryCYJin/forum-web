@@ -9,7 +9,7 @@ import {
   DialogHandlersConfig, 
   DialogHandlers 
 } from "@/types/LoginDialog";
-import { loginUserApi, registerApi, updateAvatarAndUsernameAndProfileApi, sendResetCodeApi, resetPasswordApi } from "@/lib/api/userApi";
+import { loginUserApi, registerApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
 import type { UserInfo as User } from "@/types/userType";
@@ -168,17 +168,40 @@ export class LoginDialogUtils {
             return;
           }
 
+          // 判断是否为邮箱注册
+          const isEmail = formData.phone.includes('@');
+          
+          // 如果是邮箱注册，需要验证码
+          if (isEmail && !formData.registerVerificationCode) {
+            alert('邮箱注册需要验证码，请先发送验证码');
+            return;
+          }
+
           console.log("注册信息:", { 
             phone: formData.phone, 
-            password: formData.password 
+            password: formData.password,
+            verificationCode: formData.registerVerificationCode 
           });
 
-          // 调用注册API
-          const registerResult = await registerApi({
-            phoneOrEmail: formData.phone,
-            password: formData.password,
-            repassword: formData.password
-          });
+          let registerResult;
+
+          // 根据是否有验证码选择不同的API
+          if (isEmail && formData.registerVerificationCode) {
+            // 带验证码的邮箱注册
+            registerResult = await registerWithCodeApi({
+              phoneOrEmail: formData.phone,
+              password: formData.password,
+              repassword: formData.password,
+              verificationCode: formData.registerVerificationCode
+            });
+          } else {
+            // 普通注册（手机号注册）
+            registerResult = await registerApi({
+              phoneOrEmail: formData.phone,
+              password: formData.password,
+              repassword: formData.password
+            });
+          }
 
           console.log("注册成功:", registerResult);
 
@@ -244,6 +267,37 @@ export class LoginDialogUtils {
       },
 
       /**
+       * 处理发送注册验证码
+       */
+      handleSendRegisterCode: async () => {
+        try {
+          // 验证邮箱格式
+          if (!formData.phone) {
+            alert('请输入邮箱地址');
+            return;
+          }
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData.phone)) {
+            alert('请输入有效的邮箱地址');
+            return;
+          }
+
+          console.log("发送注册验证码到:", formData.phone);
+
+          // 调用发送注册验证码API (type=1表示注册)
+          const result = await sendUnifiedEmailCodeApi(formData.phone, 1);
+          
+          console.log("注册验证码发送成功:", result);
+          alert('验证码已发送到您的邮箱，请查收');
+
+        } catch (error: any) {
+          console.error("发送注册验证码失败:", error);
+          alert(error.message || '发送验证码失败，请稍后重试');
+        }
+      },
+
+      /**
        * 处理发送验证码
        */
       handleSendCode: async () => {
@@ -262,8 +316,8 @@ export class LoginDialogUtils {
 
           console.log("发送验证码到:", formData.phone);
 
-          // 调用发送验证码API
-          const result = await sendResetCodeApi({ email: formData.phone });
+          // 调用发送密码重置验证码API (type=2表示密码重置)
+          const result = await sendUnifiedEmailCodeApi(formData.phone, 2);
           
           console.log("验证码发送成功:", result);
           alert('验证码已发送到您的邮箱，请查收');
