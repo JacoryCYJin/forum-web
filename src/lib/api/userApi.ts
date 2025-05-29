@@ -327,11 +327,11 @@ export async function changeEmailApi(params: ChangeEmailRequest): Promise<string
   try {
     console.log('修改邮箱参数:', params);
 
-    const searchParams = new URLSearchParams();
-    searchParams.append('email', params.newEmail);
-    searchParams.append('verificationCode', params.verificationCode);
-
-    const response: ApiResponse<string> = await post('/user/change-email', searchParams);
+    // 发送JSON格式数据，与后端@RequestBody注解匹配
+    const response: ApiResponse<string> = await post('/user/change-email', {
+      email: params.newEmail,
+      verificationCode: params.verificationCode
+    });
     console.log('修改邮箱响应:', response);
 
     if (response.code === 0) {
