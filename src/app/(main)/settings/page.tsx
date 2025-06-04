@@ -17,6 +17,8 @@ import {
   sendPhoneCodeApi,
   sendUnifiedEmailCodeApi
 } from '@/lib/api/userApi';
+import { formatDateToChinese } from '@/lib/utils/dateUtils';
+import { updateUserAndSync } from '@/lib/utils/userUtils';
 import type { PrivacySettings } from '@/types/userType';
 
 /**
@@ -266,6 +268,12 @@ export default function SettingsPage() {
         newPasswordConfirm: securitySettings.newPasswordConfirm
       });
       
+      // 密码修改成功后，更新用户的updatedAt时间
+      if (user) {
+        const updatedUserInfo = updateUserAndSync(user, {}, true);
+        setUser(updatedUserInfo);
+      }
+      
       // 清空密码字段并关闭编辑状态
       setSecuritySettings(prev => ({
         ...prev,
@@ -324,7 +332,9 @@ export default function SettingsPage() {
       
       // 更新用户信息
       if (user) {
-        const newUserInfo = { ...user, phone: securitySettings.newPhone };
+        const newUserInfo = updateUserAndSync(user, { 
+          phone: securitySettings.newPhone
+        });
         setUser(newUserInfo);
       }
       
@@ -411,7 +421,9 @@ export default function SettingsPage() {
       
       // 更新用户信息
       if (user) {
-        const newUserInfo = { ...user, email: securitySettings.newEmail };
+        const newUserInfo = updateUserAndSync(user, { 
+          email: securitySettings.newEmail
+        });
         setUser(newUserInfo);
       }
       
@@ -786,7 +798,7 @@ export default function SettingsPage() {
                       {!isEditingPassword ? (
                         <div className="text-neutral-600 dark:text-neutral-400">
                           <p>为了您的账户安全，建议定期更换密码</p>
-                          <p className="text-sm mt-1">上次修改时间：2024年1月1日</p>
+                          <p className="text-sm mt-1">上次修改时间：{formatDateToChinese(user?.updatedAt)}</p>
                         </div>
                       ) : (
                         <div className="space-y-4 max-w-md">

@@ -41,6 +41,11 @@ export interface User {
    * 创建时间
    */
   ctime?: string;
+  
+  /**
+   * 更新时间
+   */
+  mtime?: string;
 }
 
 /**
@@ -81,6 +86,12 @@ export interface LoginVO {
    * 创建时间
    */
   ctime?: string;
+  
+  /**
+   * 更新时间
+   */
+  mtime?: string;
+  
   
   /**
    * JWT访问令牌
@@ -295,6 +306,8 @@ export interface UserInfo {
   createdAt: Date;
   /** 最后登录时间 */
   lastLoginAt: Date;
+  /** 最后更新时间 */
+  updatedAt?: Date;
 }
 
 /**

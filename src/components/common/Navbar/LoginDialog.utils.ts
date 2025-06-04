@@ -114,7 +114,8 @@ export class LoginDialogUtils {
             email: loginResult.email,
             avatarUrl: loginResult.avatarUrl,
             profile: loginResult.profile,
-            ctime: loginResult.ctime
+            ctime: loginResult.ctime,
+            mtime: loginResult.mtime
           }));
 
           // 转换LoginVO为User格式并保存到userStore
@@ -127,7 +128,8 @@ export class LoginDialogUtils {
             avatar: processAvatarPath(loginResult.avatarUrl), // 使用工具函数处理头像路径
             bio: loginResult.profile,
             createdAt: loginResult.ctime ? new Date(loginResult.ctime) : new Date(),
-            lastLoginAt: new Date()
+            lastLoginAt: new Date(),
+            updatedAt: loginResult.mtime ? new Date(loginResult.mtime) : undefined
           };
 
           // 更新userStore状态
@@ -220,7 +222,8 @@ export class LoginDialogUtils {
             email: registerResult.email,
             avatarUrl: registerResult.avatarUrl,
             profile: registerResult.profile,
-            ctime: registerResult.ctime
+            ctime: registerResult.ctime,
+            mtime: registerResult.mtime
           }));
 
           // 转换LoginVO为User格式并保存到userStore
@@ -233,7 +236,8 @@ export class LoginDialogUtils {
             avatar: processAvatarPath(registerResult.avatarUrl), // 使用工具函数处理头像路径
             bio: registerResult.profile,
             createdAt: registerResult.ctime ? new Date(registerResult.ctime) : new Date(),
-            lastLoginAt: new Date()
+            lastLoginAt: new Date(),
+            updatedAt: registerResult.mtime ? new Date(registerResult.mtime) : undefined
           };
 
           // 更新userStore状态
