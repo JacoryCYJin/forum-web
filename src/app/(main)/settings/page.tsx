@@ -78,7 +78,7 @@ export default function SettingsPage() {
     // 密码修改
     currentPassword: '',
     newPassword: '',
-    confirmPassword: '',
+    newPasswordConfirm: '',
     
     // 手机号修改
     newPhone: '',
@@ -234,13 +234,27 @@ export default function SettingsPage() {
    * 处理密码修改
    */
   const handleChangePassword = async () => {
-    if (!securitySettings.currentPassword || !securitySettings.newPassword) {
+    // 基础验证
+    if (!securitySettings.currentPassword || !securitySettings.newPassword || !securitySettings.newPasswordConfirm) {
       alert('请输入当前密码和新密码');
       return;
     }
     
-    if (securitySettings.newPassword !== securitySettings.confirmPassword) {
+    // 密码长度验证
+    if (securitySettings.newPassword.length < 8 || securitySettings.newPassword.length > 16) {
+      alert('新密码长度必须在8到16位之间');
+      return;
+    }
+    
+    // 密码一致性验证
+    if (securitySettings.newPassword !== securitySettings.newPasswordConfirm) {
       alert('新密码和确认密码不匹配');
+      return;
+    }
+
+    // 检查新密码是否与当前密码相同
+    if (securitySettings.currentPassword === securitySettings.newPassword) {
+      alert('新密码不能与当前密码相同');
       return;
     }
 
@@ -249,7 +263,7 @@ export default function SettingsPage() {
       await changePasswordApi({
         currentPassword: securitySettings.currentPassword,
         newPassword: securitySettings.newPassword,
-        confirmPassword: securitySettings.confirmPassword
+        newPasswordConfirm: securitySettings.newPasswordConfirm
       });
       
       // 清空密码字段并关闭编辑状态
@@ -257,7 +271,7 @@ export default function SettingsPage() {
         ...prev,
         currentPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        newPasswordConfirm: ''
       }));
       setIsEditingPassword(false);
       
@@ -806,8 +820,8 @@ export default function SettingsPage() {
                             </label>
                             <input
                               type="password"
-                              value={securitySettings.confirmPassword}
-                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                              value={securitySettings.newPasswordConfirm}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPasswordConfirm: e.target.value }))}
                               className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                               placeholder="请再次输入新密码"
                             />
@@ -820,7 +834,7 @@ export default function SettingsPage() {
                                   ...prev,
                                   currentPassword: '',
                                   newPassword: '',
-                                  confirmPassword: ''
+                                  newPasswordConfirm: ''
                                 }));
                               }}
                               className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"

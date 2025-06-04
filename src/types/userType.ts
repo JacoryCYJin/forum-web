@@ -520,7 +520,7 @@ export interface ChangePasswordRequest {
   /**
    * 确认新密码
    */
-  confirmPassword: string;
+  newPasswordConfirm: string;
 }
 
 /**

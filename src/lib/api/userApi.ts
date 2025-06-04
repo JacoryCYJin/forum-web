@@ -269,16 +269,33 @@ export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarA
  * 修改密码API
  * 
  * 通过JWT令牌验证身份并修改用户密码
+ * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
  *
  * @async
  * @param {ChangePasswordRequest} params - 修改密码参数
+ * @param {string} params.currentPassword - 当前密码
+ * @param {string} params.newPassword - 新密码
+ * @param {string} params.newPasswordConfirm - 确认新密码
  * @returns {Promise<string>} 修改结果消息
  * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 修改密码
+ * await changePasswordApi({
+ *   currentPassword: 'old123456',
+ *   newPassword: 'new123456', 
+ *   newPasswordConfirm: 'new123456'
+ * });
  */
 export async function changePasswordApi(params: ChangePasswordRequest): Promise<string> {
   try {
-    console.log('修改密码参数:', { ...params, currentPassword: '***', newPassword: '***', confirmPassword: '***' });
+    console.log('修改密码参数:', { 
+      ...params, 
+      currentPassword: '***', 
+      newPassword: '***', 
+      newPasswordConfirm: '***' 
+    });
 
+    // 直接传递参数，字段名已与后端匹配
     const response: ApiResponse<string> = await post('/user/change-password', params);
     console.log('修改密码响应:', response);
 

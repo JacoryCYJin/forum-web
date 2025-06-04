@@ -24,6 +24,44 @@ export enum AuthStep {
 }
 
 /**
+ * 密码强度等级枚举
+ */
+export enum PasswordStrength {
+  /** 弱密码 */
+  WEAK = "weak",
+  /** 中等强度 */
+  MEDIUM = "medium",
+  /** 强密码 */
+  STRONG = "strong",
+}
+
+/**
+ * 密码验证结果接口
+ */
+export interface PasswordValidation {
+  /** 是否有效 */
+  isValid: boolean;
+  /** 密码强度 */
+  strength: PasswordStrength;
+  /** 验证消息列表 */
+  messages: string[];
+  /** 强度百分比（0-100） */
+  strengthPercent: number;
+}
+
+/**
+ * 表单验证规则接口
+ */
+export interface ValidationRule {
+  /** 规则名称 */
+  name: string;
+  /** 验证函数 */
+  validate: (value: string) => boolean;
+  /** 错误消息 */
+  message: string;
+}
+
+/**
  * 登录对话框组件Props
  */
 export interface LoginDialogProps {
