@@ -129,7 +129,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         <input
           type="text"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder="请输入账号/手机号"
+          placeholder="请输入手机号或邮箱"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -582,12 +582,12 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
       </h2>
       <div className="mb-6 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
-          手机号
+          账号
         </label>
         <input
-          type="tel"
+          type="text"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder="请输入手机号"
+          placeholder="请输入手机号或邮箱"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -942,8 +942,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
 
   // 创建自定义切换函数，在切换时清空输入框
   const customToggleAuthMode = (targetStep: AuthStep) => {
-    // 如果从登录页面切换，清空登录表单
-    if (currentStep === AuthStepEnum.LOGIN) {
+    // 如果从登录页面切换到注册页面，清空登录表单
+    if (currentStep === AuthStepEnum.LOGIN && (targetStep === AuthStepEnum.EMAIL_REGISTER || targetStep === AuthStepEnum.PHONE_REGISTER)) {
       setPhone("");
       setEmail("");
       setPassword("");
@@ -953,6 +953,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       setVerificationCode("");
       setNewPassword("");
       setRegisterVerificationCode("");
+    }
+    // 从登录页面切换到忘记密码时，保留phone字段的内容，只清空password
+    if (currentStep === AuthStepEnum.LOGIN && targetStep === AuthStepEnum.FORGOT_PASSWORD) {
+      // 保留phone字段，清空密码
+      setPassword("");
     }
     
     dialogUtils.toggleAuthMode(targetStep);

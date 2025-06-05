@@ -204,9 +204,9 @@ export interface SendResetCodeRequest {
  */
 export interface ResetPasswordRequest {
   /**
-   * 邮箱地址
+   * 手机号或邮箱
    */
-  email: string;
+  phoneOrEmail: string;
   
   /**
    * 验证码

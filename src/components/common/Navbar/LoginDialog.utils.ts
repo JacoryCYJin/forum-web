@@ -494,25 +494,34 @@ export class LoginDialogUtils {
        */
       handleSendCode: async () => {
         try {
-          // 验证邮箱格式
+          // 验证输入
           if (!formData.phone) {
-            alert('请输入邮箱地址');
+            alert('请输入手机号或邮箱');
             return;
           }
 
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(formData.phone)) {
-            alert('请输入有效的邮箱地址');
+          // 判断是邮箱还是手机号
+          const isEmail = formData.phone.includes('@');
+          const isPhone = /^1[3-9]\d{9}$/.test(formData.phone);
+
+          if (!isEmail && !isPhone) {
+            alert('请输入有效的手机号或邮箱地址');
             return;
           }
 
-          console.log("发送验证码到:", formData.phone);
+          console.log("发送验证码到:", formData.phone, "类型:", isEmail ? "邮箱" : "手机号");
 
-          // 调用发送密码重置验证码API (type=2表示密码重置)
-          const result = await sendUnifiedEmailCodeApi(formData.phone, 2);
-          
-          console.log("验证码发送成功:", result);
-          alert('验证码已发送到您的邮箱，请查收');
+          if (isEmail) {
+            // 发送邮箱验证码
+            const result = await sendUnifiedEmailCodeApi(formData.phone, 2); // type=2表示密码重置
+            console.log("邮箱验证码发送成功:", result);
+            alert('验证码已发送到您的邮箱，请查收');
+          } else {
+            // 发送手机验证码
+            const result = await sendPhoneCodeApi(formData.phone, 2); // type=2表示密码重置
+            console.log("手机验证码发送成功:", result);
+            alert('验证码已发送到您的手机，请查收');
+          }
 
         } catch (error: any) {
           console.error("发送验证码失败:", error);
@@ -525,26 +534,62 @@ export class LoginDialogUtils {
        */
       handleResetPassword: async () => {
         try {
+          console.log("🔍 开始重置密码流程");
+          console.log("📋 当前表单数据:", {
+            phone: formData.phone,
+            verificationCode: formData.verificationCode,
+            newPassword: formData.newPassword ? "已填写" : "未填写"
+          });
+
           // 验证输入
           if (!formData.phone || !formData.verificationCode || !formData.newPassword) {
+            console.log("❌ 验证失败: 必填字段为空");
             alert('请填写完整的重置密码信息');
             return;
           }
 
-          console.log("重置密码:", { 
-            email: formData.phone, 
+          // 判断是邮箱还是手机号
+          const isEmail = formData.phone.includes('@');
+          const isPhone = /^1[3-9]\d{9}$/.test(formData.phone);
+
+          if (!isEmail && !isPhone) {
+            console.log("❌ 验证失败: 格式不正确");
+            alert('请输入有效的手机号或邮箱地址');
+            return;
+          }
+
+          console.log("✅ 验证通过:", { 
+            phoneOrEmail: formData.phone, 
             verificationCode: formData.verificationCode, 
-            newPassword: formData.newPassword 
+            newPassword: "***",
+            type: isEmail ? "邮箱" : "手机号"
           });
 
-          // 调用重置密码API
-          const result = await resetPasswordApi({
-            email: formData.phone,
+          console.log("🚀 调用重置密码API...");
+          
+          // 构造API参数
+          const apiParams = {
+            phoneOrEmail: formData.phone,
             code: formData.verificationCode,
             newPassword: formData.newPassword
+          };
+          
+          console.log("📤 准备发送的API参数:", {
+            phoneOrEmail: apiParams.phoneOrEmail,
+            phoneOrEmailType: typeof apiParams.phoneOrEmail,
+            phoneOrEmailLength: apiParams.phoneOrEmail?.length,
+            code: apiParams.code,
+            codeType: typeof apiParams.code,
+            codeLength: apiParams.code?.length,
+            newPassword: apiParams.newPassword ? '***' : '未提供',
+            newPasswordType: typeof apiParams.newPassword,
+            newPasswordLength: apiParams.newPassword?.length
           });
+          
+          // 调用重置密码API
+          const result = await resetPasswordApi(apiParams);
 
-          console.log("密码重置成功:", result);
+          console.log("✅ 密码重置成功:", result);
           alert('密码重置成功，请使用新密码登录');
 
           // 返回登录页面
@@ -557,7 +602,11 @@ export class LoginDialogUtils {
           );
 
         } catch (error: any) {
-          console.error("重置密码失败:", error);
+          console.error("❌ 重置密码失败:", error);
+          console.error("❌ 错误详情:", {
+            message: error.message,
+            stack: error.stack
+          });
           alert(error.message || '重置密码失败，请稍后重试');
         }
       },
