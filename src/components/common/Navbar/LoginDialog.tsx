@@ -219,12 +219,12 @@ const EmailRegisterPanel: React.FC<EmailRegisterPanelProps> = ({
         slideDirection
       )}
     >
-      <h2 className="text-2xl font-bold mb-6 text-center text-neutral-500 dark:text-dark-neutral">
+      <h2 className="text-2xl font-bold mb-2 text-center text-neutral-500 dark:text-dark-neutral">
         邮箱注册
       </h2>
       
       {/* 切换到手机号注册的小按钮 */}
-      <div className="mb-4 text-center">
+      <div className="mb-2 text-center">
         <button
           onClick={toggleToPhoneRegister}
           className="text-xs text-neutral-400 hover:text-primary transition-colors"
@@ -273,7 +273,7 @@ const EmailRegisterPanel: React.FC<EmailRegisterPanelProps> = ({
         </div>
       </div>
       
-      <div className="mb-6 mx-3 flex items-center">
+      <div className="mb-5 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           密码
         </label>
@@ -286,7 +286,7 @@ const EmailRegisterPanel: React.FC<EmailRegisterPanelProps> = ({
         />
       </div>
       
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-4">
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
@@ -336,7 +336,7 @@ const EmailRegisterPanel: React.FC<EmailRegisterPanelProps> = ({
         >
           注册
         </button>
-        <div className="mt-6 text-center">
+        <div className="mt-3 text-center">
           <button
             onClick={toggleToLogin}
             className="text-sm text-neutral-400 hover:text-primary transition-colors"
@@ -405,12 +405,12 @@ const PhoneRegisterPanel: React.FC<PhoneRegisterPanelProps> = ({
         slideDirection
       )}
     >
-      <h2 className="text-2xl font-bold mb-6 text-center text-neutral-500 dark:text-dark-neutral">
+      <h2 className="text-2xl font-bold mb-2 text-center text-neutral-500 dark:text-dark-neutral">
         手机号注册
       </h2>
       
       {/* 切换到邮箱注册的小按钮 */}
-      <div className="mb-4 text-center">
+      <div className="mb-2 text-center">
         <button
           onClick={toggleToEmailRegister}
           className="text-xs text-neutral-400 hover:text-primary transition-colors"
@@ -459,7 +459,7 @@ const PhoneRegisterPanel: React.FC<PhoneRegisterPanelProps> = ({
         </div>
       </div>
       
-      <div className="mb-6 mx-3 flex items-center">
+      <div className="mb-5 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           密码
         </label>
@@ -472,7 +472,7 @@ const PhoneRegisterPanel: React.FC<PhoneRegisterPanelProps> = ({
         />
       </div>
       
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-4">
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
@@ -522,7 +522,7 @@ const PhoneRegisterPanel: React.FC<PhoneRegisterPanelProps> = ({
         >
           注册
         </button>
-        <div className="mt-6 text-center">
+        <div className="mt-3 text-center">
           <button
             onClick={toggleToLogin}
             className="text-sm text-neutral-400 hover:text-primary transition-colors"
