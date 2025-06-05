@@ -39,7 +39,7 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-dark-secondary">
+    <div className="min-h-screen dark:bg-dark-secondary">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 页面标题 */}
         <div className="mb-8">
@@ -75,7 +75,7 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
             <p className="text-neutral-500 dark:text-neutral-400 mb-6">
               该分类下还没有文章，来发布第一篇吧！
             </p>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
               发布文章
             </button>
           </div>
