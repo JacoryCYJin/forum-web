@@ -7,9 +7,9 @@ import {
   AuthStep, 
   AnimationDirection, 
   DialogHandlersConfig, 
-  DialogHandlers 
+  DialogHandlers
 } from "@/types/loginDialogtype";
-import { loginUserApi, registerApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi } from "@/lib/api/userApi";
+import { loginUserApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
 import type { UserInfo as User } from "@/types/userType";
@@ -166,44 +166,45 @@ export class LoginDialogUtils {
         try {
           // 验证输入
           if (!formData.phone || !formData.password) {
-            alert('请输入手机号和密码');
+            alert('请输入手机号/邮箱和密码');
             return;
           }
 
-          // 判断是否为邮箱注册
-          const isEmail = formData.phone.includes('@');
-          
-          // 如果是邮箱注册，需要验证码
-          if (isEmail && !formData.registerVerificationCode) {
-            alert('邮箱注册需要验证码，请先发送验证码');
+          // 验证码现在是必需的
+          if (!formData.registerVerificationCode) {
+            alert('请先获取验证码');
             return;
+          }
+
+          // 根据注册模式验证输入格式
+          if (formData.registerMode === "email") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.phone)) {
+              alert('请输入有效的邮箱地址');
+              return;
+            }
+          } else if (formData.registerMode === "phone") {
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            if (!phoneRegex.test(formData.phone)) {
+              alert('请输入有效的手机号');
+              return;
+            }
           }
 
           console.log("注册信息:", { 
             phone: formData.phone, 
             password: formData.password,
-            verificationCode: formData.registerVerificationCode 
+            verificationCode: formData.registerVerificationCode,
+            registerMode: formData.registerMode
           });
 
-          let registerResult;
-
-          // 根据是否有验证码选择不同的API
-          if (isEmail && formData.registerVerificationCode) {
-            // 带验证码的邮箱注册
-            registerResult = await registerWithCodeApi({
-              phoneOrEmail: formData.phone,
-              password: formData.password,
-              repassword: formData.password,
-              verificationCode: formData.registerVerificationCode
-            });
-          } else {
-            // 普通注册（手机号注册）
-            registerResult = await registerApi({
-              phoneOrEmail: formData.phone,
-              password: formData.password,
-              repassword: formData.password
-            });
-          }
+          // 使用带验证码的注册API
+          const registerResult = await registerWithCodeApi({
+            phoneOrEmail: formData.phone,
+            password: formData.password,
+            repassword: formData.password,
+            verificationCode: formData.registerVerificationCode
+          });
 
           console.log("注册成功:", registerResult);
 
@@ -297,6 +298,37 @@ export class LoginDialogUtils {
 
         } catch (error: any) {
           console.error("发送注册验证码失败:", error);
+          alert(error.message || '发送验证码失败，请稍后重试');
+        }
+      },
+
+      /**
+       * 处理发送手机号验证码
+       */
+      handleSendPhoneCode: async () => {
+        try {
+          // 验证手机号格式
+          if (!formData.phone) {
+            alert('请输入手机号');
+            return;
+          }
+
+          const phoneRegex = /^1[3-9]\d{9}$/;
+          if (!phoneRegex.test(formData.phone)) {
+            alert('请输入有效的手机号');
+            return;
+          }
+
+          console.log("发送手机验证码到:", formData.phone);
+
+          // 调用发送手机验证码API (type=1表示注册)
+          const result = await sendPhoneCodeApi(formData.phone, 1);
+          
+          console.log("手机验证码发送成功:", result);
+          alert('验证码已发送到您的手机，请查收');
+
+        } catch (error: any) {
+          console.error("发送手机验证码失败:", error);
           alert(error.message || '发送验证码失败，请稍后重试');
         }
       },

@@ -17,11 +17,9 @@ import type {
   ApiResponse,
   UpdateAvatarAndUsernameAndProfileRequest,
   ChangePasswordRequest,
-  ChangePhoneRequest,
   ChangeEmailRequest,
-  SendPhoneCodeRequest,
   UpdatePrivacySettingsRequest,
-  PrivacySettings,
+  PrivacySettings
 } from '@/types/userType';
 
 /**
@@ -318,32 +316,35 @@ export async function changePasswordApi(params: ChangePasswordRequest): Promise<
 }
 
 /**
+ * 发送手机验证码API
+ * 
+ * @param phone 手机号
+ * @param type 验证码类型：1-注册，2-重置密码，3-修改手机号
+ * @returns Promise<string> 发送结果消息
+ */
+export async function sendPhoneCodeApi(phone: string, type: number): Promise<string> {
+  // const response = await request.post('/user/send-unified-phone-code', {
+  const response = await request.post('http://localhost:8080/user/send-unified-phone-code', {
+    phone,
+    type
+  });
+  return response.data;
+}
+
+/**
  * 修改手机号API
  * 
- * 通过JWT令牌验证身份并修改用户手机号
- *
- * @async
- * @param {ChangePhoneRequest} params - 修改手机号参数
- * @returns {Promise<string>} 修改结果消息
- * @throws {Error} 当API请求失败时抛出错误
+ * @param data 修改手机号数据
+ * @returns Promise<string> 修改结果消息
  */
-export async function changePhoneApi(params: ChangePhoneRequest): Promise<string> {
-  try {
-    console.log('修改手机号参数:', params);
-
-    // const response: ApiResponse<string> = await post('/user/change-phone', params);
-    const response: ApiResponse<string> = await post('http://localhost:8080/user/change-phone', params);
-    console.log('修改手机号响应:', response);
-
-    if (response.code === 0) {
-      return response.data;
-    } else {
-      throw new Error(response.message || '修改手机号失败');
-    }
-  } catch (error: any) {
-    console.error('修改手机号失败:', error);
-    throw new Error(error.message || '修改手机号失败，请稍后重试');
-  }
+export async function changePhoneApi(data: {
+  currentPhone: string;
+  newPhone: string;
+  verificationCode: string;
+}): Promise<string> {
+  // const response = await request.post('/user/change-phone', data);
+  const response = await request.post('http://localhost:8080/user/change-phone', data);
+  return response.data;
 }
 
 /**
@@ -380,38 +381,6 @@ export async function changeEmailApi(params: ChangeEmailRequest): Promise<string
 }
 
 /**
- * 发送手机验证码API
- * 
- * 向指定手机号发送验证码
- *
- * @async
- * @param {SendPhoneCodeRequest} params - 发送手机验证码参数
- * @returns {Promise<string>} 发送结果消息
- * @throws {Error} 当API请求失败时抛出错误
- */
-export async function sendPhoneCodeApi(params: SendPhoneCodeRequest): Promise<string> {
-  try {
-    console.log('发送手机验证码参数:', params);
-
-    const searchParams = new URLSearchParams();
-    searchParams.append('phone', params.phone);
-
-    // const response: ApiResponse<string> = await post('/user/send-phone-code', searchParams);
-    const response: ApiResponse<string> = await post('http://localhost:8080/user/send-phone-code', searchParams);
-    console.log('发送手机验证码响应:', response);
-
-    if (response.code === 0) {
-      return response.data;
-    } else {
-      throw new Error(response.message || '发送验证码失败');
-    }
-  } catch (error: any) {
-    console.error('发送手机验证码失败:', error);
-    throw new Error(error.message || '发送验证码失败，请稍后重试');
-  }
-}
-
-/**
  * 带验证码的用户注册API
  * 
  * 使用邮箱验证码进行用户注册
@@ -425,10 +394,9 @@ export async function registerWithCodeApi(params: RegisterWithCodeRequest): Prom
   try {
     console.log('带验证码注册参数:', params);
 
-    // 注意：这里假设后端注册接口已经支持验证码参数
-    // 如果后端还未支持，需要修改后端接口
-    // const response: ApiResponse<LoginVO> = await post('/user/register', params);
-    const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/register', params);
+    // 调用正确的带验证码注册端点
+    // const response: ApiResponse<LoginVO> = await post('/user/register-with-code', params);
+    const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/register-with-code', params);
     console.log('带验证码注册响应:', response);
     
     if (response.code === 0) {

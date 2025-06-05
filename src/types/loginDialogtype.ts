@@ -24,6 +24,16 @@ export enum AuthStep {
 }
 
 /**
+ * 注册模式枚举
+ */
+export enum RegisterMode {
+  /** 邮箱注册 */
+  EMAIL = "email",
+  /** 手机号注册 */
+  PHONE = "phone",
+}
+
+/**
  * 密码强度等级枚举
  */
 export enum PasswordStrength {
@@ -147,12 +157,12 @@ export interface LoginPanelProps extends BasePanelProps {
  */
 export interface RegisterPanelProps extends BasePanelProps {
   /**
-   * 手机号
+   * 手机号/邮箱
    */
   phone: string;
   
   /**
-   * 设置手机号的函数
+   * 设置手机号/邮箱的函数
    */
   setPhone: (phone: string) => void;
   
@@ -205,6 +215,16 @@ export interface RegisterPanelProps extends BasePanelProps {
    * 发送注册验证码的函数
    */
   handleSendRegisterCode: () => void;
+  
+  /**
+   * 当前注册模式
+   */
+  registerMode: RegisterMode;
+  
+  /**
+   * 设置注册模式的函数
+   */
+  setRegisterMode: (mode: RegisterMode) => void;
 }
 
 /**
@@ -379,6 +399,7 @@ export interface DialogHandlersConfig {
     newPassword: string;
     bio: string;
     registerVerificationCode: string;
+    registerMode: RegisterMode;
   };
   
   /**
@@ -394,6 +415,7 @@ export interface DialogHandlersConfig {
     setNewPassword: (password: string) => void;
     setBio: (bio: string) => void;
     setRegisterVerificationCode: (code: string) => void;
+    setRegisterMode: (mode: RegisterMode) => void;
   };
 }
 
@@ -413,4 +435,5 @@ export interface DialogHandlers {
   skipCurrentStep: () => void;
   handlePreviousStep: () => void;
   handleSendRegisterCode: () => void;
+  handleSendPhoneCode: () => void;
 } 

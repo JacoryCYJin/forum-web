@@ -83,6 +83,7 @@ export default function SettingsPage() {
     newPasswordConfirm: '',
     
     // 手机号修改
+    currentPhone: '',
     newPhone: '',
     phoneVerificationCode: '',
     
@@ -301,11 +302,23 @@ export default function SettingsPage() {
       return;
     }
 
+    // 验证当前手机号是否与用户手机号匹配
+    if (securitySettings.currentPhone !== user?.phone) {
+      alert('当前手机号不正确，请重新输入');
+      return;
+    }
+
+    // 验证新手机号不能与当前手机号相同
+    if (securitySettings.currentPhone === securitySettings.newPhone) {
+      alert('新手机号不能与当前手机号相同');
+      return;
+    }
+
     setPhoneCodeSending(true);
     try {
-      await sendPhoneCodeApi({ phone: securitySettings.newPhone });
+      await sendPhoneCodeApi(securitySettings.newPhone, 3); // type=3表示修改手机号
       setPhoneCodeCountdown(60);
-      alert('验证码已发送到您的手机');
+      alert('验证码已发送到您的新手机号');
     } catch (error: any) {
       console.error('发送手机验证码失败:', error);
       alert(error.message || '发送验证码失败，请稍后重试');
@@ -318,14 +331,27 @@ export default function SettingsPage() {
    * 处理手机号修改
    */
   const handleChangePhone = async () => {
-    if (!securitySettings.newPhone || !securitySettings.phoneVerificationCode) {
-      alert('请输入新手机号和验证码');
+    if (!securitySettings.currentPhone || !securitySettings.newPhone || !securitySettings.phoneVerificationCode) {
+      alert('请输入当前手机号、新手机号和验证码');
+      return;
+    }
+
+    // 再次验证当前手机号是否与用户手机号匹配
+    if (securitySettings.currentPhone !== user?.phone) {
+      alert('当前手机号不正确，请重新输入');
+      return;
+    }
+
+    // 验证新手机号不能与当前手机号相同
+    if (securitySettings.currentPhone === securitySettings.newPhone) {
+      alert('新手机号不能与当前手机号相同');
       return;
     }
 
     setIsLoading(true);
     try {
       await changePhoneApi({
+        currentPhone: securitySettings.currentPhone,
         newPhone: securitySettings.newPhone,
         verificationCode: securitySettings.phoneVerificationCode
       });
@@ -341,6 +367,7 @@ export default function SettingsPage() {
       // 清空手机号字段并关闭编辑状态
       setSecuritySettings(prev => ({
         ...prev,
+        currentPhone: '',
         newPhone: '',
         phoneVerificationCode: ''
       }));
@@ -896,11 +923,18 @@ export default function SettingsPage() {
                         <div className="space-y-4 max-w-md">
                           <div>
                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                              当前手机号
+                              当前手机号验证
                             </label>
-                            <div className="px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-                              {user?.phone ? maskText(user.phone, 3, 4) : '未绑定'}
-                            </div>
+                            <input
+                              type="tel"
+                              value={securitySettings.currentPhone}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, currentPhone: e.target.value }))}
+                              className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="请输入当前完整手机号进行验证"
+                            />
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                              为了安全起见，请完整输入您当前的手机号
+                            </p>
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
@@ -928,9 +962,9 @@ export default function SettingsPage() {
                               />
                               <button
                                 onClick={handleSendPhoneCode}
-                                disabled={phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone}
+                                disabled={phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.currentPhone || !securitySettings.newPhone}
                                 className={`px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${
-                                  phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.newPhone
+                                  phoneCodeSending || phoneCodeCountdown > 0 || !securitySettings.currentPhone || !securitySettings.newPhone
                                     ? 'bg-neutral-400 cursor-not-allowed'
                                     : 'bg-primary hover:bg-primary-hover'
                                 } text-white`}
@@ -938,6 +972,9 @@ export default function SettingsPage() {
                                 {phoneCodeCountdown > 0 ? `${phoneCodeCountdown}s` : phoneCodeSending ? '发送中...' : '发送验证码'}
                               </button>
                             </div>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                              验证码将发送到您的新手机号
+                            </p>
                           </div>
                           <div className="flex space-x-4 pt-2">
                             <button
@@ -945,6 +982,7 @@ export default function SettingsPage() {
                                 setIsEditingPhone(false);
                                 setSecuritySettings(prev => ({
                                   ...prev,
+                                  currentPhone: '',
                                   newPhone: '',
                                   phoneVerificationCode: ''
                                 }));
