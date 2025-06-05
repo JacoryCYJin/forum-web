@@ -4,21 +4,8 @@
  */
 
 import { notFound } from 'next/navigation';
-
-/**
- * 分类页面属性接口
- */
-interface CategoryPageProps {
-  /**
-   * 路由参数
-   */
-  params: {
-    /**
-     * 分类ID
-     */
-    categoryId: string;
-  };
-}
+import { getCategoryByIdApi } from '@/lib/api/categoryApi';
+import { CategoryPageProps } from '@/types/categoryType';
 
 /**
  * 分类页面组件
@@ -37,13 +24,27 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
     notFound();
   }
 
+  // 根据分类ID获取分类信息
+  let category;
+  try {
+    category = await getCategoryByIdApi(categoryId);
+  } catch (error) {
+    console.error('获取分类信息失败:', error);
+    notFound();
+  }
+
+  // 如果分类不存在，显示404页面
+  if (!category) {
+    notFound();
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-dark-secondary">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 页面标题 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
-            分类: {categoryId}
+            分类: {category.categoryName}
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400">
             浏览该分类下的所有文章
@@ -87,8 +88,12 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
+              <span className="text-neutral-500 dark:text-neutral-400">分类名称:</span>
+              <span className="text-neutral-900 dark:text-white">{category.categoryName}</span>
+            </div>
+            <div className="flex justify-between">
               <span className="text-neutral-500 dark:text-neutral-400">分类ID:</span>
-              <span className="text-neutral-900 dark:text-white">{categoryId}</span>
+              <span className="text-neutral-900 dark:text-white font-mono text-xs">{categoryId}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-neutral-500 dark:text-neutral-400">文章数量:</span>

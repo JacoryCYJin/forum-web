@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Fire, Code, VideoOne, ActivitySource, Down, Concern, MapDraw } from '@icon-park/react';
-import { getCategoryListApi } from '@/lib/api/categoryApi';
+import { Home, Fire, Code, VideoOne, ActivitySource, Down, Concern, MapDraw, Music, ForkSpoon, Journey, Camera, CoffeeMachine, Sport, Book, Gamepad, Chip } from '@icon-park/react';
+import { getCategoryListWithCacheApi } from '@/lib/api/categoryApi';
 import { Category } from '@/types/categoryType';
 
 /**
@@ -100,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
       setError(null);
       
       console.log('🚀 开始获取分类数据...');
-      const categoryData = await getCategoryListApi();
+      const categoryData = await getCategoryListWithCacheApi();
       
       // 再次检查组件是否仍然挂载
       if (!isMountedRef.current) return;
@@ -199,12 +199,27 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
     
     switch (categoryName) {
       case '科技':
+        return <Chip theme={theme} size="22" className="sidebar-icon" />;
       case '技术':
         return <Code theme={theme} size="22" className="sidebar-icon" />;
       case '电影':
-      case '音乐':
-      case '游戏':
         return <VideoOne theme={theme} size="22" className="sidebar-icon" />;
+      case '音乐':
+        return <Music theme={theme} size="22" className="sidebar-icon" />;
+      case '美食':
+        return <ForkSpoon theme={theme} size="22" className="sidebar-icon" />;
+      case '旅行':
+        return <Journey theme={theme} size="22" className="sidebar-icon" />;
+      case '摄影':
+        return <Camera theme={theme} size="22" className="sidebar-icon" />;
+      case '生活':
+        return <CoffeeMachine theme={theme} size="22" className="sidebar-icon" />;
+      case '运动':
+        return <Sport theme={theme} size="22" className="sidebar-icon" />;
+      case '读书':
+        return <Book theme={theme} size="22" className="sidebar-icon" />;
+      case '游戏':
+        return <Gamepad theme={theme} size="22" className="sidebar-icon" />;
       default:
         return <Code theme={theme} size="22" className="sidebar-icon" />;
     }
