@@ -17,20 +17,11 @@ export enum AnimationDirection {
  */
 export enum AuthStep {
   LOGIN = "login",
-  REGISTER = "register", 
+  EMAIL_REGISTER = "email_register",
+  PHONE_REGISTER = "phone_register",
   FORGOT_PASSWORD = "forgot_password",
   AVATAR = "avatar",
   TAGS = "tags",
-}
-
-/**
- * 注册模式枚举
- */
-export enum RegisterMode {
-  /** 邮箱注册 */
-  EMAIL = "email",
-  /** 手机号注册 */
-  PHONE = "phone",
 }
 
 /**
@@ -157,12 +148,12 @@ export interface LoginPanelProps extends BasePanelProps {
  */
 export interface RegisterPanelProps extends BasePanelProps {
   /**
-   * 手机号/邮箱
+   * 手机号
    */
   phone: string;
   
   /**
-   * 设置手机号/邮箱的函数
+   * 设置手机号的函数
    */
   setPhone: (phone: string) => void;
   
@@ -215,16 +206,146 @@ export interface RegisterPanelProps extends BasePanelProps {
    * 发送注册验证码的函数
    */
   handleSendRegisterCode: () => void;
+}
+
+/**
+ * 邮箱注册面板组件Props
+ */
+export interface EmailRegisterPanelProps extends BasePanelProps {
+  /**
+   * 邮箱地址
+   */
+  email: string;
   
   /**
-   * 当前注册模式
+   * 设置邮箱地址的函数
    */
-  registerMode: RegisterMode;
+  setEmail: (email: string) => void;
   
   /**
-   * 设置注册模式的函数
+   * 密码
    */
-  setRegisterMode: (mode: RegisterMode) => void;
+  password: string;
+  
+  /**
+   * 设置密码的函数
+   */
+  setPassword: (password: string) => void;
+  
+  /**
+   * 验证码
+   */
+  verificationCode: string;
+  
+  /**
+   * 设置验证码的函数
+   */
+  setVerificationCode: (code: string) => void;
+  
+  /**
+   * 处理邮箱注册的函数
+   */
+  handleEmailRegister: () => void;
+  
+  /**
+   * 发送邮箱验证码的函数
+   */
+  handleSendEmailCode: () => void;
+  
+  /**
+   * 切换到登录页面的函数
+   */
+  toggleToLogin: () => void;
+  
+  /**
+   * 切换到手机号注册的函数
+   */
+  toggleToPhoneRegister: () => void;
+  
+  /**
+   * 是否同意协议
+   */
+  agreeTerms: boolean;
+  
+  /**
+   * 设置同意协议状态的函数
+   */
+  setAgreeTerms: (agree: boolean) => void;
+  
+  /**
+   * 显示协议弹窗的函数
+   */
+  onShowTermsDialog: () => void;
+}
+
+/**
+ * 手机号注册面板组件Props
+ */
+export interface PhoneRegisterPanelProps extends BasePanelProps {
+  /**
+   * 手机号
+   */
+  phone: string;
+  
+  /**
+   * 设置手机号的函数
+   */
+  setPhone: (phone: string) => void;
+  
+  /**
+   * 密码
+   */
+  password: string;
+  
+  /**
+   * 设置密码的函数
+   */
+  setPassword: (password: string) => void;
+  
+  /**
+   * 验证码
+   */
+  verificationCode: string;
+  
+  /**
+   * 设置验证码的函数
+   */
+  setVerificationCode: (code: string) => void;
+  
+  /**
+   * 处理手机号注册的函数
+   */
+  handlePhoneRegister: () => void;
+  
+  /**
+   * 发送手机验证码的函数
+   */
+  handleSendPhoneCode: () => void;
+  
+  /**
+   * 切换到登录页面的函数
+   */
+  toggleToLogin: () => void;
+  
+  /**
+   * 切换到邮箱注册的函数
+   */
+  toggleToEmailRegister: () => void;
+  
+  /**
+   * 是否同意协议
+   */
+  agreeTerms: boolean;
+  
+  /**
+   * 设置同意协议状态的函数
+   */
+  setAgreeTerms: (agree: boolean) => void;
+  
+  /**
+   * 显示协议弹窗的函数
+   */
+  onShowTermsDialog: () => void;
 }
 
 /**
@@ -391,6 +512,7 @@ export interface DialogHandlersConfig {
    */
   formData: {
     phone: string;
+    email: string;
     password: string;
     nickname: string;
     avatar: string | null;
@@ -399,7 +521,6 @@ export interface DialogHandlersConfig {
     newPassword: string;
     bio: string;
     registerVerificationCode: string;
-    registerMode: RegisterMode;
   };
   
   /**
@@ -407,6 +528,7 @@ export interface DialogHandlersConfig {
    */
   setters: {
     setPhone: (phone: string) => void;
+    setEmail: (email: string) => void;
     setPassword: (password: string) => void;
     setNickname: (nickname: string) => void;
     setAvatar: (avatar: string | null) => void;
@@ -415,7 +537,6 @@ export interface DialogHandlersConfig {
     setNewPassword: (password: string) => void;
     setBio: (bio: string) => void;
     setRegisterVerificationCode: (code: string) => void;
-    setRegisterMode: (mode: RegisterMode) => void;
   };
 }
 
@@ -425,7 +546,11 @@ export interface DialogHandlersConfig {
 export interface DialogHandlers {
   handleLogin: () => void;
   handleRegister: () => void;
+  handleEmailRegister: () => void;
+  handlePhoneRegister: () => void;
   handleSendCode: () => void;
+  handleSendEmailCode: () => void;
+  handleSendPhoneCode: () => void;
   handleResetPassword: () => void;
   handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAvatarSubmit: () => void;
@@ -435,5 +560,4 @@ export interface DialogHandlers {
   skipCurrentStep: () => void;
   handlePreviousStep: () => void;
   handleSendRegisterCode: () => void;
-  handleSendPhoneCode: () => void;
 } 

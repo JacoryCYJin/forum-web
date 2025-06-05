@@ -7,9 +7,9 @@ import {
   AuthStep, 
   AnimationDirection, 
   DialogHandlersConfig, 
-  DialogHandlers
+  DialogHandlers 
 } from "@/types/loginDialogtype";
-import { loginUserApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
+import { loginUserApi, registerApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
 import type { UserInfo as User } from "@/types/userType";
@@ -170,41 +170,45 @@ export class LoginDialogUtils {
             return;
           }
 
-          // 验证码现在是必需的
-          if (!formData.registerVerificationCode) {
-            alert('请先获取验证码');
+          // 判断是否为邮箱或手机号
+          const isEmail = formData.phone.includes('@');
+          const isPhoneNumber = /^1[3-9]\d{9}$/.test(formData.phone);
+          
+          // 检查是否需要验证码
+          const needsVerificationCode = isEmail || isPhoneNumber;
+          
+          if (needsVerificationCode && !formData.registerVerificationCode) {
+            alert('注册需要验证码，请先发送验证码');
             return;
-          }
-
-          // 根据注册模式验证输入格式
-          if (formData.registerMode === "email") {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(formData.phone)) {
-              alert('请输入有效的邮箱地址');
-              return;
-            }
-          } else if (formData.registerMode === "phone") {
-            const phoneRegex = /^1[3-9]\d{9}$/;
-            if (!phoneRegex.test(formData.phone)) {
-              alert('请输入有效的手机号');
-              return;
-            }
           }
 
           console.log("注册信息:", { 
             phone: formData.phone, 
             password: formData.password,
             verificationCode: formData.registerVerificationCode,
-            registerMode: formData.registerMode
+            isEmail: isEmail,
+            isPhoneNumber: isPhoneNumber
           });
 
-          // 使用带验证码的注册API
-          const registerResult = await registerWithCodeApi({
-            phoneOrEmail: formData.phone,
-            password: formData.password,
-            repassword: formData.password,
-            verificationCode: formData.registerVerificationCode
-          });
+          let registerResult;
+
+          // 根据是否有验证码选择不同的API
+          if (needsVerificationCode && formData.registerVerificationCode) {
+            // 带验证码的注册（邮箱或手机号）
+            registerResult = await registerWithCodeApi({
+              phoneOrEmail: formData.phone,
+              password: formData.password,
+              repassword: formData.password,
+              verificationCode: formData.registerVerificationCode
+            });
+          } else {
+            // 普通注册（无验证码）
+            registerResult = await registerApi({
+              phoneOrEmail: formData.phone,
+              password: formData.password,
+              repassword: formData.password
+            });
+          }
 
           console.log("注册成功:", registerResult);
 
@@ -272,6 +276,200 @@ export class LoginDialogUtils {
       },
 
       /**
+       * 处理邮箱注册
+       */
+      handleEmailRegister: async () => {
+        try {
+          // 验证输入
+          if (!formData.email || !formData.password || !formData.registerVerificationCode) {
+            alert('请填写完整的邮箱注册信息');
+            return;
+          }
+
+          // 验证邮箱格式
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData.email)) {
+            alert('请输入有效的邮箱地址');
+            return;
+          }
+
+          console.log("邮箱注册信息:", { 
+            email: formData.email, 
+            password: formData.password,
+            verificationCode: formData.registerVerificationCode
+          });
+
+          // 带验证码的邮箱注册
+          const registerResult = await registerWithCodeApi({
+            phoneOrEmail: formData.email,
+            password: formData.password,
+            repassword: formData.password,
+            verificationCode: formData.registerVerificationCode
+          });
+
+          console.log("邮箱注册成功:", registerResult);
+
+          // 使用TokenManager保存令牌信息（会自动启动定时器）
+          TokenManager.saveToken({
+            accessToken: registerResult.accessToken,
+            tokenType: registerResult.tokenType,
+            expiresIn: registerResult.expiresIn
+          });
+
+          // 保存用户信息到localStorage
+          localStorage.setItem('userInfo', JSON.stringify({
+            userId: registerResult.userId,
+            username: registerResult.username,
+            phone: registerResult.phone,
+            email: registerResult.email,
+            avatarUrl: registerResult.avatarUrl,
+            profile: registerResult.profile,
+            ctime: registerResult.ctime,
+            mtime: registerResult.mtime
+          }));
+
+          // 转换LoginVO为User格式并保存到userStore
+          const userInfo: User = {
+            id: registerResult.userId,
+            username: registerResult.username,
+            nickname: registerResult.username,
+            email: registerResult.email || '',
+            phone: registerResult.phone || '',
+            avatar: processAvatarPath(registerResult.avatarUrl),
+            bio: registerResult.profile,
+            createdAt: registerResult.ctime ? new Date(registerResult.ctime) : new Date(),
+            lastLoginAt: new Date(),
+            updatedAt: registerResult.mtime ? new Date(registerResult.mtime) : undefined
+          };
+
+          // 更新userStore状态
+          const { setUser, setUserStats } = useUserStore.getState();
+          setUser(userInfo);
+          
+          // 设置默认的用户统计信息
+          setUserStats({
+            followingCount: 0,
+            followersCount: 0,
+            postsCount: 0,
+            viewsCount: 0
+          });
+
+          // 显示成功消息
+          alert('邮箱注册成功！现在可以设置头像和昵称');
+
+          // 进入头像设置步骤
+          this.switchToStepWithAnimation(
+            currentStep,
+            AuthStep.AVATAR,
+            setCurrentStep,
+            setIsSliding,
+            setSlideDirection
+          );
+
+        } catch (error: any) {
+          console.error("邮箱注册失败:", error);
+          alert(error.message || '邮箱注册失败，请稍后重试');
+        }
+      },
+
+      /**
+       * 处理手机号注册
+       */
+      handlePhoneRegister: async () => {
+        try {
+          // 验证输入
+          if (!formData.phone || !formData.password || !formData.registerVerificationCode) {
+            alert('请填写完整的手机号注册信息');
+            return;
+          }
+
+          // 验证手机号格式
+          const phoneRegex = /^1[3-9]\d{9}$/;
+          if (!phoneRegex.test(formData.phone)) {
+            alert('请输入有效的手机号');
+            return;
+          }
+
+          console.log("手机号注册信息:", { 
+            phone: formData.phone, 
+            password: formData.password,
+            verificationCode: formData.registerVerificationCode
+          });
+
+          // 带验证码的手机号注册
+          const registerResult = await registerWithCodeApi({
+            phoneOrEmail: formData.phone,
+            password: formData.password,
+            repassword: formData.password,
+            verificationCode: formData.registerVerificationCode
+          });
+
+          console.log("手机号注册成功:", registerResult);
+
+          // 使用TokenManager保存令牌信息（会自动启动定时器）
+          TokenManager.saveToken({
+            accessToken: registerResult.accessToken,
+            tokenType: registerResult.tokenType,
+            expiresIn: registerResult.expiresIn
+          });
+
+          // 保存用户信息到localStorage
+          localStorage.setItem('userInfo', JSON.stringify({
+            userId: registerResult.userId,
+            username: registerResult.username,
+            phone: registerResult.phone,
+            email: registerResult.email,
+            avatarUrl: registerResult.avatarUrl,
+            profile: registerResult.profile,
+            ctime: registerResult.ctime,
+            mtime: registerResult.mtime
+          }));
+
+          // 转换LoginVO为User格式并保存到userStore
+          const userInfo: User = {
+            id: registerResult.userId,
+            username: registerResult.username,
+            nickname: registerResult.username,
+            email: registerResult.email || '',
+            phone: registerResult.phone || '',
+            avatar: processAvatarPath(registerResult.avatarUrl),
+            bio: registerResult.profile,
+            createdAt: registerResult.ctime ? new Date(registerResult.ctime) : new Date(),
+            lastLoginAt: new Date(),
+            updatedAt: registerResult.mtime ? new Date(registerResult.mtime) : undefined
+          };
+
+          // 更新userStore状态
+          const { setUser, setUserStats } = useUserStore.getState();
+          setUser(userInfo);
+          
+          // 设置默认的用户统计信息
+          setUserStats({
+            followingCount: 0,
+            followersCount: 0,
+            postsCount: 0,
+            viewsCount: 0
+          });
+
+          // 显示成功消息
+          alert('手机号注册成功！现在可以设置头像和昵称');
+
+          // 进入头像设置步骤
+          this.switchToStepWithAnimation(
+            currentStep,
+            AuthStep.AVATAR,
+            setCurrentStep,
+            setIsSliding,
+            setSlideDirection
+          );
+
+        } catch (error: any) {
+          console.error("手机号注册失败:", error);
+          alert(error.message || '手机号注册失败，请稍后重试');
+        }
+      },
+
+      /**
        * 处理发送注册验证码
        */
       handleSendRegisterCode: async () => {
@@ -298,37 +496,6 @@ export class LoginDialogUtils {
 
         } catch (error: any) {
           console.error("发送注册验证码失败:", error);
-          alert(error.message || '发送验证码失败，请稍后重试');
-        }
-      },
-
-      /**
-       * 处理发送手机号验证码
-       */
-      handleSendPhoneCode: async () => {
-        try {
-          // 验证手机号格式
-          if (!formData.phone) {
-            alert('请输入手机号');
-            return;
-          }
-
-          const phoneRegex = /^1[3-9]\d{9}$/;
-          if (!phoneRegex.test(formData.phone)) {
-            alert('请输入有效的手机号');
-            return;
-          }
-
-          console.log("发送手机验证码到:", formData.phone);
-
-          // 调用发送手机验证码API (type=1表示注册)
-          const result = await sendPhoneCodeApi(formData.phone, 1);
-          
-          console.log("手机验证码发送成功:", result);
-          alert('验证码已发送到您的手机，请查收');
-
-        } catch (error: any) {
-          console.error("发送手机验证码失败:", error);
           alert(error.message || '发送验证码失败，请稍后重试');
         }
       },
@@ -601,6 +768,68 @@ export class LoginDialogUtils {
           );
         }
       },
+
+      /**
+       * 处理发送邮箱验证码
+       */
+      handleSendEmailCode: async () => {
+        try {
+          // 验证邮箱格式
+          if (!formData.email) {
+            alert('请输入邮箱地址');
+            return;
+          }
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData.email)) {
+            alert('请输入有效的邮箱地址');
+            return;
+          }
+
+          console.log("发送邮箱验证码到:", formData.email);
+
+          // 调用发送邮箱验证码API (type=1表示注册)
+          const result = await sendUnifiedEmailCodeApi(formData.email, 1);
+          
+          console.log("邮箱验证码发送成功:", result);
+          alert('验证码已发送到您的邮箱，请查收');
+
+        } catch (error: any) {
+          console.error("发送邮箱验证码失败:", error);
+          alert(error.message || '发送验证码失败，请稍后重试');
+        }
+      },
+
+      /**
+       * 处理发送手机验证码
+       */
+      handleSendPhoneCode: async () => {
+        try {
+          // 验证手机号格式
+          if (!formData.phone) {
+            alert('请输入手机号');
+            return;
+          }
+
+          const phoneRegex = /^1[3-9]\d{9}$/;
+          if (!phoneRegex.test(formData.phone)) {
+            alert('请输入有效的手机号');
+            return;
+          }
+
+          console.log("发送手机验证码到:", formData.phone);
+
+          // 调用发送手机验证码API (type=1表示注册)
+          const result = await sendPhoneCodeApi(formData.phone, 1);
+          
+          console.log("手机验证码发送成功:", result);
+          alert('验证码已发送到您的手机，请查收');
+
+        } catch (error: any) {
+          console.error("发送手机验证码失败:", error);
+          alert(error.message || '发送验证码失败，请稍后重试');
+        }
+      },
     };
   }
 
@@ -613,7 +842,7 @@ export class LoginDialogUtils {
    */
   static getAnimationDirection(currentStep: AuthStep, targetStep: AuthStep): AnimationDirection {
     // 定义步骤顺序
-    const stepOrder = [AuthStep.LOGIN, AuthStep.REGISTER, AuthStep.AVATAR, AuthStep.TAGS];
+    const stepOrder = [AuthStep.LOGIN, AuthStep.EMAIL_REGISTER, AuthStep.PHONE_REGISTER, AuthStep.AVATAR, AuthStep.TAGS];
     const forgotPasswordStep = AuthStep.FORGOT_PASSWORD;
     
     // 忘记密码相关动画 - 只有内容滑动，不改变红白区域位置
@@ -625,9 +854,15 @@ export class LoginDialogUtils {
     }
     
     // 登录和注册之间的切换 - 红白区域会移动，不需要内容动画
-    if ((currentStep === AuthStep.LOGIN && targetStep === AuthStep.REGISTER) ||
-        (currentStep === AuthStep.REGISTER && targetStep === AuthStep.LOGIN)) {
+    if ((currentStep === AuthStep.LOGIN && (targetStep === AuthStep.EMAIL_REGISTER || targetStep === AuthStep.PHONE_REGISTER)) ||
+        ((currentStep === AuthStep.EMAIL_REGISTER || currentStep === AuthStep.PHONE_REGISTER) && targetStep === AuthStep.LOGIN)) {
       return AnimationDirection.NONE; // 红白区域移动，不需要内容动画
+    }
+    
+    // 邮箱注册和手机号注册之间的切换 - 红白区域位置不变，使用内容滑动
+    if ((currentStep === AuthStep.EMAIL_REGISTER && targetStep === AuthStep.PHONE_REGISTER) ||
+        (currentStep === AuthStep.PHONE_REGISTER && targetStep === AuthStep.EMAIL_REGISTER)) {
+      return currentStep === AuthStep.EMAIL_REGISTER ? AnimationDirection.LEFT : AnimationDirection.RIGHT;
     }
     
     // 流程中的向前和向后移动

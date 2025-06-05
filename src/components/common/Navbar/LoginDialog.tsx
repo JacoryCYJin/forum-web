@@ -18,24 +18,21 @@ import type {
   AnimationDirection,
   LogoProps,
   LoginPanelProps,
-  RegisterPanelProps,
+  EmailRegisterPanelProps,
+  PhoneRegisterPanelProps,
   ForgotPasswordPanelProps,
   AvatarPanelProps,
   TagsPanelProps,
-  RegisterMode,
 } from "@/types/loginDialogtype";
 
 // 导入枚举
 import {
   AuthStep as AuthStepEnum,
   AnimationDirection as AnimationDirectionEnum,
-  RegisterMode as RegisterModeEnum,
 } from "@/types/loginDialogtype";
 
 // 导入工具方法
 import { LoginDialogUtils } from "./LoginDialog.utils";
-
-import { sendPhoneCodeApi } from '@/lib/api/userApi';
 
 /**
  * 验证码倒计时Hook
@@ -167,51 +164,38 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
 };
 
 /**
- * 注册面板组件
+ * 邮箱注册面板组件
  *
- * 用户注册表单面板
+ * 邮箱注册表单面板
  */
-const RegisterPanel: React.FC<RegisterPanelProps> = ({
-  phone,
-  setPhone,
+const EmailRegisterPanel: React.FC<EmailRegisterPanelProps> = ({
+  email,
+  setEmail,
   password,
   setPassword,
-  handleRegister,
-  toggleAuthMode,
+  verificationCode,
+  setVerificationCode,
+  handleEmailRegister,
+  handleSendEmailCode,
+  toggleToLogin,
+  toggleToPhoneRegister,
   isSliding = false,
   slideDirection = AnimationDirectionEnum.NONE,
   agreeTerms,
   setAgreeTerms,
   onShowTermsDialog,
-  verificationCode,
-  setVerificationCode,
-  handleSendRegisterCode,
-  registerMode,
-  setRegisterMode,
 }) => {
   // 添加倒计时Hook
-  const [registerCountdown, startRegisterCountdown] = useCountdown(60);
+  const [emailCountdown, startEmailCountdown] = useCountdown(60);
 
   /**
-   * 处理发送验证码
+   * 处理发送邮箱验证码
    */
   const handleSendCode = async () => {
     try {
-      if (registerMode === RegisterModeEnum.PHONE) {
-        // 发送手机验证码 - 需要从dialogUtils获取
-        const phoneRegex = /^1[3-9]\d{9}$/;
-        if (!phoneRegex.test(phone)) {
-          alert('请输入有效的手机号');
-          return;
-        }
-        await sendPhoneCodeApi(phone, 1); // type=1表示注册
-      } else {
-        // 发送邮箱验证码
-        await handleSendRegisterCode();
-      }
-      
+      await handleSendEmailCode();
       // 发送成功后开始倒计时
-      startRegisterCountdown();
+      startEmailCountdown();
     } catch (error) {
       console.error('发送验证码失败:', error);
       // 发送失败不开始倒计时
@@ -225,21 +209,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
     if (!agreeTerms) {
       return;
     }
-    handleRegister();
-  };
-
-  /**
-   * 获取输入框占位符文本
-   */
-  const getPlaceholderText = () => {
-    return registerMode === RegisterModeEnum.EMAIL ? '请输入邮箱地址' : '请输入手机号';
-  };
-
-  /**
-   * 获取账号标签文本
-   */
-  const getAccountLabelText = () => {
-    return registerMode === RegisterModeEnum.EMAIL ? '邮箱' : '手机号';
+    handleEmailRegister();
   };
 
   return (
@@ -249,56 +219,34 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         slideDirection
       )}
     >
-      <div className="flex items-center justify-center mb-6">
-        <h2 className="text-2xl font-bold text-center text-neutral-500 dark:text-dark-neutral">
-          注册
-        </h2>
-        <div className="ml-4 flex items-center space-x-2">
-          <button
-            onClick={() => {
-              setRegisterMode(RegisterModeEnum.EMAIL);
-              setPhone(""); // 清空输入
-              setVerificationCode(""); // 清空验证码
-            }}
-            className={`px-3 py-1 text-xs rounded-full transition-colors ${
-              registerMode === RegisterModeEnum.EMAIL
-                ? 'bg-primary text-white'
-                : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-            }`}
-          >
-            邮箱注册
-          </button>
-          <button
-            onClick={() => {
-              setRegisterMode(RegisterModeEnum.PHONE);
-              setPhone(""); // 清空输入
-              setVerificationCode(""); // 清空验证码
-            }}
-            className={`px-3 py-1 text-xs rounded-full transition-colors ${
-              registerMode === RegisterModeEnum.PHONE
-                ? 'bg-primary text-white'
-                : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-            }`}
-          >
-            手机注册
-          </button>
-        </div>
+      <h2 className="text-2xl font-bold mb-6 text-center text-neutral-500 dark:text-dark-neutral">
+        邮箱注册
+      </h2>
+      
+      {/* 切换到手机号注册的小按钮 */}
+      <div className="mb-4 text-center">
+        <button
+          onClick={toggleToPhoneRegister}
+          className="text-xs text-neutral-400 hover:text-primary transition-colors"
+        >
+          使用手机号注册
+        </button>
       </div>
       
       <div className="mb-6 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
-          {getAccountLabelText()}
+          邮箱
         </label>
         <input
-          type={registerMode === RegisterModeEnum.EMAIL ? "email" : "tel"}
+          type="email"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder={getPlaceholderText()}
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          placeholder="请输入邮箱地址"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
       
-      {/* 验证码字段 - 始终显示 */}
+      {/* 验证码字段 - 默认显示 */}
       <div className="mb-6 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
           验证码
@@ -313,14 +261,14 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           />
           <button
             onClick={handleSendCode}
-            disabled={registerCountdown > 0 || !phone.trim()}
+            disabled={emailCountdown > 0 || !email.trim()}
             className={`px-4 py-3 rounded-md whitespace-nowrap text-sm font-medium transition-colors ${
-              registerCountdown > 0 || !phone.trim()
+              emailCountdown > 0 || !email.trim()
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : 'bg-primary text-white hover:bg-primary-hover'
             }`}
           >
-            {registerCountdown > 0 ? `${registerCountdown}秒后重试` : '发送验证码'}
+            {emailCountdown > 0 ? `${emailCountdown}秒后重试` : '发送验证码'}
           </button>
         </div>
       </div>
@@ -337,6 +285,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
+      
       <div className="flex items-center justify-center mb-8">
         <label className="flex items-center cursor-pointer">
           <input
@@ -378,6 +327,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           </span>
         </label>
       </div>
+      
       <div className="text-center">
         <button
           onClick={handleRegisterWithTerms}
@@ -388,7 +338,193 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         </button>
         <div className="mt-6 text-center">
           <button
-            onClick={toggleAuthMode}
+            onClick={toggleToLogin}
+            className="text-sm text-neutral-400 hover:text-primary transition-colors"
+          >
+            已有账号，返回登录
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * 手机号注册面板组件
+ *
+ * 手机号注册表单面板
+ */
+const PhoneRegisterPanel: React.FC<PhoneRegisterPanelProps> = ({
+  phone,
+  setPhone,
+  password,
+  setPassword,
+  verificationCode,
+  setVerificationCode,
+  handlePhoneRegister,
+  handleSendPhoneCode,
+  toggleToLogin,
+  toggleToEmailRegister,
+  isSliding = false,
+  slideDirection = AnimationDirectionEnum.NONE,
+  agreeTerms,
+  setAgreeTerms,
+  onShowTermsDialog,
+}) => {
+  // 添加倒计时Hook
+  const [phoneCountdown, startPhoneCountdown] = useCountdown(60);
+
+  /**
+   * 处理发送手机验证码
+   */
+  const handleSendCode = async () => {
+    try {
+      await handleSendPhoneCode();
+      // 发送成功后开始倒计时
+      startPhoneCountdown();
+    } catch (error) {
+      console.error('发送验证码失败:', error);
+      // 发送失败不开始倒计时
+    }
+  };
+
+  /**
+   * 处理注册
+   */
+  const handleRegisterWithTerms = () => {
+    if (!agreeTerms) {
+      return;
+    }
+    handlePhoneRegister();
+  };
+
+  return (
+    <div
+      className={LoginDialogUtils.getPanelAnimationClass(
+        isSliding,
+        slideDirection
+      )}
+    >
+      <h2 className="text-2xl font-bold mb-6 text-center text-neutral-500 dark:text-dark-neutral">
+        手机号注册
+      </h2>
+      
+      {/* 切换到邮箱注册的小按钮 */}
+      <div className="mb-4 text-center">
+        <button
+          onClick={toggleToEmailRegister}
+          className="text-xs text-neutral-400 hover:text-primary transition-colors"
+        >
+          使用邮箱注册
+        </button>
+      </div>
+      
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
+          手机号
+        </label>
+        <input
+          type="tel"
+          className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
+          placeholder="请输入手机号"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+      </div>
+      
+      {/* 验证码字段 - 默认显示 */}
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
+          验证码
+        </label>
+        <div className="flex flex-1 gap-2">
+          <input
+            type="text"
+            className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
+            placeholder="请输入验证码"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+          />
+          <button
+            onClick={handleSendCode}
+            disabled={phoneCountdown > 0 || !phone.trim()}
+            className={`px-4 py-3 rounded-md whitespace-nowrap text-sm font-medium transition-colors ${
+              phoneCountdown > 0 || !phone.trim()
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                : 'bg-primary text-white hover:bg-primary-hover'
+            }`}
+          >
+            {phoneCountdown > 0 ? `${phoneCountdown}秒后重试` : '发送验证码'}
+          </button>
+        </div>
+      </div>
+      
+      <div className="mb-6 mx-3 flex items-center">
+        <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
+          密码
+        </label>
+        <input
+          type="password"
+          className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
+          placeholder="请输入密码"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      
+      <div className="flex items-center justify-center mb-8">
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={agreeTerms}
+            onChange={(e) => setAgreeTerms(e.target.checked)}
+            className="sr-only"
+          />
+          <div
+            className={`w-4 h-4 rounded border-2 mr-2 flex items-center justify-center transition-colors ${
+              agreeTerms
+                ? "bg-primary border-primary"
+                : "border-checkbox-unchecked-light dark:border-checkbox-unchecked-dark bg-transparent"
+            }`}
+          >
+            {agreeTerms && (
+              <svg
+                className="w-2.5 h-2.5 text-white"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </div>
+          <span className="text-sm text-neutral-500 dark:text-dark-neutral">
+            同意
+            <button
+              type="button"
+              onClick={onShowTermsDialog}
+              className="text-primary hover:text-primary-hover underline mx-1"
+            >
+              协议
+            </button>
+          </span>
+        </label>
+      </div>
+      
+      <div className="text-center">
+        <button
+          onClick={handleRegisterWithTerms}
+          disabled={!agreeTerms}
+          className="btn-primary"
+        >
+          注册
+        </button>
+        <div className="mt-6 text-center">
+          <button
+            onClick={toggleToLogin}
             className="text-sm text-neutral-400 hover:text-primary transition-colors"
           >
             已有账号，返回登录
@@ -446,12 +582,12 @@ const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
       </h2>
       <div className="mb-6 mx-3 flex items-center">
         <label className="text-neutral-500 dark:text-dark-neutral w-14 flex-shrink-0 text-sm">
-          邮箱
+          手机号
         </label>
         <input
-          type="email"
+          type="tel"
           className="flex-1 px-4 py-2 border border-input-border-light dark:border-input-border-dark rounded-md bg-input-background-light dark:bg-input-background-dark text-input-text-light dark:text-input-text-dark placeholder:text-input-placeholder-light dark:placeholder:text-input-placeholder-dark focus:outline-none focus:border-input-border-focus focus:ring-1 focus:ring-input-border-focus transition-colors"
-          placeholder="请输入邮箱地址"
+          placeholder="请输入手机号"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -688,6 +824,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
 
   // 表单数据
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -700,9 +837,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
 
   // 注册验证码相关状态
   const [registerVerificationCode, setRegisterVerificationCode] = useState("");
-
-  // 注册模式状态
-  const [registerMode, setRegisterMode] = useState<RegisterMode>(RegisterModeEnum.EMAIL);
 
   // 协议相关状态
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -722,6 +856,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
    */
   const resetFormData = () => {
     setPhone("");
+    setEmail("");
     setPassword("");
     setNickname("");
     setAvatar(null);
@@ -730,7 +865,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
     setVerificationCode("");
     setNewPassword("");
     setRegisterVerificationCode("");
-    setRegisterMode(RegisterModeEnum.EMAIL);
     setAgreeTerms(false);
   };
 
@@ -770,8 +904,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
     if (visible) {
       // 弹窗打开时重置到登录状态
       setCurrentStep(AuthStepEnum.LOGIN);
-      // 重置注册模式为邮箱注册
-      setRegisterMode(RegisterModeEnum.EMAIL);
     }
   }, [visible]);
 
@@ -784,6 +916,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
     onClose: handleClose,
     formData: {
       phone,
+      email,
       password,
       nickname,
       avatar,
@@ -792,10 +925,10 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       newPassword,
       bio,
       registerVerificationCode,
-      registerMode,
     },
     setters: {
       setPhone,
+      setEmail,
       setPassword,
       setNickname,
       setAvatar,
@@ -804,7 +937,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       setNewPassword,
       setBio,
       setRegisterVerificationCode,
-      setRegisterMode,
     },
   });
 
@@ -813,6 +945,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
     // 如果从登录页面切换，清空登录表单
     if (currentStep === AuthStepEnum.LOGIN) {
       setPhone("");
+      setEmail("");
       setPassword("");
     }
     // 如果切换到登录页面，清空其他表单数据
@@ -820,10 +953,6 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
       setVerificationCode("");
       setNewPassword("");
       setRegisterVerificationCode("");
-    }
-    // 如果切换到注册页面，重置为邮箱注册模式
-    if (targetStep === AuthStepEnum.REGISTER) {
-      setRegisterMode(RegisterModeEnum.EMAIL);
     }
     
     dialogUtils.toggleAuthMode(targetStep);
@@ -913,33 +1042,50 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
                   setPassword={setPassword}
                   handleLogin={dialogUtils.handleLogin}
                   toggleAuthMode={() =>
-                    customToggleAuthMode(AuthStepEnum.REGISTER)
+                    customToggleAuthMode(AuthStepEnum.EMAIL_REGISTER)
                   }
                   isSliding={isSliding}
                   slideDirection={slideDirection}
                 />
               )}
 
-              {currentStep === AuthStepEnum.REGISTER && (
-                <RegisterPanel
-                  phone={phone}
-                  setPhone={setPhone}
+              {currentStep === AuthStepEnum.EMAIL_REGISTER && (
+                <EmailRegisterPanel
+                  email={email}
+                  setEmail={setEmail}
                   password={password}
                   setPassword={setPassword}
-                  handleRegister={dialogUtils.handleRegister}
-                  toggleAuthMode={() =>
-                    customToggleAuthMode(AuthStepEnum.LOGIN)
-                  }
+                  verificationCode={registerVerificationCode}
+                  setVerificationCode={setRegisterVerificationCode}
+                  handleEmailRegister={dialogUtils.handleEmailRegister}
+                  handleSendEmailCode={dialogUtils.handleSendEmailCode}
+                  toggleToLogin={() => customToggleAuthMode(AuthStepEnum.LOGIN)}
+                  toggleToPhoneRegister={() => customToggleAuthMode(AuthStepEnum.PHONE_REGISTER)}
                   isSliding={isSliding}
                   slideDirection={slideDirection}
                   agreeTerms={agreeTerms}
                   setAgreeTerms={setAgreeTerms}
                   onShowTermsDialog={handleShowTermsDialog}
+                />
+              )}
+
+              {currentStep === AuthStepEnum.PHONE_REGISTER && (
+                <PhoneRegisterPanel
+                  phone={phone}
+                  setPhone={setPhone}
+                  password={password}
+                  setPassword={setPassword}
                   verificationCode={registerVerificationCode}
                   setVerificationCode={setRegisterVerificationCode}
-                  handleSendRegisterCode={dialogUtils.handleSendRegisterCode}
-                  registerMode={registerMode}
-                  setRegisterMode={setRegisterMode}
+                  handlePhoneRegister={dialogUtils.handlePhoneRegister}
+                  handleSendPhoneCode={dialogUtils.handleSendPhoneCode}
+                  toggleToLogin={() => customToggleAuthMode(AuthStepEnum.LOGIN)}
+                  toggleToEmailRegister={() => customToggleAuthMode(AuthStepEnum.EMAIL_REGISTER)}
+                  isSliding={isSliding}
+                  slideDirection={slideDirection}
+                  agreeTerms={agreeTerms}
+                  setAgreeTerms={setAgreeTerms}
+                  onShowTermsDialog={handleShowTermsDialog}
                 />
               )}
 
