@@ -8,7 +8,6 @@ import request from '@/lib/utils/request';
 import type {
   LoginVO,
   LoginRequest,
-  RegisterRequest,
   RegisterWithCodeRequest,
   ResetPasswordRequest,
   RefreshTokenRequest,
@@ -63,45 +62,6 @@ export async function loginUserApi(params: LoginRequest): Promise<LoginVO> {
     throw new Error(error.message || '登录失败，请稍后重试');
   }
 }
-
-/**
- * 用户注册API
- * 
- * 第一步基础信息注册，注册成功后直接返回登录信息
- *
- * @async
- * @param {RegisterRequest} params - 注册参数
- * @returns {Promise<LoginVO>} 注册后的登录信息（包含JWT令牌）
- * @throws {Error} 当API请求失败时抛出错误
- */
-export async function registerUserApi(params: RegisterRequest): Promise<LoginVO> {
-  try {
-    console.log('注册参数:', params);
-
-    // 直接发送JSON格式数据
-    // const response: ApiResponse<LoginVO> = await post('/user/register', params);
-    const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/register', params);
-    console.log('注册响应:', response);
-    
-    if (response.code === 0) {
-      return response.data;
-    } else {
-      throw new Error(response.message || '注册失败');
-    }
-  } catch (error: any) {
-    console.error('注册失败:', error);
-    throw new Error(error.message || '注册失败，请稍后重试');
-  }
-}
-
-/**
- * 注册API别名
- * 
- * @async
- * @param {RegisterRequest} params - 注册参数
- * @returns {Promise<LoginVO>} 注册后的登录信息（包含JWT令牌）
- */
-export const registerApi = registerUserApi;
 
 /**
  * 统一发送邮箱验证码API

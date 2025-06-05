@@ -9,7 +9,7 @@ import {
   DialogHandlersConfig, 
   DialogHandlers 
 } from "@/types/loginDialogtype";
-import { loginUserApi, registerApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
+import { loginUserApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
 import type { UserInfo as User } from "@/types/userType";
@@ -174,11 +174,15 @@ export class LoginDialogUtils {
           const isEmail = formData.phone.includes('@');
           const isPhoneNumber = /^1[3-9]\d{9}$/.test(formData.phone);
           
-          // 检查是否需要验证码
-          const needsVerificationCode = isEmail || isPhoneNumber;
-          
-          if (needsVerificationCode && !formData.registerVerificationCode) {
+          // 验证码是必需的
+          if (!formData.registerVerificationCode) {
             alert('注册需要验证码，请先发送验证码');
+            return;
+          }
+
+          // 必须是有效的邮箱或手机号
+          if (!isEmail && !isPhoneNumber) {
+            alert('请输入有效的邮箱地址或手机号');
             return;
           }
 
@@ -190,25 +194,12 @@ export class LoginDialogUtils {
             isPhoneNumber: isPhoneNumber
           });
 
-          let registerResult;
-
-          // 根据是否有验证码选择不同的API
-          if (needsVerificationCode && formData.registerVerificationCode) {
-            // 带验证码的注册（邮箱或手机号）
-            registerResult = await registerWithCodeApi({
-              phoneOrEmail: formData.phone,
-              password: formData.password,
-              repassword: formData.password,
-              verificationCode: formData.registerVerificationCode
-            });
-          } else {
-            // 普通注册（无验证码）
-            registerResult = await registerApi({
-              phoneOrEmail: formData.phone,
-              password: formData.password,
-              repassword: formData.password
-            });
-          }
+          // 带验证码的注册（邮箱或手机号）
+          const registerResult = await registerWithCodeApi({
+            phoneOrEmail: formData.phone,
+            password: formData.password,
+            verificationCode: formData.registerVerificationCode
+          });
 
           console.log("注册成功:", registerResult);
 
@@ -303,7 +294,6 @@ export class LoginDialogUtils {
           const registerResult = await registerWithCodeApi({
             phoneOrEmail: formData.email,
             password: formData.password,
-            repassword: formData.password,
             verificationCode: formData.registerVerificationCode
           });
 
@@ -400,7 +390,6 @@ export class LoginDialogUtils {
           const registerResult = await registerWithCodeApi({
             phoneOrEmail: formData.phone,
             password: formData.password,
-            repassword: formData.password,
             verificationCode: formData.registerVerificationCode
           });
 

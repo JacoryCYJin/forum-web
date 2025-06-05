@@ -145,26 +145,6 @@ export interface UpdateAvatarAndUsernameAndProfileRequest {
 }
 
 /**
- * 注册请求参数
- */
-export interface RegisterRequest {
-  /**
-   * 手机号或邮箱
-   */
-  phoneOrEmail: string;
-  
-  /**
-   * 密码
-   */
-  password: string;
-  
-  /**
-   * 确认密码
-   */
-  repassword: string;
-}
-
-/**
  * 带验证码的注册请求参数
  */
 export interface RegisterWithCodeRequest {
@@ -177,11 +157,6 @@ export interface RegisterWithCodeRequest {
    * 密码
    */
   password: string;
-  
-  /**
-   * 确认密码
-   */
-  repassword: string;
   
   /**
    * 验证码
