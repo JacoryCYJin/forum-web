@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Fire, Code, VideoOne, ActivitySource, Down, Concern, MapDraw } from '@icon-park/react';
@@ -51,6 +51,11 @@ interface SidebarItem {
  */
 const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   /**
+   * 组件挂载状态引用，防止在组件卸载后更新状态
+   */
+  const isMountedRef = useRef(true);
+  
+  /**
    * 侧边栏折叠状态
    */
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -58,7 +63,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   /**
    * 分类展开状态
    */
-  const [expandedCategories, setExpandedCategories] = useState<{[key: string]: boolean}>({});
+  const [expandedCategories, setExpandedCategories] = useState<{[key: string]: boolean}>({
+    '分类': true // 默认展开分类区域
+  });
   
   /**
    * 分类数据列表
@@ -68,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   /**
    * 加载状态
    */
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   
   /**
    * 错误信息
@@ -80,41 +87,69 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   /**
    * 获取分类数据
    * 
-   * 从API获取分类列表并更新组件状态
+   * 从API获取分类列表并更新组件状态，包含完整的错误处理
    * 
    * @async
    */
   const fetchCategories = async () => {
+    // 检查组件是否仍然挂载
+    if (!isMountedRef.current) return;
+    
     try {
       setIsLoading(true);
       setError(null);
+      
+      console.log('🚀 开始获取分类数据...');
       const categoryData = await getCategoryListApi();
+      
+      // 再次检查组件是否仍然挂载
+      if (!isMountedRef.current) return;
+      
+      console.log('✅ 分类数据获取成功:', categoryData);
       setCategories(categoryData || []);
       
-      // 初始化分类展开状态
-      const initialState: {[key: string]: boolean} = {};
-      initialState['分类'] = true; // 分类区域默认展开
-      setExpandedCategories(initialState);
-    } catch (err) {
-      console.error('获取分类列表失败:', err);
-      setError('获取分类列表失败');
+    } catch (err: any) {
+      // 再次检查组件是否仍然挂载
+      if (!isMountedRef.current) return;
+      
+      console.error('❌ 获取分类列表失败:', err);
+      
+      // 提取错误信息
+      const errorMessage = err?.message || '获取分类列表失败';
+      setError(errorMessage);
+      
+      // 设置空数组避免渲染错误
+      setCategories([]);
+      
     } finally {
-      setIsLoading(false);
+      // 检查组件是否仍然挂载后再更新状态
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   /**
-   * 组件初始化时获取分类数据
+   * 组件挂载时的副作用
    */
   useEffect(() => {
+    // 设置组件为挂载状态
+    isMountedRef.current = true;
+    
+    // 🚀 启用真实API调用
     fetchCategories();
+    
+    // 清理函数
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   /**
    * 当折叠状态改变时，调用父组件的回调函数
    */
   useEffect(() => {
-    if (onToggle) {
+    if (onToggle && isMountedRef.current) {
       onToggle(isCollapsed);
     }
   }, [isCollapsed, onToggle]);
@@ -123,7 +158,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
    * 切换侧边栏折叠状态
    */
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
+    if (isMountedRef.current) {
+      setIsCollapsed(!isCollapsed);
+    }
   };
 
   /**
@@ -132,10 +169,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
    * @param {string} title - 分类标题
    */
   const toggleCategory = (title: string) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [title]: !prev[title]
-    }));
+    if (isMountedRef.current) {
+      setExpandedCategories(prev => ({
+        ...prev,
+        [title]: !prev[title]
+      }));
+    }
   };
 
   /**
@@ -149,27 +188,34 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   };
 
   /**
-   * 根据分类ID生成图标
+   * 根据分类名称生成图标
    * 
-   * @param {string} categoryId - 分类ID
+   * @param {string} categoryName - 分类名称
    * @param {boolean} isActive - 是否为激活状态
    * @returns {React.ReactElement} 分类图标
    */
-  const getCategoryIcon = (categoryId: string, isActive: boolean = false) => {
-    // 根据分类ID返回对应图标，可以根据实际需求扩展
+  const getCategoryIcon = (categoryName: string, isActive: boolean = false) => {
     const theme = isActive ? "filled" : "outline";
     
-    // 这里可以根据实际的分类ID映射到具体图标
-    // 暂时使用默认图标，后续可以根据分类名称或ID进行匹配
-    switch (categoryId.toLowerCase()) {
-      case 'tech':
+    switch (categoryName) {
+      case '科技':
       case '技术':
         return <Code theme={theme} size="22" className="sidebar-icon" />;
-      case 'entertainment':
-      case '娱乐':
+      case '电影':
+      case '音乐':
+      case '游戏':
         return <VideoOne theme={theme} size="22" className="sidebar-icon" />;
       default:
         return <Code theme={theme} size="22" className="sidebar-icon" />;
+    }
+  };
+
+  /**
+   * 手动重试获取分类数据
+   */
+  const handleRetry = () => {
+    if (isMountedRef.current) {
+      fetchCategories();
     }
   };
 
@@ -289,46 +335,56 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                 )}
                 
                 {/* 错误状态 */}
-                {error && (
-                  <div className="flex items-center p-2 text-red-500 dark:text-red-400">
-                    <span className="text-sm">{error}</span>
-                    <button 
-                      onClick={fetchCategories}
-                      className="ml-2 text-xs underline hover:no-underline"
-                    >
-                      重试
-                    </button>
+                {error && !isLoading && (
+                  <div className="p-2">
+                    <div className="flex flex-col space-y-2">
+                      <span className="text-xs text-red-500 dark:text-red-400">{error}</span>
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={handleRetry}
+                          className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline hover:no-underline"
+                        >
+                          重试
+                        </button>
+                        <button 
+                          onClick={() => setError(null)}
+                          className="text-xs text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300"
+                        >
+                          忽略
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
                 {/* 分类列表 */}
                 {!isLoading && !error && (
                   <ul>
-                    {categories.map((category) => {
-                      const categoryPath = `/category/${category.categoryId}`;
-                      const isActive = isLinkActive(categoryPath);
-                      
-                      return (
-                        <li key={category.categoryId}>
-                          <Link 
-                            href={categoryPath}
-                            className={`flex items-center p-2 rounded-md ${
-                              isActive
-                                ? 'bg-neutral-200 dark:bg-zinc-700 text-neutral-900 dark:text-white' 
-                                : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800'
-                            }`}
-                          >
-                            {getCategoryIcon(category.categoryId, isActive)}
-                            <span className="ml-3">{category.categoryName}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                    
-                    {/* 空状态 */}
-                    {categories.length === 0 && !isLoading && !error && (
+                    {categories.length > 0 ? (
+                      categories.map((category) => {
+                        const categoryPath = `/category/${category.categoryId}`;
+                        const isActive = isLinkActive(categoryPath);
+                        
+                        return (
+                          <li key={category.categoryId}>
+                            <Link 
+                              href={categoryPath}
+                              className={`flex items-center p-2 rounded-md ${
+                                isActive
+                                  ? 'bg-neutral-200 dark:bg-zinc-700 text-neutral-900 dark:text-white' 
+                                  : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800'
+                              }`}
+                            >
+                              {getCategoryIcon(category.categoryName, isActive)}
+                              <span className="ml-3">{category.categoryName}</span>
+                            </Link>
+                          </li>
+                        );
+                      })
+                    ) : (
+                      /* 空状态 */
                       <li className="p-2 text-neutral-500 dark:text-neutral-400 text-sm">
-                        暂无分类
+                        暂无分类数据
                       </li>
                     )}
                   </ul>
