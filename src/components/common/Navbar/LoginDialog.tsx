@@ -33,6 +33,7 @@ import {
 
 // 导入工具方法
 import { LoginDialogUtils } from "./LoginDialog.utils";
+import type { Category } from "@/types/categoryType";
 
 /**
  * 验证码倒计时Hook
@@ -769,9 +770,12 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
         slideDirection
       )}
     >
-      <h2 className="text-2xl font-bold mb-8 text-center text-neutral-500 dark:text-dark-neutral">
-        选择喜欢的分类
+      <h2 className="text-2xl font-bold mb-4 text-center text-neutral-500 dark:text-dark-neutral">
+        选择感兴趣的分类
       </h2>
+      <p className="text-sm text-neutral-400 text-center mb-6">
+        选择您感兴趣的内容分类，帮助我们为您推荐更好的内容
+      </p>
       <div className="mb-8 flex flex-wrap gap-3 justify-center">
         {availableTags.map((tag, index) => (
           <button
@@ -787,6 +791,16 @@ const TagsPanel: React.FC<TagsPanelProps> = ({
           </button>
         ))}
       </div>
+      {selectedTags.length > 0 && (
+        <div className="mb-6 text-center">
+          <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+            已选择 {selectedTags.length} 个分类:
+          </div>
+          <div className="text-sm text-primary">
+            {selectedTags.join(', ')}
+          </div>
+        </div>
+      )}
       <div className="mt-8 text-center">
         <button
           onClick={handleTagsSubmit}
@@ -848,8 +862,40 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
     AnimationDirectionEnum.NONE
   );
 
+  // 分类数据状态
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+
   // 文件输入引用
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * 加载分类数据
+   */
+  const loadCategories = async () => {
+    if (availableCategories.length > 0) return; // 避免重复加载
+    
+    try {
+      setCategoriesLoading(true);
+      const categories = await LoginDialogUtils.getCategoriesApi();
+      setAvailableCategories(categories);
+    } catch (error) {
+      console.error('加载分类数据失败:', error);
+      // 使用默认分类
+      setAvailableCategories(LoginDialogUtils.getDefaultCategories());
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  /**
+   * 监听步骤变化，在进入标签选择步骤时加载分类数据
+   */
+  useEffect(() => {
+    if (currentStep === AuthStepEnum.TAGS && visible) {
+      loadCategories();
+    }
+  }, [currentStep, visible]);
 
   /**
    * 重置所有表单数据
@@ -966,8 +1012,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   // 判断红色区域是否在左侧
   const isRedOnLeft = LoginDialogUtils.isRedOnLeft(currentStep);
 
-  // 可选标签列表
-  const availableTags = LoginDialogUtils.getAvailableTags();
+  // 可选标签列表 - 使用分类名称
+  const availableTags = availableCategories.map(category => category.categoryName);
+
+  // 如果正在加载分类且没有可用分类，显示默认标签
+  const displayTags = availableTags.length > 0 ? availableTags : LoginDialogUtils.getAvailableTags();
 
   return (
     <>
@@ -1129,9 +1178,9 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
 
               {currentStep === AuthStepEnum.TAGS && (
                 <TagsPanel
-                  availableTags={availableTags}
+                  availableTags={categoriesLoading ? ['加载中...'] : displayTags}
                   selectedTags={selectedTags}
-                  toggleTag={dialogUtils.toggleTag}
+                  toggleTag={categoriesLoading ? () => {} : dialogUtils.toggleTag}
                   handleTagsSubmit={dialogUtils.handleTagsSubmit}
                   skipCurrentStep={dialogUtils.skipCurrentStep}
                   onPreviousStep={dialogUtils.handlePreviousStep}

@@ -14,6 +14,8 @@ import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
 import type { UserInfo as User } from "@/types/userType";
 import { processAvatarPath, validateAvatarFile } from "@/lib/utils/avatarUtils";
+import { getCategoryListWithCacheApi } from "@/lib/api/categoryApi";
+import type { Category } from "@/types/categoryType";
 
 /**
  * 登录对话框的工具方法集合
@@ -971,8 +973,53 @@ export class LoginDialogUtils {
   }
 
   /**
-   * 获取可选标签列表
+   * 获取分类列表
    * 
+   * 从API获取分类数据，用于用户注册时选择感兴趣的分类
+   *
+   * @async
+   * @returns {Promise<Category[]>} 分类列表
+   * @throws {Error} 当API请求失败时抛出错误
+   * @example
+   * // 获取分类列表
+   * const categories = await LoginDialogUtils.getCategoriesApi();
+   */
+  static async getCategoriesApi(): Promise<Category[]> {
+    try {
+      console.log('正在获取分类列表...');
+      const categories = await getCategoryListWithCacheApi();
+      console.log('✅ 获取分类列表成功:', categories);
+      return categories;
+    } catch (error) {
+      console.error('❌ 获取分类列表失败:', error);
+      // 如果API失败，返回默认分类
+      return this.getDefaultCategories();
+    }
+  }
+
+  /**
+   * 获取默认分类列表
+   * 
+   * 当API请求失败时使用的备用分类列表
+   *
+   * @returns {Category[]} 默认分类列表
+   */
+  static getDefaultCategories(): Category[] {
+    return [
+      { categoryId: 'default-life', categoryName: '生活' },
+      { categoryId: 'default-photography', categoryName: '摄影' },
+      { categoryId: 'default-travel', categoryName: '旅游' },
+      { categoryId: 'default-food', categoryName: '美食' },
+      { categoryId: 'default-technology', categoryName: '科技' },
+      { categoryId: 'default-music', categoryName: '音乐' },
+      { categoryId: 'default-sports', categoryName: '运动' },
+    ];
+  }
+
+  /**
+   * 获取可选标签列表（保留原有方法用于向后兼容）
+   * 
+   * @deprecated 建议使用 getCategoriesApi() 获取真实分类数据
    * @returns 标签列表
    */
   static getAvailableTags(): string[] {
@@ -984,6 +1031,25 @@ export class LoginDialogUtils {
       "科技",
       "音乐",
       "运动",
+    ];
+  }
+
+  /**
+   * 获取推荐标签列表
+   * 
+   * 用于帖子编辑时的标签推荐，可以是分类名称的扩展
+   *
+   * @returns {string[]} 推荐标签列表
+   */
+  static getRecommendedTags(): string[] {
+    return [
+      '日常', '生活记录', '心情', '分享',
+      '风景', '人像', '街拍', '静物',
+      '国内游', '出国', '自驾', '攻略',
+      '家常菜', '甜品', '探店', '下厨',
+      '数码', '软件', '编程', '科普',
+      '流行', '古典', '民谣', '乐器',
+      '健身', '跑步', '球类', '户外'
     ];
   }
 } 

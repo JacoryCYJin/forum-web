@@ -1,12 +1,14 @@
 /**
  * @file 视频帖子编辑器组件
- * @description 支持视频上传，填写标题和简介
+ * @description 支持视频上传，填写标题和简介，选择分类和标签
  */
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { LoginDialogUtils } from '@/components/common/Navbar/LoginDialog.utils';
+import type { Category } from '@/types/categoryType';
 
 /**
  * 视频帖子编辑器Props
@@ -29,7 +31,9 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
   // 表单状态
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTag, setCustomTag] = useState('');
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
@@ -37,15 +41,43 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // 可选标签
-  const availableTags = [
-    '生活', '技术', '摄影', '旅游', '美食', '运动', 
-    '音乐', '电影', '读书', '学习', '工作', '娱乐'
-  ];
+  // 分类和标签数据
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
+  const [recommendedTags, setRecommendedTags] = useState<string[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // 支持的视频格式
   const supportedVideoFormats = ['mp4', 'mov', 'avi', 'mkv', 'webm'];
   const maxVideoSize = 500 * 1024 * 1024; // 500MB
+
+  /**
+   * 初始化分类和标签数据
+   */
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        setLoadingCategories(true);
+        
+        // 获取分类数据
+        const categories = await LoginDialogUtils.getCategoriesApi();
+        setAvailableCategories(categories);
+        
+        // 获取推荐标签
+        const tags = LoginDialogUtils.getRecommendedTags();
+        setRecommendedTags(tags);
+        
+      } catch (error) {
+        console.error('获取分类和标签数据失败:', error);
+        // 使用默认数据
+        setAvailableCategories(LoginDialogUtils.getDefaultCategories());
+        setRecommendedTags(LoginDialogUtils.getRecommendedTags());
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    initializeData();
+  }, []);
 
   /**
    * 处理标签选择
@@ -53,9 +85,27 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
+    } else if (selectedTags.length < 8) { // 限制最多8个标签
       setSelectedTags([...selectedTags, tag]);
     }
+  };
+
+  /**
+   * 添加自定义标签
+   */
+  const handleAddCustomTag = () => {
+    const trimmedTag = customTag.trim();
+    if (trimmedTag && !selectedTags.includes(trimmedTag) && selectedTags.length < 8) {
+      setSelectedTags([...selectedTags, trimmedTag]);
+      setCustomTag('');
+    }
+  };
+
+  /**
+   * 移除标签
+   */
+  const handleRemoveTag = (tagToRemove: string) => {
+    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
   /**
@@ -170,6 +220,11 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
       return;
     }
 
+    if (!selectedCategory) {
+      alert('请选择分类');
+      return;
+    }
+
     if (!videoFile) {
       alert('请上传视频文件');
       return;
@@ -184,6 +239,7 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
       console.log('发布视频帖子:', {
         title,
         description,
+        category: selectedCategory,
         tags: selectedTags,
         coverImage,
         videoFile: {
@@ -248,6 +304,45 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
               rows={4}
               className="w-full px-4 py-3 border border-neutral-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white placeholder-neutral-400 resize-none"
             />
+          </div>
+
+          {/* 分类选择 */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              选择分类 <span className="text-red-500">*</span>
+            </label>
+            {loadingCategories ? (
+              <div className="text-neutral-500 dark:text-neutral-400">加载分类中...</div>
+            ) : (
+              <div className="relative">
+                <select
+                  value={selectedCategory?.categoryId || ''}
+                  onChange={(e) => {
+                    const categoryId = e.target.value;
+                    const category = availableCategories.find(cat => cat.categoryId === categoryId);
+                    setSelectedCategory(category || null);
+                  }}
+                  className="w-full px-4 py-3 border border-neutral-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white appearance-none cursor-pointer"
+                >
+                  <option value="">请选择分类</option>
+                  {availableCategories.map(category => (
+                    <option key={category.categoryId} value={category.categoryId}>
+                      {category.categoryName}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            )}
+            {selectedCategory && (
+              <div className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                已选择分类: {selectedCategory.categoryName}
+              </div>
+            )}
           </div>
 
           {/* 封面图片 */}
@@ -380,27 +475,75 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
         {/* 标签选择 */}
         <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">
-            选择标签 (最多选择5个)
+            选择标签 (最多8个，可自定义)
           </label>
-          <div className="flex flex-wrap gap-2">
-            {availableTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => handleTagToggle(tag)}
-                disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
-                className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                  selectedTags.includes(tag)
-                    ? 'bg-secondary text-white'
-                    : 'bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {tag}
-              </button>
-            ))}
+          
+          {/* 推荐标签 */}
+          <div className="mb-4">
+            <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">推荐标签:</div>
+            <div className="flex flex-wrap gap-2">
+              {recommendedTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => handleTagToggle(tag)}
+                  disabled={!selectedTags.includes(tag) && selectedTags.length >= 8}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                    selectedTags.includes(tag)
+                      ? 'bg-secondary text-white'
+                      : 'bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* 自定义标签输入 */}
+          <div className="mb-4">
+            <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">自定义标签:</div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customTag}
+                onChange={(e) => setCustomTag(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddCustomTag()}
+                placeholder="输入自定义标签..."
+                className="flex-1 px-3 py-2 border border-neutral-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                disabled={selectedTags.length >= 8}
+              />
+              <button
+                onClick={handleAddCustomTag}
+                disabled={!customTag.trim() || selectedTags.includes(customTag.trim()) || selectedTags.length >= 8}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                添加
+              </button>
+            </div>
+          </div>
+
+          {/* 已选择的标签 */}
           {selectedTags.length > 0 && (
-            <div className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-              已选择: {selectedTags.join(', ')}
+            <div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+                已选择标签 ({selectedTags.length}/8):
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedTags.map(tag => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-secondary text-white"
+                  >
+                    {tag}
+                    <button
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-2 text-white hover:text-red-200"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -415,7 +558,7 @@ export function PostEditorVideo({ onCancel }: PostEditorVideoProps) {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !title.trim() || !description.trim() || !videoFile || isUploading}
+            disabled={isSubmitting || !title.trim() || !description.trim() || !selectedCategory || !videoFile || isUploading}
             className="px-6 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
           >
             {isSubmitting && (

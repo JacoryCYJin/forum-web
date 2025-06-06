@@ -40,9 +40,55 @@ body {
   box-sizing: border-box;
 }
 
-input:focus {
+/* 移除所有默认的focus outline */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
   outline: none;
   box-shadow: none;
+}
+
+/* 统一的focus样式 - 适用于输入框、选择器等 */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2) !important;
+}
+
+/* 按钮的focus样式 */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3) !important;
+}
+
+/* 特殊处理：下拉选择器在不同浏览器中的一致性 */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2) !important;
+}
+
+/* 确保在深色模式下也有良好的对比度 */
+@media (prefers-color-scheme: dark) {
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3) !important;
+  }
+  
+  button:focus {
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.4) !important;
+  }
 }
 
 a {
