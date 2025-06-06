@@ -83,7 +83,7 @@ export const useLanguageStore = create<LanguageState>()(
           document.documentElement.lang = language;
         }
         
-        console.log(`🌐 语言已切换为: ${AVAILABLE_LANGUAGES.find(l => l.code === language)?.name}`);
+        console.log(`语言已切换为: ${AVAILABLE_LANGUAGES.find(l => l.code === language)?.name}`);
       },
       
       // 获取当前语言配置

@@ -50,7 +50,7 @@ export class TokenManager {
     
     // 注意：expiresIn是秒数，需要转换为毫秒
     const expirationTime = issuedAt + (tokenData.expiresIn * 1000);
-    console.log('💾 Token已保存，过期时间:', new Date(expirationTime));
+    console.log('Token已保存，过期时间:', new Date(expirationTime));
   }
 
   /**
@@ -163,7 +163,7 @@ export class TokenManager {
         return false;
       }
 
-      console.log('🔄 正在刷新令牌...');
+      console.log('正在刷新令牌...');
 
       // 调用刷新令牌API
       const refreshResult = await refreshTokenApi({
@@ -219,7 +219,7 @@ export class TokenManager {
     localStorage.removeItem(this.ISSUED_AT_KEY);
     localStorage.removeItem('userInfo');
     
-    console.log('🗑️ 令牌信息已清除');
+    console.log('令牌信息已清除');
   }
 
   /**
@@ -236,7 +236,7 @@ export class TokenManager {
 
     // 如果已过期，尝试刷新
     if (this.isTokenExpired()) {
-      console.log('🔄 令牌已过期，尝试刷新...');
+      console.log('令牌已过期，尝试刷新...');
       return await this.refreshToken();
     }
 
@@ -302,7 +302,7 @@ export class TokenManager {
     const ageDays = Math.floor(tokenAge / (1000 * 60 * 60 * 24));
     const ageHours = Math.floor((tokenAge % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     
-    console.log(`🔄 API调用成功，令牌已使用超过1天（${ageDays}天${ageHours}小时），执行滑动刷新...`);
+    console.log(`API调用成功，令牌已使用超过1天（${ageDays}天${ageHours}小时），执行滑动刷新...`);
     
     return await this.refreshToken();
   }
@@ -315,7 +315,7 @@ export function initializeTokenManager(): void {
   if (typeof window !== 'undefined') {
     const tokenInfo = TokenManager.getTokenInfo();
     if (tokenInfo) {
-      console.log('🚀 令牌管理器已初始化');
+      console.log('令牌管理器已初始化');
     }
   }
 } 

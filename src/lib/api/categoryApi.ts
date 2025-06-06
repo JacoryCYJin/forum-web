@@ -26,7 +26,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
  */
 export async function getCategoryListApi(): Promise<Category[]> {
   try {
-    console.log('📡 正在调用分类API...');
+    console.log('正在调用分类API...');
     // const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
     const response: ApiResponse<CategoryListResponse> = await get("http://localhost:8084/categories/list", {
       page: 1,
@@ -37,10 +37,10 @@ export async function getCategoryListApi(): Promise<Category[]> {
     console.log("✅ 获取分类列表响应:", response);
     
     if (response && response.data && response.data.list && Array.isArray(response.data.list)) {
-      console.log(`📊 获取到 ${response.data.list.length} 个分类`);
+      console.log(`获取到 ${response.data.list.length} 个分类`);
       return response.data.list;
     } else {
-      console.warn('⚠️ API响应数据格式异常:', response);
+      console.warn('API响应数据格式异常:', response);
       return [];
     }
   } catch (error) {
@@ -63,12 +63,12 @@ export async function getCategoryListWithCacheApi(): Promise<Category[]> {
   
   // 检查缓存是否有效
   if (categoriesCache && (now - cacheTimestamp) < CACHE_DURATION) {
-    console.log('📦 使用缓存的分类数据');
+    console.log('使用缓存的分类数据');
     return categoriesCache;
   }
   
   try {
-    console.log('🌐 重新获取分类数据');
+    console.log('重新获取分类数据');
     const categories = await getCategoryListApi();
     
     // 更新缓存
@@ -81,7 +81,7 @@ export async function getCategoryListWithCacheApi(): Promise<Category[]> {
     
     // 如果请求失败但有缓存数据，返回缓存数据
     if (categoriesCache) {
-      console.log('⚠️ 请求失败，使用缓存数据');
+      console.log('请求失败，使用缓存数据');
       return categoriesCache;
     }
     
@@ -97,7 +97,7 @@ export async function getCategoryListWithCacheApi(): Promise<Category[]> {
 export function clearCategoryCache(): void {
   categoriesCache = null;
   cacheTimestamp = 0;
-  console.log('🗑️ 已清除分类缓存');
+  console.log('已清除分类缓存');
 }
 
 /**
@@ -113,7 +113,7 @@ export function clearCategoryCache(): void {
  */
 export async function getCategoryByIdApi(categoryId: string): Promise<Category | null> {
   try {
-    console.log('🔍 查找分类信息，ID:', categoryId);
+    console.log('查找分类信息，ID:', categoryId);
     
     // 使用缓存版本的API
     const categories = await getCategoryListWithCacheApi();
@@ -124,7 +124,7 @@ export async function getCategoryByIdApi(categoryId: string): Promise<Category |
       console.log('✅ 找到分类信息:', category);
       return category;
     } else {
-      console.warn('⚠️ 未找到分类信息，ID:', categoryId);
+      console.warn('未找到分类信息，ID:', categoryId);
       return null;
     }
   } catch (error) {
@@ -145,7 +145,7 @@ export async function getCategoryByIdApi(categoryId: string): Promise<Category |
  */
 export async function getCategoryByNameApi(categoryName: string): Promise<Category | null> {
   try {
-    console.log('🔍 根据名称查找分类信息:', categoryName);
+    console.log('根据名称查找分类信息:', categoryName);
     
     // const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
     const response: ApiResponse<CategoryListResponse> = await get("http://localhost:8084/categories/list", {

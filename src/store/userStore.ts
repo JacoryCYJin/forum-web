@@ -133,7 +133,7 @@ export const useUserStore = create<UserState>()(
           localStorage.removeItem('userInfo');
         }
         
-        console.log('👋 已退出登录');
+        console.log('已退出登录');
       },
       
       // 更新用户资料
