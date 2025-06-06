@@ -114,9 +114,9 @@ export async function sendUnifiedEmailCodeApi(email: string, type: number): Prom
  */
 export async function resetPasswordApi(params: ResetPasswordRequest): Promise<string> {
   try {
-    console.log('🔍 resetPasswordApi - 开始处理重置密码请求');
-    console.log('📋 接收到的参数:', params);
-    console.log('📋 参数详情:', { 
+    console.log('resetPasswordApi - 开始处理重置密码请求');
+    console.log('接收到的参数:', params);
+    console.log('参数详情:', { 
       phoneOrEmail: params.phoneOrEmail,
       phoneOrEmailType: typeof params.phoneOrEmail,
       phoneOrEmailLength: params.phoneOrEmail?.length,
@@ -134,21 +134,21 @@ export async function resetPasswordApi(params: ResetPasswordRequest): Promise<st
       code: params.code, 
       newPassword: params.newPassword 
     };
-    console.log('📤 发送给后端的数据:', {
+    console.log('发送给后端的数据:', {
       ...requestData,
       newPassword: requestData.newPassword ? '***' : requestData.newPassword
     });
 
     const url = 'http://localhost:8080/user/reset-password';
-    console.log('🌐 请求URL:', url);
-    console.log('📝 请求方法: POST');
-    console.log('📋 请求Content-Type: application/json;charset=utf-8');
+    console.log('请求URL:', url);
+    console.log('请求方法: POST');
+    console.log('请求Content-Type: application/json;charset=utf-8');
 
     // const response: ApiResponse<string> = await post('/user/reset-password', { phoneOrEmail: params.phoneOrEmail, code: params.code, newPassword: params.newPassword });
     const response: ApiResponse<string> = await post(url, requestData);
-    console.log('📥 重置密码响应:', response);
-    console.log('📊 响应状态码:', response.code);
-    console.log('📝 响应消息:', response.message);
+    console.log('重置密码响应:', response);
+    console.log('响应状态码:', response.code);
+    console.log('响应消息:', response.message);
     
     if (response.code === 0) {
       console.log('✅ 重置密码成功');
