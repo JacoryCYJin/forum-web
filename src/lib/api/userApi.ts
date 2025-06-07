@@ -188,7 +188,7 @@ export async function getUserInfoApi(params: GetUserInfoRequest): Promise<User> 
   try {
     // const response: ApiResponse<User> = await get('/user/info', {
     const response: ApiResponse<User> = await get('http://localhost:8080/user/info', {
-      username: params.username,
+      userId: params.userId,
     });
     
     if (response.code === 0) {

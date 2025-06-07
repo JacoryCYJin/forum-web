@@ -23,13 +23,13 @@ import type {
   ForgotPasswordPanelProps,
   AvatarPanelProps,
   TagsPanelProps,
-} from "@/types/loginDialogtype";
+} from "@/types/loginDialogType";
 
 // 导入枚举
 import {
   AuthStep as AuthStepEnum,
   AnimationDirection as AnimationDirectionEnum,
-} from "@/types/loginDialogtype";
+} from "@/types/loginDialogType";
 
 // 导入工具方法
 import { LoginDialogUtils } from "./LoginDialog.utils";

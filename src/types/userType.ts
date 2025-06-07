@@ -234,9 +234,9 @@ export interface RefreshTokenRequest {
  */
 export interface GetUserInfoRequest {
   /**
-   * 用户名
+   * 用户id
    */
-  username: string;
+  userId: string;
 }
 
 /**

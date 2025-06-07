@@ -8,7 +8,7 @@ import {
   AnimationDirection, 
   DialogHandlersConfig, 
   DialogHandlers 
-} from "@/types/loginDialogtype";
+} from "@/types/loginDialogType";
 import { loginUserApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
