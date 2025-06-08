@@ -48,8 +48,8 @@ export async function loginUserApi(params: LoginRequest): Promise<LoginVO> {
     console.log('登录参数:', params);
 
     // 直接发送JSON格式数据
-    // const response: ApiResponse<LoginVO> = await post('/user/login', params);
-    const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/login', params);
+    const response: ApiResponse<LoginVO> = await post('/user/login', params);
+    // const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/login', params);
     console.log('登录响应:', response);
     
     if (response.code === 0) {
@@ -87,8 +87,8 @@ export async function sendUnifiedEmailCodeApi(email: string, type: number): Prom
   try {
     console.log('发送统一邮箱验证码参数:', { email, type });
 
-    // const response: ApiResponse<string> = await post('/user/send-unified-email-code', { email, type });
-    const response: ApiResponse<string> = await post('http://localhost:8080/user/send-unified-email-code', { email, type });
+    const response: ApiResponse<string> = await post('/user/send-unified-email-code', { email, type });
+    // const response: ApiResponse<string> = await post('http://localhost:8080/user/send-unified-email-code', { email, type });
     console.log('发送统一邮箱验证码响应:', response);
     
     if (response.code === 0) {
@@ -139,7 +139,8 @@ export async function resetPasswordApi(params: ResetPasswordRequest): Promise<st
       newPassword: requestData.newPassword ? '***' : requestData.newPassword
     });
 
-    const url = 'http://localhost:8080/user/reset-password';
+    const url = '/user/reset-password';
+    // const url = 'http://localhost:8080/user/reset-password';
     console.log('请求URL:', url);
     console.log('请求方法: POST');
     console.log('请求Content-Type: application/json;charset=utf-8');
@@ -186,8 +187,8 @@ export async function resetPasswordApi(params: ResetPasswordRequest): Promise<st
  */
 export async function getUserInfoApi(params: GetUserInfoRequest): Promise<User> {
   try {
-    // const response: ApiResponse<User> = await get('/user/info', {
-    const response: ApiResponse<User> = await get('http://localhost:8080/user/info', {
+    const response: ApiResponse<User> = await get('/user/info', {
+    // const response: ApiResponse<User> = await get('http://localhost:8080/user/info', {
       userId: params.userId,
     });
     
@@ -217,7 +218,8 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
   try {
     // 创建一个临时的axios实例，绕过拦截器
     const tempAxios = request.create({
-      baseURL: 'http://localhost:8080',
+      baseURL: '',
+      // baseURL: 'http://localhost:8080',
       timeout: 15000,
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
@@ -257,8 +259,8 @@ export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarA
   try {
     console.log('更新用户资料参数:', params);
 
-    // const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username-profile', params);
-    const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/update-avatar-username-profile', params);
+    const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username-profile', params);
+    // const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/update-avatar-username-profile', params);
     console.log('更新用户资料响应:', response);
 
     if (response.code === 0) {
@@ -303,8 +305,8 @@ export async function changePasswordApi(params: ChangePasswordRequest): Promise<
     });
 
     // 直接传递参数，字段名已与后端匹配
-    // const response: ApiResponse<string> = await post('/user/change-password', params);
-    const response: ApiResponse<string> = await post('http://localhost:8080/user/change-password', params);
+    const response: ApiResponse<string> = await post('/user/change-password', params);
+    // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-password', params);
     console.log('修改密码响应:', response);
 
     if (response.code === 0) {
@@ -326,8 +328,8 @@ export async function changePasswordApi(params: ChangePasswordRequest): Promise<
  * @returns Promise<string> 发送结果消息
  */
 export async function sendPhoneCodeApi(phone: string, type: number): Promise<string> {
-  // const response = await request.post('/user/send-unified-phone-code', {
-  const response = await request.post('http://localhost:8080/user/send-unified-phone-code', {
+  const response = await request.post('/user/send-unified-phone-code', {
+  // const response = await request.post('http://localhost:8080/user/send-unified-phone-code', {
     phone,
     type
   });
@@ -345,8 +347,8 @@ export async function changePhoneApi(data: {
   newPhone: string;
   verificationCode: string;
 }): Promise<string> {
-  // const response = await request.post('/user/change-phone', data);
-  const response = await request.post('http://localhost:8080/user/change-phone', data);
+  const response = await request.post('/user/change-phone', data);
+  // const response = await request.post('http://localhost:8080/user/change-phone', data);
   return response.data;
 }
 
@@ -365,8 +367,8 @@ export async function changeEmailApi(params: ChangeEmailRequest): Promise<string
     console.log('修改邮箱参数:', params);
 
     // 发送JSON格式数据，与后端@RequestBody注解匹配
-    // const response: ApiResponse<string> = await post('/user/change-email', {
-    const response: ApiResponse<string> = await post('http://localhost:8080/user/change-email', {
+    const response: ApiResponse<string> = await post('/user/change-email', {
+    // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-email', {
       email: params.newEmail,
       verificationCode: params.verificationCode
     });
@@ -398,8 +400,8 @@ export async function registerWithCodeApi(params: RegisterWithCodeRequest): Prom
     console.log('带验证码注册参数:', params);
 
     // 调用正确的带验证码注册端点
-    // const response: ApiResponse<LoginVO> = await post('/user/register-with-code', params);
-    const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/register-with-code', params);
+    const response: ApiResponse<LoginVO> = await post('/user/register-with-code', params);
+    // const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/register-with-code', params);
     console.log('带验证码注册响应:', response);
     
     if (response.code === 0) {
@@ -427,8 +429,8 @@ export async function updatePrivacySettingsApi(params: UpdatePrivacySettingsRequ
   try {
     console.log('更新隐私设置参数:', params);
 
-    // const response: ApiResponse<PrivacySettings> = await post('/user/update-privacy-settings', params);
-    const response: ApiResponse<PrivacySettings> = await post('http://localhost:8080/user/update-privacy-settings', params);
+    const response: ApiResponse<PrivacySettings> = await post('/user/update-privacy-settings', params);
+    // const response: ApiResponse<PrivacySettings> = await post('http://localhost:8080/user/update-privacy-settings', params);
     console.log('更新隐私设置响应:', response);
 
     if (response.code === 0) {
@@ -453,8 +455,8 @@ export async function updatePrivacySettingsApi(params: UpdatePrivacySettingsRequ
  */
 export async function getPrivacySettingsApi(): Promise<PrivacySettings> {
   try {
-    // const response: ApiResponse<PrivacySettings> = await get('/user/privacy-settings');
-    const response: ApiResponse<PrivacySettings> = await get('http://localhost:8080/user/privacy-settings');
+    const response: ApiResponse<PrivacySettings> = await get('/user/privacy-settings');
+    // const response: ApiResponse<PrivacySettings> = await get('http://localhost:8080/user/privacy-settings');
     console.log('获取隐私设置响应:', response);
 
     if (response.code === 0) {

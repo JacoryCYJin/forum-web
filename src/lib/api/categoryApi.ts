@@ -27,8 +27,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
 export async function getCategoryListApi(): Promise<Category[]> {
   try {
     console.log('正在调用分类API...');
-    // const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
-    const response: ApiResponse<CategoryListResponse> = await get("http://localhost:8084/categories/list", {
+    const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
       page: 1,
       pageSize: 10,
       fetchAll: true,
@@ -147,8 +146,7 @@ export async function getCategoryByNameApi(categoryName: string): Promise<Catego
   try {
     console.log('根据名称查找分类信息:', categoryName);
     
-    // const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
-    const response: ApiResponse<CategoryListResponse> = await get("http://localhost:8084/categories/list", {
+    const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
       category_name: categoryName,
       page: 1,
       pageSize: 10,

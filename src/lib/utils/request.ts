@@ -10,8 +10,8 @@ interface ResponseData<T = any> {
 
 // 创建 axios 实例
 const request: AxiosInstance = axios.create({
-  // baseURL: 'http://localhost:8080', // 设置后端服务地址
-  baseURL: '', // 设置后端服务地址
+  baseURL: 'http://127.0.0.1:8080', // 设置后端服务地址 - 使用127.0.0.1替代localhost
+  // baseURL: '', // 设置后端服务地址
   timeout: 15000, // 请求超时时间
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
@@ -68,9 +68,21 @@ request.interceptors.response.use(
       // 统一的错误处理
       let message = '请求失败，请稍后重试';
   
+      console.error('=== 详细错误信息 ===');
+      console.error('错误对象:', error);
+      console.error('错误类型:', error.name);
+      console.error('错误消息:', error.message);
+      console.error('错误代码:', error.code);
+      console.error('错误config:', error.config);
+      console.error('错误request:', error.request);
+      console.error('错误response:', error.response);
+
       if (error.response) {
         // 服务器返回了错误状态码（如 4xx、5xx）
         const status = error.response.status;
+        console.error('服务器响应状态:', status);
+        console.error('服务器响应数据:', error.response.data);
+        console.error('服务器响应头:', error.response.headers);
         
         if (status === 401) {
           // token过期或无效，清除本地存储的认证信息
@@ -86,9 +98,16 @@ request.interceptors.response.use(
         }
       } else if (error.request) {
         // 请求已发送，但没有收到响应（如网络错误、超时）
+        console.error('网络请求详情:');
+        console.error('  - readyState:', error.request.readyState);
+        console.error('  - status:', error.request.status);
+        console.error('  - statusText:', error.request.statusText);
+        console.error('  - responseURL:', error.request.responseURL);
+        console.error('  - timeout:', error.request.timeout);
         message = '网络错误，请检查网络连接';
       } else {
         // 请求未发出（如请求配置错误）
+        console.error('请求配置错误:', error.message);
         message = error.message || '请求配置错误';
       }
   

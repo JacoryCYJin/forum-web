@@ -34,16 +34,32 @@ import type {
  */
 export async function getPostListApi(params: PostQueryParams = {}): Promise<PageResponse<Post>> {
   try {
-    // const response: ApiResponse<PageResponse<Post>> = await get('/posts/list', params);
-    const response: ApiResponse<PageResponse<Post>> = await get('http://localhost:8084/posts/list', params);
+    console.log('📤 发送帖子列表请求，参数:', params);
     
-    if (response.code === 0) {
-      return response.data;
+    const response: ApiResponse<any> = await get('/posts/list', params);
+    
+    console.log('📦 帖子列表API原始响应:', response);
+    
+    if (response.code === 0 && response.data) {
+      // 后端返回的是PageVO格式，需要映射到PageResponse格式
+      const pageVO = response.data;
+      const mappedResponse: PageResponse<Post> = {
+        list: pageVO.list || [],
+        total: pageVO.totalCount || 0,  // PageVO.totalCount -> PageResponse.total
+        pageNum: params.page_num || 1,
+        pageSize: params.page_size || 10,
+        pages: pageVO.pageCount || 1,   // PageVO.pageCount -> PageResponse.pages
+        isFirstPage: (params.page_num || 1) === 1,
+        isLastPage: (params.page_num || 1) >= (pageVO.pageCount || 1)
+      };
+      
+      console.log('📊 映射后的分页数据:', mappedResponse);
+      return mappedResponse;
     } else {
       throw new Error(response.message || '获取帖子列表失败');
     }
   } catch (error) {
-    console.error('获取帖子列表失败:', error);
+    console.error('❌ 获取帖子列表失败:', error);
     throw error;
   }
 }
@@ -62,8 +78,7 @@ export async function getPostListApi(params: PostQueryParams = {}): Promise<Page
  */
 export async function getPostByIdApi(postId: string): Promise<Post> {
   try {
-    // const response: ApiResponse<Post> = await get(`/posts/${postId}`);
-    const response: ApiResponse<Post> = await get(`http://localhost:8084/posts/${postId}`);
+    const response: ApiResponse<Post> = await get(`/posts/${postId}`);
     
     if (response.code === 0) {
       return response.data;
@@ -77,35 +92,60 @@ export async function getPostByIdApi(postId: string): Promise<Post> {
 }
 
 /**
- * 根据分类获取帖子列表API
+ * 根据分类ID获取帖子列表API
  * 
  * 获取指定分类下的帖子列表
  *
  * @async
- * @param {string} categoryName - 分类名称
- * @param {number} pageNum - 页码
+ * @param {string} categoryId - 分类ID
+ * @param {number} pageNum - 页码，从1开始
  * @param {number} pageSize - 每页大小
  * @returns {Promise<PageResponse<Post>>} 分页帖子列表数据
  * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 获取指定分类的帖子列表
+ * const posts = await getPostsByCategoryIdApi('category-123', 1, 10);
  */
-export async function getPostsByCategoryApi(
-  categoryName: string, 
+export async function getPostsByCategoryIdApi(
+  categoryId: string, 
   pageNum: number = 1, 
   pageSize: number = 10
 ): Promise<PageResponse<Post>> {
   try {
-    const response: ApiResponse<PageResponse<Post>> = await get(
-      `http://localhost:8084/posts/category/${categoryName}`,
-      { page_num: pageNum, page_size: pageSize }
-    );
+    console.log(`正在获取分类 ${categoryId} 的帖子列表, 页码: ${pageNum}, 每页: ${pageSize}`);
     
-    if (response.code === 0) {
-      return response.data;
+    const response: ApiResponse<any> = await get(
+      `/posts/category/${categoryId}`,
+      { 
+        pageNum: pageNum, 
+        pageSize: pageSize 
+      }
+    ); 
+
+
+    
+    console.log('分类帖子列表API原始响应:', response);
+    
+    if (response.code === 0 && response.data) {
+      // 后端返回的是PageVO格式，需要映射到PageResponse格式
+      const pageVO = response.data;
+      const mappedResponse: PageResponse<Post> = {
+        list: pageVO.list || [],
+        total: pageVO.totalCount || 0,  // PageVO.totalCount -> PageResponse.total
+        pageNum: pageNum,
+        pageSize: pageSize,
+        pages: pageVO.pageCount || 1,   // PageVO.pageCount -> PageResponse.pages
+        isFirstPage: pageNum === 1,
+        isLastPage: pageNum >= (pageVO.pageCount || 1)
+      };
+      
+      console.log('映射后的分页数据:', mappedResponse);
+      return mappedResponse;
     } else {
       throw new Error(response.message || '获取分类帖子列表失败');
     }
   } catch (error) {
-    console.error(`获取分类(${categoryName})帖子列表失败:`, error);
+    console.error(`获取分类 ${categoryId} 帖子列表失败:`, error);
     throw error;
   }
 }
