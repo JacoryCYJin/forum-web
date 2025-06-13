@@ -34,26 +34,21 @@ import type {
  */
 export async function getPostListApi(params: PostQueryParams = {}): Promise<PageResponse<Post>> {
   try {
-    console.log('📤 发送帖子列表请求，参数:', params);
-    
     const response: ApiResponse<any> = await get('/posts/list', params);
-    
-    console.log('📦 帖子列表API原始响应:', response);
     
     if (response.code === 0 && response.data) {
       // 后端返回的是PageVO格式，需要映射到PageResponse格式
       const pageVO = response.data;
       const mappedResponse: PageResponse<Post> = {
         list: pageVO.list || [],
-        total: pageVO.totalCount || 0,  // PageVO.totalCount -> PageResponse.total
+        total: pageVO.total_count || 0,  // 修改：使用 total_count 字段
         pageNum: params.page_num || 1,
         pageSize: params.page_size || 10,
-        pages: pageVO.pageCount || 1,   // PageVO.pageCount -> PageResponse.pages
+        pages: pageVO.page_count || 1,   // 修改：使用 page_count 字段
         isFirstPage: (params.page_num || 1) === 1,
-        isLastPage: (params.page_num || 1) >= (pageVO.pageCount || 1)
+        isLastPage: (params.page_num || 1) >= (pageVO.page_count || 1)
       };
       
-      console.log('📊 映射后的分页数据:', mappedResponse);
       return mappedResponse;
     } else {
       throw new Error(response.message || '获取帖子列表失败');
@@ -112,8 +107,6 @@ export async function getPostsByCategoryIdApi(
   pageSize: number = 10
 ): Promise<PageResponse<Post>> {
   try {
-    console.log(`正在获取分类 ${categoryId} 的帖子列表, 页码: ${pageNum}, 每页: ${pageSize}`);
-    
     const response: ApiResponse<any> = await get(
       `/posts/category/${categoryId}`,
       { 
@@ -122,24 +115,19 @@ export async function getPostsByCategoryIdApi(
       }
     ); 
 
-
-    
-    console.log('分类帖子列表API原始响应:', response);
-    
     if (response.code === 0 && response.data) {
       // 后端返回的是PageVO格式，需要映射到PageResponse格式
       const pageVO = response.data;
       const mappedResponse: PageResponse<Post> = {
         list: pageVO.list || [],
-        total: pageVO.totalCount || 0,  // PageVO.totalCount -> PageResponse.total
+        total: pageVO.total_count || 0,  // 修改：使用 total_count 字段
         pageNum: pageNum,
         pageSize: pageSize,
-        pages: pageVO.pageCount || 1,   // PageVO.pageCount -> PageResponse.pages
+        pages: pageVO.page_count || 1,   // 修改：使用 page_count 字段
         isFirstPage: pageNum === 1,
-        isLastPage: pageNum >= (pageVO.pageCount || 1)
+        isLastPage: pageNum >= (pageVO.page_count || 1)
       };
       
-      console.log('映射后的分页数据:', mappedResponse);
       return mappedResponse;
     } else {
       throw new Error(response.message || '获取分类帖子列表失败');
