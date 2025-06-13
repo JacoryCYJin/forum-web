@@ -32,17 +32,17 @@ export default {
         },
         secondary: {
           DEFAULT: "#0079D3", // Reddit蓝色
-          hover: "#0288D1",
+          hover: "#0066CC",
           50: "#E3F2FD",
           100: "#BBDEFB",
           200: "#90CAF9",
           300: "#64B5F6",
           400: "#42A5F5",
           500: "#0079D3",
-          600: "#0288D1",
-          700: "#0277BD",
-          800: "#01579B",
-          900: "#01497C",
+          600: "#0066CC",
+          700: "#0057B8",
+          800: "#004BA0",
+          900: "#003D82",
         },
         neutral: {
           50: "#FAFAFA",
@@ -101,7 +101,8 @@ export default {
             light: "#E5E7EB",
             dark: "#4B5563",
           }
-        }
+        },
+
       },
       fontFamily: {
         sans: [
@@ -126,11 +127,16 @@ export default {
         '2xl': '20px',
         '3xl': '24px',
         '4xl': '28px',
+        '5xl': '32px',
+        '6xl': '36px',
+        '7xl': '48px',
       },
       borderRadius: {
         'dialog-left': '16px 0 0 16px',
         'dialog-right': '0 16px 16px 0',
-      }
+      },
+
+
     },
   },
   plugins: [],

@@ -105,3 +105,270 @@ a {
     @apply mr-3 text-lg text-neutral-400;
   }
 }
+
+/* 介绍页面专用样式 - 完全独立的配色系统 */
+.intro-page {
+  /* 介绍页面专用CSS变量 - 橙色+深蓝色配色方案 */
+  --intro-primary: #FF4500;        /* 主题橙色 */
+  --intro-secondary: #1E3A8A;      /* 深蓝色，替代深灰色 */
+  --intro-gradient-from: #FF4500;
+  --intro-gradient-to: #1E3A8A;
+  --intro-gradient-via: #FF6B35;
+  
+  /* 背景色 */
+  --intro-bg: #FFFFFF;
+  --intro-bg-card: #F6F7F8;
+  --intro-bg-section: #FAFAFA;
+  
+  /* 文本色 */
+  --intro-text-primary: #1A1A1B;
+  --intro-text-secondary: #666666;
+  --intro-text-muted: #999999;
+  
+  /* 特色卡片背景 */
+  --intro-feature-orange-light: #FFF8F0;
+  --intro-feature-blue-light: #EFF6FF;    /* 蓝色替代灰色 */
+  --intro-feature-warm-light: #FFFBF0;
+  --intro-feature-cool-light: #F0F8FF;    /* 更蓝的冷色调 */
+}
+
+/* 深色模式下的介绍页面变量 */
+.dark .intro-page {
+  --intro-bg: #1A1A1B;
+  --intro-bg-card: #272729;
+  --intro-bg-section: #0F0F0F;
+  
+  --intro-text-primary: #D7DADC;
+  --intro-text-secondary: #878A8C;
+  --intro-text-muted: #666666;
+  
+  --intro-feature-orange-light: #2A1A0D;
+  --intro-feature-blue-light: #0D1B2A;    /* 深色模式下的蓝色背景 */
+  --intro-feature-warm-light: #2A251A;
+  --intro-feature-cool-light: #0D1A26;    /* 深色模式下的冷蓝色 */
+}
+
+/* 介绍页面专用组件样式 */
+.intro-page .intro-gradient-text {
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.intro-page .intro-button-primary {
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px 0 rgba(255, 69, 0, 0.3);
+}
+
+.intro-page .intro-button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(255, 69, 0, 0.4);
+}
+
+.intro-page .intro-button-secondary {
+  background: transparent;
+  color: var(--intro-text-primary);
+  border: 2px solid var(--intro-secondary);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.intro-page .intro-button-secondary:hover {
+  background: var(--intro-secondary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* 功能卡片背景样式 */
+.intro-page .intro-feature-card-orange {
+  background: linear-gradient(135deg, var(--intro-feature-orange-light) 0%, #FFE0B2 100%);
+}
+
+.intro-page .intro-feature-card-blue {
+  background: linear-gradient(135deg, var(--intro-feature-blue-light) 0%, #DBEAFE 100%);
+}
+
+.intro-page .intro-feature-card-warm {
+  background: linear-gradient(135deg, var(--intro-feature-warm-light) 0%, #FFF3E0 100%);
+}
+
+.intro-page .intro-feature-card-cool {
+  background: linear-gradient(135deg, var(--intro-feature-cool-light) 0%, #E0F2FE 100%);
+}
+
+/* 毛玻璃效果 */
+.intro-page .intro-glass {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .intro-page .intro-glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 动画效果 */
+.intro-page .intro-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.intro-page .intro-pulse {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 统计数据区块 - 移除动画效果 */
+.intro-page .intro-stats-section {
+  background: linear-gradient(90deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  color: white;
+}
+
+.intro-page .intro-stats-item {
+  /* 移除所有动画效果 */
+  transition: none;
+}
+
+.intro-page .intro-stats-item:hover {
+  /* 移除悬停动画 */
+  transform: none;
+}
+
+/* 介绍页面专用渐变背景类 */
+.intro-page .intro-gradient-primary {
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+}
+
+.intro-page .intro-gradient-hero {
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-gradient-via) 50%, var(--intro-secondary) 100%);
+}
+
+.intro-page .intro-gradient-stats {
+  background: linear-gradient(90deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+}
+
+.intro-page .intro-gradient-vision {
+  background: linear-gradient(135deg, #1A1A1B 0%, var(--intro-primary) 50%, var(--intro-secondary) 100%);
+}
+
+/* 介绍页面专用阴影效果 */
+.intro-page .intro-card-shadow {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.intro-page .intro-card-shadow-hover {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+.intro-page .intro-button-shadow {
+  box-shadow: 0 4px 15px 0 rgba(255, 69, 0, 0.3);
+}
+
+.intro-page .intro-button-shadow-hover {
+  box-shadow: 0 8px 25px 0 rgba(255, 69, 0, 0.4);
+}
+
+/* 地图背景上的文字优化 */
+.intro-page .intro-hero-title {
+  font-size: 4rem;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+@media (max-width: 1024px) {
+  .intro-page .intro-hero-title {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .intro-page .intro-hero-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* 确保渐变文字在地图背景上清晰可见 */
+.intro-page .intro-gradient-text {
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+  text-shadow: none;
+}
+
+/* 文本闪烁效果 */
+.intro-page .intro-shimmer {
+  background: linear-gradient(90deg, var(--intro-primary) 0%, var(--intro-secondary) 50%, var(--intro-primary) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 卡片悬停效果 */
+.intro-page .intro-card-hover {
+  transition: all 0.3s ease;
+}
+
+.intro-page .intro-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式文本大小 */
+@media (max-width: 640px) {
+  .intro-page .intro-hero-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  .intro-page .intro-section-title {
+    font-size: 1.875rem;
+    line-height: 1.3;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .intro-page .intro-hero-title {
+    font-size: 3.5rem;
+    line-height: 1.1;
+  }
+  
+  .intro-page .intro-section-title {
+    font-size: 2.25rem;
+    line-height: 1.2;
+  }
+}
+
+@media (min-width: 1025px) {
+  .intro-page .intro-hero-title {
+    font-size: 4rem;
+    line-height: 1.1;
+  }
+  
+  .intro-page .intro-section-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+}
