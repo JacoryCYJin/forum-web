@@ -5,6 +5,7 @@
 
 import { post, get } from '@/lib/utils/request';
 import request from '@/lib/utils/request';
+import { useUserStore } from '@/store/userStore';
 import type {
   LoginVO,
   LoginRequest,
@@ -20,6 +21,39 @@ import type {
   UpdatePrivacySettingsRequest,
   PrivacySettings
 } from '@/types/userType';
+
+/**
+ * 设置认证Cookie
+ * 
+ * @param {string} token - JWT令牌
+ * @param {number} expiresIn - 过期时间（秒）
+ */
+function setAuthCookie(token: string, expiresIn: number): void {
+  if (typeof document === 'undefined') {
+    return; // 服务端渲染时跳过
+  }
+  
+  // 计算过期日期
+  const expireDate = new Date();
+  expireDate.setTime(expireDate.getTime() + (expiresIn * 1000));
+  
+  // 设置Cookie（与后端常量COOKIE_AUTH_FIELD保持一致）
+  document.cookie = `Authorization=${token}; expires=${expireDate.toUTCString()}; path=/; SameSite=Lax`;
+  
+  console.log('已设置认证Cookie，过期时间:', expireDate);
+}
+
+/**
+ * 清除认证Cookie
+ */
+function clearAuthCookie(): void {
+  if (typeof document === 'undefined') {
+    return; // 服务端渲染时跳过
+  }
+  
+  document.cookie = 'Authorization=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+  console.log('已清除认证Cookie');
+}
 
 /**
  * 用户登录API
@@ -53,6 +87,8 @@ export async function loginUserApi(params: LoginRequest): Promise<LoginVO> {
     console.log('登录响应:', response);
     
     if (response.code === 0) {
+      // 登录成功后设置Cookie
+      setAuthCookie(response.data.accessToken, response.data.expiresIn);
       return response.data;
     } else {
       throw new Error(response.message || '登录失败');
@@ -245,10 +281,10 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
  * 修改用户资料API
  * 
  * 通过JWT令牌验证身份并修改用户资料（昵称、头像和个人简介）
- * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
+ * 注意：此API会自动从用户状态中获取userId进行身份验证
  *
  * @async
- * @param {UpdateAvatarAndUsernameRequest} params - 更新参数
+ * @param {UpdateAvatarAndUsernameAndProfileRequest} params - 更新参数
  * @param {string} [params.username] - 新昵称（可选）
  * @param {string} [params.avatarUrl] - 新头像URL（可选）
  * @param {string} [params.profile] - 新个人简介（可选）
@@ -259,8 +295,24 @@ export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarA
   try {
     console.log('更新用户资料参数:', params);
 
-    const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username-profile', params);
-    // const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/update-avatar-username-profile', params);
+    // 从userStore中获取当前用户ID
+    const { user } = useUserStore.getState();
+    if (!user || !user.id) {
+      throw new Error('用户未登录或用户ID无效');
+    }
+
+    // 将userId添加到请求参数中
+    const requestData = {
+      userId: user.id,
+      username: params.username,
+      avatarUrl: params.avatarUrl,
+      profile: params.profile
+    };
+
+    console.log('发送给后端的数据:', requestData);
+
+    const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username-profile', requestData);
+    // const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/update-avatar-username-profile', requestData);
     console.log('更新用户资料响应:', response);
 
     if (response.code === 0) {
@@ -278,7 +330,7 @@ export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarA
  * 修改密码API
  * 
  * 通过JWT令牌验证身份并修改用户密码
- * 注意：此API会自动从请求头中获取JWT令牌进行身份验证
+ * 注意：此API会自动从用户状态中获取userId进行身份验证
  *
  * @async
  * @param {ChangePasswordRequest} params - 修改密码参数
@@ -304,9 +356,29 @@ export async function changePasswordApi(params: ChangePasswordRequest): Promise<
       newPasswordConfirm: '***' 
     });
 
-    // 直接传递参数，字段名已与后端匹配
-    const response: ApiResponse<string> = await post('/user/change-password', params);
-    // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-password', params);
+    // 从userStore中获取当前用户ID
+    const { user } = useUserStore.getState();
+    if (!user || !user.id) {
+      throw new Error('用户未登录或用户ID无效');
+    }
+
+    // 将userId添加到请求参数中
+    const requestData = {
+      userId: user.id,
+      currentPassword: params.currentPassword,
+      newPassword: params.newPassword,
+      newPasswordConfirm: params.newPasswordConfirm
+    };
+
+    console.log('发送给后端的数据:', { 
+      ...requestData, 
+      currentPassword: '***', 
+      newPassword: '***', 
+      newPasswordConfirm: '***' 
+    });
+
+    const response: ApiResponse<string> = await post('/user/change-password', requestData);
+    // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-password', requestData);
     console.log('修改密码响应:', response);
 
     if (response.code === 0) {
@@ -347,9 +419,30 @@ export async function changePhoneApi(data: {
   newPhone: string;
   verificationCode: string;
 }): Promise<string> {
-  const response = await request.post('/user/change-phone', data);
-  // const response = await request.post('http://localhost:8080/user/change-phone', data);
-  return response.data;
+  try {
+    // 从userStore中获取当前用户ID
+    const { user } = useUserStore.getState();
+    if (!user || !user.id) {
+      throw new Error('用户未登录或用户ID无效');
+    }
+
+    // 将userId添加到请求参数中
+    const requestData = {
+      userId: user.id,
+      currentPhone: data.currentPhone,
+      newPhone: data.newPhone,
+      verificationCode: data.verificationCode
+    };
+
+    console.log('修改手机号请求数据:', requestData);
+
+    const response = await request.post('/user/change-phone', requestData);
+    // const response = await request.post('http://localhost:8080/user/change-phone', requestData);
+    return response.data;
+  } catch (error: any) {
+    console.error('修改手机号失败:', error);
+    throw new Error(error.message || '修改手机号失败，请稍后重试');
+  }
 }
 
 /**
@@ -366,12 +459,24 @@ export async function changeEmailApi(params: ChangeEmailRequest): Promise<string
   try {
     console.log('修改邮箱参数:', params);
 
-    // 发送JSON格式数据，与后端@RequestBody注解匹配
-    const response: ApiResponse<string> = await post('/user/change-email', {
-    // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-email', {
+    // 从userStore中获取当前用户ID
+    const { user } = useUserStore.getState();
+    if (!user || !user.id) {
+      throw new Error('用户未登录或用户ID无效');
+    }
+
+    // 将userId添加到请求参数中
+    const requestData = {
+      userId: user.id,
       email: params.newEmail,
       verificationCode: params.verificationCode
-    });
+    };
+
+    console.log('发送给后端的数据:', requestData);
+
+    // 发送JSON格式数据，与后端@RequestBody注解匹配
+    const response: ApiResponse<string> = await post('/user/change-email', requestData);
+    // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-email', requestData);
     console.log('修改邮箱响应:', response);
 
     if (response.code === 0) {
@@ -405,6 +510,8 @@ export async function registerWithCodeApi(params: RegisterWithCodeRequest): Prom
     console.log('带验证码注册响应:', response);
     
     if (response.code === 0) {
+      // 注册成功后设置Cookie
+      setAuthCookie(response.data.accessToken, response.data.expiresIn);
       return response.data;
     } else {
       throw new Error(response.message || '注册失败');
@@ -467,5 +574,29 @@ export async function getPrivacySettingsApi(): Promise<PrivacySettings> {
   } catch (error: any) {
     console.error('获取隐私设置失败:', error);
     throw new Error(error.message || '获取隐私设置失败，请稍后重试');
+  }
+}
+
+/**
+ * 用户登出API
+ * 
+ * 清除本地认证信息
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
+export async function logoutUserApi(): Promise<void> {
+  try {
+    // 清除Cookie
+    clearAuthCookie();
+    
+    // 可以选择调用后端登出接口
+    // await post('/user/logout', {});
+    
+    console.log('用户已登出');
+  } catch (error: any) {
+    console.error('登出失败:', error);
+    // 即使后端调用失败，也要清除本地Cookie
+    clearAuthCookie();
   }
 }
