@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="space-y-6">
       {/* 语言切换测试区域 */}
-      <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
+      {/* <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
         <h2 className="text-lg font-semibold text-neutral-800 dark:text-white mb-4">
           <LanguageText 
             texts={{
@@ -35,7 +35,7 @@ export default function Home() {
             />
           </p>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-neutral-800 dark:text-white">

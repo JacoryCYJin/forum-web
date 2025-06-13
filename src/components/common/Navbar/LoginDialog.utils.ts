@@ -487,7 +487,16 @@ export class LoginDialogUtils {
 
         } catch (error: any) {
           console.error("发送注册验证码失败:", error);
-          alert(error.message || '发送验证码失败，请稍后重试');
+          
+          // 检查是否是"验证码已发送"类型的错误
+          if (error.message && error.message.includes('验证码已发送')) {
+            // 对于这种情况，提示用户检查邮箱，但不阻止倒计时
+            alert('验证码已发送到您的邮箱，请查收！如未收到，请稍后重试');
+            return; // 不抛出异常，让调用方开始倒计时
+          }
+          
+          // 其他类型的错误才抛出异常
+          throw error;
         }
       },
 
@@ -527,7 +536,18 @@ export class LoginDialogUtils {
 
         } catch (error: any) {
           console.error("发送验证码失败:", error);
-          alert(error.message || '发送验证码失败，请稍后重试');
+          
+          // 检查是否是"验证码已发送"类型的错误
+          if (error.message && error.message.includes('验证码已发送')) {
+            // 判断是邮箱还是手机号
+            const isEmail = formData.phone.includes('@');
+            const target = isEmail ? '邮箱' : '手机';
+            alert(`验证码已发送到您的${target}，请查收！如未收到，请稍后重试`);
+            return; // 不抛出异常，让调用方开始倒计时
+          }
+          
+          // 其他类型的错误才抛出异常
+          throw error;
         }
       },
 
@@ -836,7 +856,16 @@ export class LoginDialogUtils {
 
         } catch (error: any) {
           console.error("发送邮箱验证码失败:", error);
-          alert(error.message || '发送验证码失败，请稍后重试');
+          
+          // 检查是否是"验证码已发送"类型的错误
+          if (error.message && error.message.includes('验证码已发送')) {
+            // 对于这种情况，提示用户检查邮箱，但不阻止倒计时
+            alert('验证码已发送到您的邮箱，请查收！如未收到，请稍后重试');
+            return; // 不抛出异常，让调用方开始倒计时
+          }
+          
+          // 其他类型的错误才抛出异常
+          throw error;
         }
       },
 
@@ -867,7 +896,16 @@ export class LoginDialogUtils {
 
         } catch (error: any) {
           console.error("发送手机验证码失败:", error);
-          alert(error.message || '发送验证码失败，请稍后重试');
+          
+          // 检查是否是"验证码已发送"类型的错误
+          if (error.message && error.message.includes('验证码已发送')) {
+            // 对于这种情况，提示用户检查手机，但不阻止倒计时
+            alert('验证码已发送到您的手机，请查收！如未收到，请稍后重试');
+            return; // 不抛出异常，让调用方开始倒计时
+          }
+          
+          // 其他类型的错误才抛出异常
+          throw error;
         }
       },
     };

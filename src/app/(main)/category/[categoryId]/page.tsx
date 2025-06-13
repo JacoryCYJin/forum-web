@@ -6,6 +6,8 @@
 import { notFound } from 'next/navigation';
 import { getCategoryByIdApi } from '@/lib/api/categoryApi';
 import { CategoryPageProps } from '@/types/categoryType';
+import PostList from '@/components/features/post/PostList';
+import LanguageText from '@/components/common/LanguageText/LanguageText';
 
 /**
  * 分类页面组件
@@ -39,73 +41,76 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
   }
 
   return (
-    <div className="min-h-screen dark:bg-dark-secondary">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
-            分类: {category.categoryName}
-          </h1>
-          <p className="text-neutral-600 dark:text-neutral-400">
-            浏览该分类下的所有文章
-          </p>
-        </div>
-
-        {/* 文章列表区域 */}
-        <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm border border-neutral-200 dark:border-zinc-800 p-6">
-          <div className="text-center py-12">
-            <div className="text-neutral-400 dark:text-neutral-500 mb-4">
-              <svg 
-                className="w-16 h-16 mx-auto mb-4" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={1.5} 
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">
-              暂无文章
-            </h3>
-            <p className="text-neutral-500 dark:text-neutral-400 mb-6">
-              该分类下还没有文章，来发布第一篇吧！
+    <div className="space-y-6">
+      {/* 分类信息卡片 */}
+      <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
+              <LanguageText 
+                texts={{
+                  'zh-CN': `分类: ${category.categoryName}`,
+                  'zh-TW': `分類: ${category.categoryName}`,
+                  'en': `Category: ${category.categoryName}`
+                }}
+              />
+            </h1>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              <LanguageText 
+                texts={{
+                  'zh-CN': '浏览该分类下的所有文章',
+                  'zh-TW': '瀏覽該分類下的所有文章',
+                  'en': 'Browse all posts in this category'
+                }}
+              />
             </p>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-              发布文章
-            </button>
+          </div>
+          
+          {/* 分类徽章 */}
+          <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
+            {category.categoryName}
           </div>
         </div>
-
-        {/* 侧边信息栏 */}
-        <div className="mt-8 bg-white dark:bg-dark-primary rounded-lg shadow-sm border border-neutral-200 dark:border-zinc-800 p-6">
-          <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">
-            分类信息
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-neutral-500 dark:text-neutral-400">分类名称:</span>
-              <span className="text-neutral-900 dark:text-white">{category.categoryName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-500 dark:text-neutral-400">分类ID:</span>
-              <span className="text-neutral-900 dark:text-white font-mono text-xs">{categoryId}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-500 dark:text-neutral-400">文章数量:</span>
-              <span className="text-neutral-900 dark:text-white">0</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-500 dark:text-neutral-400">关注人数:</span>
-              <span className="text-neutral-900 dark:text-white">0</span>
+        
+        {/* 分类详细信息 */}
+        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-zinc-700">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="text-center">
+              <span className="block text-neutral-500 dark:text-neutral-400">
+                <LanguageText 
+                  texts={{
+                    'zh-CN': '分类ID',
+                    'zh-TW': '分類ID',
+                    'en': 'Category ID'
+                  }}
+                />
+              </span>
+              <span className="block text-neutral-900 dark:text-white font-mono text-xs mt-1">
+                {categoryId}
+              </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 帖子列表标题 */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-neutral-800 dark:text-white">
+          <LanguageText 
+            texts={{
+              'zh-CN': '相关帖子',
+              'zh-TW': '相關貼文',
+              'en': 'Related Posts'
+            }}
+          />
+        </h2>
+      </div>
+
+      {/* 帖子列表 */}
+      <PostList 
+        categoryId={categoryId}
+        pageSize={10}
+      />
     </div>
   );
 }
