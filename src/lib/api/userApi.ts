@@ -177,36 +177,17 @@ export async function resetPasswordApi(params: ResetPasswordRequest): Promise<st
 
     const url = '/user/reset-password';
     // const url = 'http://localhost:8080/user/reset-password';
-    console.log('请求URL:', url);
-    console.log('请求方法: POST');
-    console.log('请求Content-Type: application/json;charset=utf-8');
 
     // const response: ApiResponse<string> = await post('/user/reset-password', { phoneOrEmail: params.phoneOrEmail, code: params.code, newPassword: params.newPassword });
     const response: ApiResponse<string> = await post(url, requestData);
-    console.log('重置密码响应:', response);
-    console.log('响应状态码:', response.code);
-    console.log('响应消息:', response.message);
     
     if (response.code === 0) {
-      console.log('✅ 重置密码成功');
       return response.data;
     } else {
-      console.log('❌ 后端返回错误:', response.message);
-      console.log('❌ 后端错误代码:', response.code);
       throw new Error(response.message || '重置密码失败');
     }
   } catch (error: any) {
-    console.error('❌ resetPasswordApi - 请求过程中发生错误:', error);
-    console.error('❌ 错误对象详情:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      url: error.response?.config?.url,
-      method: error.response?.config?.method,
-      headers: error.response?.config?.headers,
-      data: error.response?.config?.data
-    });
+    console.error('重置密码失败:', error);
     throw new Error(error.message || '重置密码失败，请稍后重试');
   }
 }
@@ -293,8 +274,6 @@ export async function refreshTokenApi(params: RefreshTokenRequest): Promise<Logi
  */
 export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarAndUsernameAndProfileRequest): Promise<User> {
   try {
-    console.log('更新用户资料参数:', params);
-
     // 从userStore中获取当前用户ID
     const { user } = useUserStore.getState();
     if (!user || !user.id) {
@@ -309,11 +288,8 @@ export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarA
       profile: params.profile
     };
 
-    console.log('发送给后端的数据:', requestData);
-
     const response: ApiResponse<LoginVO> = await post('/user/update-avatar-username-profile', requestData);
     // const response: ApiResponse<LoginVO> = await post('http://localhost:8080/user/update-avatar-username-profile', requestData);
-    console.log('更新用户资料响应:', response);
 
     if (response.code === 0) {
       return response.data;
@@ -349,13 +325,6 @@ export async function updateAvatarAndUsernameAndProfileApi(params: UpdateAvatarA
  */
 export async function changePasswordApi(params: ChangePasswordRequest): Promise<string> {
   try {
-    console.log('修改密码参数:', { 
-      ...params, 
-      currentPassword: '***', 
-      newPassword: '***', 
-      newPasswordConfirm: '***' 
-    });
-
     // 从userStore中获取当前用户ID
     const { user } = useUserStore.getState();
     if (!user || !user.id) {
@@ -370,16 +339,8 @@ export async function changePasswordApi(params: ChangePasswordRequest): Promise<
       newPasswordConfirm: params.newPasswordConfirm
     };
 
-    console.log('发送给后端的数据:', { 
-      ...requestData, 
-      currentPassword: '***', 
-      newPassword: '***', 
-      newPasswordConfirm: '***' 
-    });
-
     const response: ApiResponse<string> = await post('/user/change-password', requestData);
     // const response: ApiResponse<string> = await post('http://localhost:8080/user/change-password', requestData);
-    console.log('修改密码响应:', response);
 
     if (response.code === 0) {
       return response.data;
@@ -472,7 +433,7 @@ export async function changeEmailApi(params: ChangeEmailRequest): Promise<string
       verificationCode: params.verificationCode
     };
 
-    console.log('发送给后端的数据:', requestData);
+
 
     // 发送JSON格式数据，与后端@RequestBody注解匹配
     const response: ApiResponse<string> = await post('/user/change-email', requestData);

@@ -3,14 +3,18 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getPostByIdApi } from '@/lib/api/postsApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
-import type { Tag } from '@/types/postType';
+import type { Tag, PostDetailQueryParams } from '@/types/postType';
+import type { User } from '@/types/userType';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer/MarkdownRenderer';
+import PostDetailClient from '@/components/features/post/PostDetailClient';
+
 
 /**
  * 帖子详情页面参数类型
  */
 interface PostPageParams {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 /**
@@ -26,6 +30,22 @@ async function getUserDisplayName(userId: string): Promise<string> {
   } catch (error) {
     console.error(`获取用户信息失败 (userId: ${userId}):`, error);
     return `用户${userId}`;
+  }
+}
+
+/**
+ * 获取用户信息
+ * 
+ * @param userId - 用户ID
+ * @returns 用户信息或null
+ */
+async function getUserInfo(userId: string): Promise<User | null> {
+  try {
+    const userInfo = await getUserInfoApi({ userId });
+    return userInfo;
+  } catch (error) {
+    console.error(`获取用户信息失败 (userId: ${userId}):`, error);
+    return null;
   }
 }
 
@@ -90,22 +110,36 @@ function renderTags(tags: Tag[]) {
 /**
  * 帖子详情页面组件
  * 
- * 显示单个帖子的详细信息，支持Markdown内容渲染
+ * 显示单个帖子的详细信息，支持Markdown内容渲染和评论分页
  * 
  * @param {PostPageParams} params - 页面参数
  * @returns {Promise<JSX.Element>} 页面组件
  */
-export default async function PostPage({ params }: PostPageParams) {
+export default async function PostPage({ params, searchParams }: PostPageParams) {
   try {
     const { id } = await params;
-    const post = await getPostByIdApi(id);
+    const searchParamsResolved = await searchParams;
+    
+    // 解析评论分页参数
+    const commentPageNum = parseInt(searchParamsResolved.comment_page_num as string) || 1;
+    const commentPageSize = parseInt(searchParamsResolved.comment_page_size as string) || 10;
+    
+    const queryParams: PostDetailQueryParams = {
+      comment_page_num: commentPageNum,
+      comment_page_size: commentPageSize
+    };
+    
+    const post = await getPostByIdApi(id, queryParams);
 
     if (!post) {
       notFound();
     }
 
-    // 获取用户显示名称
-    const userDisplayName = await getUserDisplayName(post.userId);
+    // 获取用户显示名称和用户信息
+    const [userDisplayName, userInfo] = await Promise.all([
+      getUserDisplayName(post.userId),
+      getUserInfo(post.userId)
+    ]);
 
     return (
       <div className="space-y-6">
@@ -120,10 +154,10 @@ export default async function PostPage({ params }: PostPageParams) {
         </div>
 
         {/* 帖子卡片 */}
-        <article className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
+        <article className="bg-white dark:bg-dark-secondary rounded-lg shadow p-8">
           <div className="flex">
             {/* 投票区 - 暂时使用静态数据 */}
-            <div className="flex flex-col items-center mr-4">
+            {/* <div className="flex flex-col items-center mr-4">
               <button className="text-neutral-400 hover:text-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -135,7 +169,7 @@ export default async function PostPage({ params }: PostPageParams) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-            </div>
+            </div> */}
 
             {/* 内容区 */}
             <div className="flex-1">
@@ -143,7 +177,16 @@ export default async function PostPage({ params }: PostPageParams) {
                 <span className="px-2 py-1 bg-neutral-100 dark:bg-zinc-700 rounded-full text-xs text-neutral-600 dark:text-neutral-300 mr-2">
                   {post.category.categoryName}
                 </span>
-                <span>由 {userDisplayName} 发布</span>
+                <div className="flex items-center space-x-2">
+                  {userInfo?.avatarUrl && (
+                    <img
+                      src={userInfo.avatarUrl}
+                      alt={userDisplayName}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  )}
+                  <span>由 {userDisplayName} 发布</span>
+                </div>
               </div>
 
               <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-4">{post.title}</h1>
@@ -189,7 +232,7 @@ export default async function PostPage({ params }: PostPageParams) {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  0 评论
+                  {post.comments.total_count} 评论
                 </button>
 
                 <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-3 py-2 rounded ml-3">
@@ -210,29 +253,11 @@ export default async function PostPage({ params }: PostPageParams) {
           </div>
         </article>
 
-        {/* 评论区 */}
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-6 text-neutral-800 dark:text-white">评论 (0)</h2>
-
-          {/* 评论输入框 */}
-          <div className="mb-8">
-            <textarea
-              className="w-full border border-neutral-200 dark:border-zinc-700 rounded-md p-4 mb-3 bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-transparent"
-              rows={3}
-              placeholder="添加评论..."
-            />
-            <button className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-full hover:bg-primary-hover transition-colors">
-              发布评论
-            </button>
-          </div>
-
-          {/* 暂无评论提示 */}
-          <div className="text-center py-8">
-            <div className="text-neutral-500 dark:text-neutral-400">
-              暂无评论，快来发表第一条评论吧！
-            </div>
-          </div>
-        </div>
+        {/* 评论区 - 使用新的评论组件 */}
+        <PostDetailClient 
+          postId={id}
+          initialComments={post.comments}
+        />
       </div>
     );
   } catch {

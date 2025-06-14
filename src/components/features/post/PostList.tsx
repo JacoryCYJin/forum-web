@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import Link from 'next/link';
 import { getPostListApi, getPostsByCategoryIdApi } from '@/lib/api/postsApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import type { Post, PageResponse, Tag } from '@/types/postType';
 import type { User } from '@/types/userType';
-import LanguageText from '@/components/common/LanguageText/LanguageText';
-import Pagination from '@/components/common/Pagination/Pagination';
 
 /**
  * 帖子列表组件属性接口
@@ -29,6 +28,8 @@ interface PostListProps {
    */
   categoryId?: string;
 }
+import LanguageText from '@/components/common/LanguageText/LanguageText';
+import Pagination from '@/components/common/Pagination/Pagination';
 
 /**
  * 帖子列表组件
@@ -115,11 +116,11 @@ export default function PostList({
   }, [userCache, fetchingUserIds]);
 
   /**
-   * 获取帖子列表
+   * 获取帖子列表数据
    * 
    * @param page - 页码
    */
-  const fetchPosts = async (page: number = 1) => {
+  const fetchPosts = useCallback(async (page: number = 1) => {
     setIsLoading(true);
     setError(null);
     
@@ -141,9 +142,12 @@ export default function PostList({
       
       const newPosts = response.list || [];
       
-      setPosts(newPosts);
-      setPageInfo(response);
-      setCurrentPage(page);
+      // 使用flushSync强制同步更新状态
+      flushSync(() => {
+        setPosts(newPosts);
+        setPageInfo(response);
+        setCurrentPage(page);
+      });
 
       // 异步获取所有用户信息
       const userIds = [...new Set(newPosts.map(post => post.userId))];
@@ -156,7 +160,7 @@ export default function PostList({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [categoryId, pageSize, searchKeyword, fetchUserInfo]);
 
   /**
    * 组件初始化时获取数据
@@ -164,16 +168,21 @@ export default function PostList({
   useEffect(() => {
     setCurrentPage(1); // 重置页码
     fetchPosts(1);
-  }, [searchKeyword, pageSize, categoryId]);
+  }, [searchKeyword, pageSize, categoryId, fetchPosts]);
 
   /**
    * 处理分页变化
    * 
    * @param page - 新的页码
    */
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     fetchPosts(page);
-  };
+    // 页码变化时滚动到页面顶部
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [fetchPosts]);
 
   /**
    * 获取用户显示名称
@@ -285,11 +294,12 @@ export default function PostList({
   return (
     <div className="space-y-4">
       {/* 帖子列表 */}
-      {posts.map((post) => (
-        <article 
-          key={post.postId} 
-          className="bg-white dark:bg-dark-secondary rounded-md shadow hover:shadow-md transition-shadow p-4"
-        >
+              {posts.map((post) => {
+          return (
+          <article 
+            key={post.postId} 
+            className="bg-white dark:bg-dark-secondary rounded-md shadow hover:shadow-md transition-shadow p-4"
+          >
           <div className="flex-1 px-2">
             <div className="flex items-center text-xs text-neutral-400 mb-1">
               <span className="px-2 py-1 bg-neutral-100 dark:bg-zinc-700 rounded-full text-xs text-neutral-600 dark:text-neutral-300 mr-2">
@@ -365,15 +375,16 @@ export default function PostList({
             </div>
           </div>
         </article>
-      ))}
+        );
+      })}
       
       {/* 分页组件 */}
-      {pageInfo && pageInfo.total > 0 && (
+      {pageInfo && pageInfo.total_count > 0 && (
         <div className="mt-8">
           <Pagination
             currentPage={currentPage}
-            totalPages={pageInfo.pages}
-            total={pageInfo.total}
+            totalPages={pageInfo.page_count}
+            total={pageInfo.total_count}
             pageSize={pageSize}
             onPageChange={handlePageChange}
             showWhenSinglePage={true}

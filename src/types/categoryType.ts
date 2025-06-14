@@ -27,13 +27,13 @@ export interface CategoryListResponse {
  */
 export interface CategoryPageProps {
   /**
-   * 路由参数
+   * 路由参数 - Next.js 13+ App Router中params是Promise
    */
-  params: {
+  params: Promise<{
     /**
      * 分类ID - Next.js动态路由参数
      */
     categoryId: string;
     // 注意：categoryName 不会自动传递，需要通过API获取
-  };
+  }>;
 }

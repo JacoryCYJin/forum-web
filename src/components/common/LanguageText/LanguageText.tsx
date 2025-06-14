@@ -8,21 +8,31 @@
 import { useLanguageStore } from '@/store/languageStore';
 
 /**
- * 多语言文本映射接口
- */
-interface LanguageTextMap {
-  'zh-CN': string;
-  'zh-TW': string;
-  'en': string;
-}
-
-/**
- * 多语言文本组件Props
+ * 多语言文本组件属性接口
  */
 interface LanguageTextProps {
-  /** 多语言文本映射 */
-  texts: LanguageTextMap;
-  /** 额外的CSS类名 */
+  /**
+   * 多语言文本映射
+   */
+  texts: {
+    'zh-CN': string;
+    'zh-TW': string;
+    'en': string;
+  };
+  
+  /**
+   * 默认文本（当找不到对应语言时显示）
+   */
+  defaultText?: string;
+  
+  /**
+   * HTML标签类型
+   */
+  as?: keyof React.JSX.IntrinsicElements;
+  
+  /**
+   * CSS类名
+   */
   className?: string;
 }
 

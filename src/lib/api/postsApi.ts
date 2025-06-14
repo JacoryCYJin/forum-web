@@ -7,7 +7,9 @@
 import { get } from '@/lib/utils/request';
 import type { 
   Post, 
-  PostQueryParams, 
+  PostDetail,
+  PostQueryParams,
+  PostDetailQueryParams,
   PageResponse, 
   ApiResponse 
 } from '@/types/postType';
@@ -34,22 +36,10 @@ import type {
  */
 export async function getPostListApi(params: PostQueryParams = {}): Promise<PageResponse<Post>> {
   try {
-    const response: ApiResponse<any> = await get('/posts/list', params);
+    const response: ApiResponse<PageResponse<Post>> = await get('/posts/list', params);
     
     if (response.code === 0 && response.data) {
-      // 后端返回的是PageVO格式，需要映射到PageResponse格式
-      const pageVO = response.data;
-      const mappedResponse: PageResponse<Post> = {
-        list: pageVO.list || [],
-        total: pageVO.total_count || 0,  // 修改：使用 total_count 字段
-        pageNum: params.page_num || 1,
-        pageSize: params.page_size || 10,
-        pages: pageVO.page_count || 1,   // 修改：使用 page_count 字段
-        isFirstPage: (params.page_num || 1) === 1,
-        isLastPage: (params.page_num || 1) >= (pageVO.page_count || 1)
-      };
-      
-      return mappedResponse;
+      return response.data;
     } else {
       throw new Error(response.message || '获取帖子列表失败');
     }
@@ -62,18 +52,34 @@ export async function getPostListApi(params: PostQueryParams = {}): Promise<Page
 /**
  * 根据ID获取帖子详情API
  * 
- * 获取单个帖子的详细信息
+ * 获取单个帖子的详细信息，包含分页的评论列表
  *
  * @async
  * @param {string} postId - 帖子ID
- * @returns {Promise<Post>} 帖子详情数据
+ * @param {PostDetailQueryParams} params - 查询参数（评论分页）
+ * @returns {Promise<PostDetail>} 帖子详情数据
  * @throws {Error} 当API请求失败时抛出错误
  * @example
+ * // 获取帖子详情（默认评论分页）
  * const post = await getPostByIdApi('post-123');
+ * 
+ * // 获取帖子详情（指定评论分页）
+ * const post = await getPostByIdApi('post-123', { 
+ *   comment_page_num: 2, 
+ *   comment_page_size: 20 
+ * });
  */
-export async function getPostByIdApi(postId: string): Promise<Post> {
+export async function getPostByIdApi(
+  postId: string, 
+  params: PostDetailQueryParams = {}
+): Promise<PostDetail> {
   try {
-    const response: ApiResponse<Post> = await get(`/posts/${postId}`);
+    const queryParams = {
+      comment_page_num: params.comment_page_num || 1,
+      comment_page_size: params.comment_page_size || 10
+    };
+    
+    const response: ApiResponse<PostDetail> = await get(`/posts/${postId}`, queryParams);
     
     if (response.code === 0) {
       return response.data;
@@ -107,28 +113,16 @@ export async function getPostsByCategoryIdApi(
   pageSize: number = 10
 ): Promise<PageResponse<Post>> {
   try {
-    const response: ApiResponse<any> = await get(
-      `/posts/category/${categoryId}`,
-      { 
-        pageNum: pageNum, 
-        pageSize: pageSize 
-      }
-    ); 
+    const url = `/posts/category/${categoryId}`;
+    const params = { 
+      pageNum: pageNum,  // 修改为与后端一致的参数名
+      pageSize: pageSize // 修改为与后端一致的参数名
+    };
+    
+    const response: ApiResponse<PageResponse<Post>> = await get(url, params);
 
     if (response.code === 0 && response.data) {
-      // 后端返回的是PageVO格式，需要映射到PageResponse格式
-      const pageVO = response.data;
-      const mappedResponse: PageResponse<Post> = {
-        list: pageVO.list || [],
-        total: pageVO.total_count || 0,  // 修改：使用 total_count 字段
-        pageNum: pageNum,
-        pageSize: pageSize,
-        pages: pageVO.page_count || 1,   // 修改：使用 page_count 字段
-        isFirstPage: pageNum === 1,
-        isLastPage: pageNum >= (pageVO.page_count || 1)
-      };
-      
-      return mappedResponse;
+      return response.data;
     } else {
       throw new Error(response.message || '获取分类帖子列表失败');
     }

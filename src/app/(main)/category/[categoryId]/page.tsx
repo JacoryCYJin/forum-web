@@ -19,7 +19,7 @@ import LanguageText from '@/components/common/LanguageText/LanguageText';
  * @returns {Promise<React.ReactElement>} 分类页面React元素
  */
 async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactElement> {
-  const { categoryId } = params;
+  const { categoryId } = await params;
 
   // 如果分类ID无效，显示404页面
   if (!categoryId) {
@@ -108,6 +108,7 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
 
       {/* 帖子列表 */}
       <PostList 
+        key={categoryId} // 添加key确保组件在不同分类间正确重新渲染
         categoryId={categoryId}
         pageSize={10}
       />

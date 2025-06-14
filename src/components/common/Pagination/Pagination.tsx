@@ -92,6 +92,8 @@ export interface PaginationProps {
 export default function Pagination({
   currentPage,
   totalPages,
+  total, // eslint-disable-line @typescript-eslint/no-unused-vars
+  pageSize, // eslint-disable-line @typescript-eslint/no-unused-vars
   onPageChange,
   showPagesCount = 5,
   compact = false,
