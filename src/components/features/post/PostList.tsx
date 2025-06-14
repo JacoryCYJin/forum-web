@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
 import { getPostListApi, getPostsByCategoryIdApi } from '@/lib/api/postsApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
+import { usePaginationStore } from '@/store/paginationStore';
 import type { Post, PageResponse, Tag } from '@/types/postType';
 import type { User } from '@/types/userType';
 
@@ -72,15 +73,22 @@ export default function PostList({
    */
   const [error, setError] = useState<string | null>(null);
   
-  /**
-   * 当前页码
-   */
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  
   // 用户信息缓存：userId -> User
   const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
   // 正在请求中的用户ID集合，避免重复请求
   const [fetchingUserIds, setFetchingUserIds] = useState<Set<string>>(new Set());
+
+  // 使用ref来跟踪上一次的props，避免不必要的重置
+  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize });
+
+  // 分页状态管理
+  const { getPage, setPage, resetPage } = usePaginationStore();
+  
+  // 生成页面唯一标识
+  const pageKey = categoryId ? `category-${categoryId}` : searchKeyword ? `search-${searchKeyword}` : 'home';
+  
+  // 从store获取当前页码
+  const currentPage = getPage(pageKey);
 
   /**
    * 获取用户信息并缓存
@@ -146,7 +154,6 @@ export default function PostList({
       flushSync(() => {
         setPosts(newPosts);
         setPageInfo(response);
-        setCurrentPage(page);
       });
 
       // 异步获取所有用户信息
@@ -163,12 +170,31 @@ export default function PostList({
   }, [categoryId, pageSize, searchKeyword, fetchUserInfo]);
 
   /**
-   * 组件初始化时获取数据
+   * 组件初始化和关键props变化时获取数据
    */
   useEffect(() => {
-    setCurrentPage(1); // 重置页码
-    fetchPosts(1);
-  }, [searchKeyword, pageSize, categoryId, fetchPosts]);
+    const prevProps = prevPropsRef.current;
+    const currentProps = { categoryId, searchKeyword, pageSize };
+    
+    // 检查是否是真正需要重置页码的变化
+    const shouldResetPage = (
+      prevProps.categoryId !== currentProps.categoryId ||
+      prevProps.searchKeyword !== currentProps.searchKeyword ||
+      prevProps.pageSize !== currentProps.pageSize
+    );
+    
+    if (shouldResetPage) {
+      // 只有在关键参数变化时才重置页码
+      resetPage(pageKey);
+      fetchPosts(1);
+    } else {
+      // 如果没有关键变化，使用当前页码获取数据
+      fetchPosts(currentPage);
+    }
+    
+    // 更新ref
+    prevPropsRef.current = currentProps;
+  }, [searchKeyword, pageSize, categoryId, fetchPosts, currentPage, pageKey, resetPage]);
 
   /**
    * 处理分页变化
@@ -176,13 +202,31 @@ export default function PostList({
    * @param page - 新的页码
    */
   const handlePageChange = useCallback((page: number) => {
-    fetchPosts(page);
-    // 页码变化时滚动到页面顶部
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
+    // 更新store中的页码
+    setPage(pageKey, page);
+    
+    // 立即获取数据，然后在数据更新后滚动
+    fetchPosts(page).then(() => {
+      // 使用 requestAnimationFrame 确保 DOM 更新完成后再滚动
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // 使用多种方法确保滚动成功
+          window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+          });
+          
+          // 备用方案：如果smooth滚动有问题，800ms后强制滚动到顶部
+          setTimeout(() => {
+            if (window.scrollY > 10) {
+              window.scrollTo(0, 0);
+            }
+          }, 800);
+        });
+      });
     });
-  }, [fetchPosts]);
+  }, [fetchPosts, pageKey, setPage]);
 
   /**
    * 获取用户显示名称

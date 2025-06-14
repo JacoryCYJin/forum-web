@@ -6,8 +6,9 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getPostByIdApi } from '@/lib/api/postsApi';
+
 import CommentSection from './CommentSection';
 import type { PageResponse, Comment } from '@/types/postType';
 
@@ -42,18 +43,6 @@ export default function PostDetailClient({ postId, initialComments }: PostDetail
   const [loading, setLoading] = useState(false);
 
   /**
-   * 页码变化时滚动到页面顶部
-   */
-  useEffect(() => {
-    if (currentPage > 1) {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  }, [currentPage]);
-
-  /**
    * 获取指定页码的评论数据
    * 
    * @param page - 目标页码
@@ -70,6 +59,27 @@ export default function PostDetailClient({ postId, initialComments }: PostDetail
       
       setComments(postDetail.comments);
       setCurrentPage(page);
+      
+      // 数据加载完成后滚动到页面顶部
+      // 使用 requestAnimationFrame 确保 DOM 更新完成后再滚动
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // 使用多种方法确保滚动成功
+          window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+          });
+          
+          // 备用方案：如果smooth滚动有问题，800ms后强制滚动到顶部
+          setTimeout(() => {
+            if (window.scrollY > 10) {
+              window.scrollTo(0, 0);
+            }
+          }, 800);
+        });
+      });
+      
     } catch (error) {
       console.error('获取评论数据失败:', error);
     } finally {
