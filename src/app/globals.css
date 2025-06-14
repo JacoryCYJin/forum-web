@@ -108,12 +108,12 @@ a {
 
 /* 介绍页面专用样式 - 完全独立的配色系统 */
 .intro-page {
-  /* 介绍页面专用CSS变量 - 橙色+深蓝色配色方案 */
+  /* 介绍页面专用CSS变量 - 橙色+暖色调配色方案 */
   --intro-primary: #FF4500;        /* 主题橙色 */
-  --intro-secondary: #1E3A8A;      /* 深蓝色，替代深灰色 */
+  --intro-secondary: #D84315;      /* 深橙色，更协调的辅助色 */
   --intro-gradient-from: #FF4500;
-  --intro-gradient-to: #1E3A8A;
-  --intro-gradient-via: #FF6B35;
+  --intro-gradient-to: #D84315;
+  --intro-gradient-via: #FF5722;
   
   /* 背景色 */
   --intro-bg: #FFFFFF;
@@ -125,11 +125,11 @@ a {
   --intro-text-secondary: #666666;
   --intro-text-muted: #999999;
   
-  /* 特色卡片背景 */
+  /* 特色卡片背景 - 使用更协调的暖色调 */
   --intro-feature-orange-light: #FFF8F0;
-  --intro-feature-blue-light: #EFF6FF;    /* 蓝色替代灰色 */
+  --intro-feature-secondary-light: #FFF3E0;    /* 暖橙色替代蓝色 */
   --intro-feature-warm-light: #FFFBF0;
-  --intro-feature-cool-light: #F0F8FF;    /* 更蓝的冷色调 */
+  --intro-feature-cool-light: #FFF5F0;         /* 浅橙色替代蓝色 */
 }
 
 /* 深色模式下的介绍页面变量 */
@@ -143,9 +143,9 @@ a {
   --intro-text-muted: #666666;
   
   --intro-feature-orange-light: #2A1A0D;
-  --intro-feature-blue-light: #0D1B2A;    /* 深色模式下的蓝色背景 */
+  --intro-feature-secondary-light: #2A1A0F;    /* 深色模式下的暖橙色背景 */
   --intro-feature-warm-light: #2A251A;
-  --intro-feature-cool-light: #0D1A26;    /* 深色模式下的冷蓝色 */
+  --intro-feature-cool-light: #2A1F1A;         /* 深色模式下的浅橙色 */
 }
 
 /* 介绍页面专用组件样式 */
@@ -193,8 +193,8 @@ a {
   background: linear-gradient(135deg, var(--intro-feature-orange-light) 0%, #FFE0B2 100%);
 }
 
-.intro-page .intro-feature-card-blue {
-  background: linear-gradient(135deg, var(--intro-feature-blue-light) 0%, #DBEAFE 100%);
+.intro-page .intro-feature-card-secondary {
+  background: linear-gradient(135deg, var(--intro-feature-secondary-light) 0%, #FFCCBC 100%);
 }
 
 .intro-page .intro-feature-card-warm {
@@ -202,7 +202,12 @@ a {
 }
 
 .intro-page .intro-feature-card-cool {
-  background: linear-gradient(135deg, var(--intro-feature-cool-light) 0%, #E0F2FE 100%);
+  background: linear-gradient(135deg, var(--intro-feature-cool-light) 0%, #FFE8E0 100%);
+}
+
+/* 保持向后兼容性 */
+.intro-page .intro-feature-card-blue {
+  background: linear-gradient(135deg, var(--intro-feature-secondary-light) 0%, #FFCCBC 100%);
 }
 
 /* 毛玻璃效果 */

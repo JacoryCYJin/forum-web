@@ -52,19 +52,13 @@ export default function IntroducePage(): React.JSX.Element {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 href="/"
-                className="intro-button-primary py-4 px-8 flex items-center shadow-lg"
+                className="intro-button-primary py-5 px-8 flex items-center shadow-lg"
               >
                 <svg className="h-5 w-5 mr-2 intro-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 立即体验
               </Link>
-              <button className="bg-white text-gray-800 border-2 border-gray-300 hover:border-primary hover:text-primary py-4 px-8 flex items-center rounded-lg font-semibold transition-all duration-300 shadow-lg">
-                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                了解更多
-              </button>
             </div>
           </div>
 
@@ -152,8 +146,8 @@ export default function IntroducePage(): React.JSX.Element {
               </div>
 
               {/* 云端文件管理 */}
-              <div className="intro-feature-card-blue rounded-3xl p-8 intro-card-hover">
-                <div className="w-16 h-16 bg-gradient-to-br from-secondary to-blue-700 rounded-2xl flex items-center justify-center mb-6">
+              <div className="intro-feature-card-secondary rounded-3xl p-8 intro-card-hover">
+                <div className="w-16 h-16 bg-gradient-to-br from-secondary to-orange-700 rounded-2xl flex items-center justify-center mb-6">
                   <span className="text-2xl text-white">☁️</span>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">云端文件管理</h3>
@@ -252,7 +246,7 @@ export default function IntroducePage(): React.JSX.Element {
               {/* 后端技术 */}
               <div className="intro-card-hover border-0 shadow-lg bg-white dark:bg-gray-800 rounded-lg">
                 <div className="p-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-secondary to-blue-700 rounded-2xl flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-secondary to-orange-700 rounded-2xl flex items-center justify-center mb-6">
                     <span className="text-2xl text-white">🗄️</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">后端技术栈</h3>
@@ -329,7 +323,7 @@ export default function IntroducePage(): React.JSX.Element {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="text-center intro-card-hover">
+              <div className="text-center intro-card-hover p-8 rounded-3xl">
                 <div className="w-20 h-20 bg-gradient-to-br from-primary to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-3xl text-white">📱</span>
                 </div>
@@ -339,8 +333,8 @@ export default function IntroducePage(): React.JSX.Element {
                 </p>
               </div>
 
-              <div className="text-center intro-card-hover">
-                <div className="w-20 h-20 bg-gradient-to-br from-secondary to-blue-700 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="text-center intro-card-hover p-8 rounded-3xl">
+                <div className="w-20 h-20 bg-gradient-to-br from-secondary to-orange-700 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-3xl text-white">⚡</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">极速加载</h3>
@@ -349,7 +343,7 @@ export default function IntroducePage(): React.JSX.Element {
                 </p>
               </div>
 
-              <div className="text-center intro-card-hover">
+              <div className="text-center intro-card-hover p-8 rounded-3xl">
                 <div className="w-20 h-20 bg-gradient-to-br from-primary to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-3xl text-white">🌍</span>
                 </div>
@@ -359,8 +353,8 @@ export default function IntroducePage(): React.JSX.Element {
                 </p>
               </div>
 
-              <div className="text-center intro-card-hover">
-                <div className="w-20 h-20 bg-gradient-to-br from-secondary to-blue-800 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="text-center intro-card-hover p-8 rounded-3xl">
+                <div className="w-20 h-20 bg-gradient-to-br from-secondary to-orange-800 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-3xl text-white">🛡️</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">隐私保护</h3>
@@ -494,7 +488,7 @@ export default function IntroducePage(): React.JSX.Element {
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <button className="intro-button-primary px-10 py-4 text-lg font-semibold rounded-full">
-                立即注册
+                立即体验
               </button>
               <button className="intro-button-secondary px-10 py-4 text-lg font-semibold rounded-full">
                 查看演示
