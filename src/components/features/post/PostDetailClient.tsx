@@ -98,6 +98,14 @@ export default function PostDetailClient({ postId, initialComments }: PostDetail
     }
   };
 
+  /**
+   * 处理评论添加成功后的刷新
+   * 刷新当前页的评论数据
+   */
+  const handleCommentAdded = () => {
+    fetchComments(currentPage);
+  };
+
   // 创建带有正确当前页码的评论数据
   const commentsWithCorrectPage = {
     ...comments,
@@ -106,8 +114,10 @@ export default function PostDetailClient({ postId, initialComments }: PostDetail
 
   return (
     <CommentSection 
+      postId={postId}
       comments={commentsWithCorrectPage}
       onPageChange={handleCommentPageChange}
+      onCommentAdded={handleCommentAdded}
       loading={loading}
     />
   );

@@ -6,11 +6,13 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
-import { getUserInfoApi } from '@/lib/api/userApi';
-import Pagination from '@/components/common/Pagination/Pagination';
-import type { User } from '@/types/userType';
-import type { Comment, PageResponse } from '@/types/postType';
+import { useState, useEffect } from "react";
+import { getUserInfoApi } from "@/lib/api/userApi";
+import { addCommentApi } from "@/lib/api/commentApi";
+import Pagination from "@/components/common/Pagination/Pagination";
+import type { User } from "@/types/userType";
+import type { Comment, PageResponse } from "@/types/postType";
+import type { AddCommentRequest } from "@/types/commentTypes";
 
 /**
  * 评论项组件属性接口
@@ -27,15 +29,25 @@ interface CommentItemProps {
  */
 interface CommentSectionProps {
   /**
+   * 帖子ID
+   */
+  postId: string;
+
+  /**
    * 评论分页数据
    */
   comments: PageResponse<Comment>;
-  
+
   /**
    * 页码变化回调函数
    */
   onPageChange: (page: number) => void;
-  
+
+  /**
+   * 评论发布成功回调函数
+   */
+  onCommentAdded?: () => void;
+
   /**
    * 是否显示加载状态
    */
@@ -44,7 +56,7 @@ interface CommentSectionProps {
 
 /**
  * 评论项组件
- * 
+ *
  * 显示单条评论信息，包含用户头像、昵称和评论内容
  *
  * @component
@@ -70,7 +82,7 @@ function CommentItem({ comment }: CommentItemProps) {
         setUser({
           userId: comment.userId,
           username: `用户${comment.userId.slice(-6)}`,
-          avatarUrl: '/images/avatars/default-avatar.png'
+          avatarUrl: "/images/avatars/cjp.png",
         } as User);
       } finally {
         setLoading(false);
@@ -97,8 +109,8 @@ function CommentItem({ comment }: CommentItemProps) {
       {/* 用户头像 */}
       <div className="flex-shrink-0">
         <img
-          src={user?.avatarUrl || '/images/avatars/default-avatar.png'}
-          alt={user?.username || '用户头像'}
+          src={user?.avatarUrl || "/images/avatars/cjp.png"}
+          alt={user?.username || "用户头像"}
           className="w-10 h-10 rounded-full object-cover"
         />
       </div>
@@ -136,31 +148,38 @@ function CommentItem({ comment }: CommentItemProps) {
 
 /**
  * 评论区组件
- * 
+ *
  * 显示帖子的评论列表，支持分页功能
  *
  * @component
  * @example
- * <CommentSection 
- *   comments={commentsData} 
+ * <CommentSection
+ *   comments={commentsData}
  *   onPageChange={(page) => handlePageChange(page)}
  *   loading={false}
  * />
  */
-export default function CommentSection({ 
-  comments, 
-  onPageChange, 
-  loading = false 
+export default function CommentSection({
+  postId,
+  comments,
+  onPageChange,
+  onCommentAdded,
+  loading = false,
 }: CommentSectionProps) {
   /**
    * 控制评论输入框是否展开
    */
   const [isCommentExpanded, setIsCommentExpanded] = useState(false);
-  
+
   /**
    * 评论内容状态
    */
-  const [commentContent, setCommentContent] = useState('');
+  const [commentContent, setCommentContent] = useState("");
+
+  /**
+   * 评论发布加载状态
+   */
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
    * 处理评论输入框点击展开
@@ -174,18 +193,61 @@ export default function CommentSection({
    */
   const handleCancelComment = () => {
     setIsCommentExpanded(false);
-    setCommentContent('');
+    setCommentContent("");
   };
 
   /**
    * 处理发布评论
    */
-  const handlePublishComment = () => {
-    if (commentContent.trim()) {
-      // TODO: 实现发布评论的API调用
-      console.log('发布评论:', commentContent);
-      setCommentContent('');
+  const handlePublishComment = async () => {
+    if (!commentContent.trim() || isSubmitting) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // 检查用户登录状态
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken) {
+        alert("请先登录后再发表评论");
+        return;
+      }
+
+      const commentData: AddCommentRequest = {
+        postId,
+        content: commentContent.trim(),
+      };
+
+
+      await addCommentApi(commentData);
+
+      // 发布成功后重置状态
+      setCommentContent("");
       setIsCommentExpanded(false);
+
+      // 调用回调函数刷新评论列表
+      if (onCommentAdded) {
+        onCommentAdded();
+      }
+
+      console.log("评论发布成功");
+    } catch (error: any) {
+      console.error("发布评论失败:", error);
+
+      // 显示用户友好的错误信息
+      if (error.message.includes("登录已过期")) {
+        alert("登录已过期，请重新登录后再试");
+      } else if (error.message.includes("网络")) {
+        alert("网络连接失败，请检查网络后重试");
+      } else if (error.message.includes("服务器繁忙")) {
+        alert("服务器繁忙，请稍后重试");
+      } else {
+        alert(error.message || "发布评论失败，请稍后重试");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -255,10 +317,10 @@ export default function CommentSection({
                 </button>
                 <button
                   onClick={handlePublishComment}
-                  disabled={!commentContent.trim()}
+                  disabled={!commentContent.trim() || isSubmitting}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-full hover:bg-primary-hover transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed"
                 >
-                  发布评论
+                  {isSubmitting ? "发布中..." : "发布评论"}
                 </button>
               </div>
             </div>
@@ -297,4 +359,4 @@ export default function CommentSection({
       )}
     </div>
   );
-} 
+}

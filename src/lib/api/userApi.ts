@@ -38,9 +38,12 @@ function setAuthCookie(token: string, expiresIn: number): void {
   expireDate.setTime(expireDate.getTime() + (expiresIn * 1000));
   
   // 设置Cookie（与后端常量COOKIE_AUTH_FIELD保持一致）
+  // 注意：不设置domain，让Cookie在当前域名下生效
   document.cookie = `Authorization=${token}; expires=${expireDate.toUTCString()}; path=/; SameSite=Lax`;
   
   console.log('已设置认证Cookie，过期时间:', expireDate);
+  console.log('当前域名:', window.location.hostname);
+  console.log('Cookie设置:', `Authorization=${token}; expires=${expireDate.toUTCString()}; path=/; SameSite=Lax`);
 }
 
 /**
@@ -51,6 +54,7 @@ function clearAuthCookie(): void {
     return; // 服务端渲染时跳过
   }
   
+  // 清除Cookie时也不设置domain
   document.cookie = 'Authorization=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
   console.log('已清除认证Cookie');
 }

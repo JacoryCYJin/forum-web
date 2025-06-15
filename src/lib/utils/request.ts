@@ -10,31 +10,22 @@ interface ResponseData<T = any> {
 
 // 创建 axios 实例
 const request: AxiosInstance = axios.create({
-  baseURL: 'http://127.0.0.1:8080', // 设置后端服务地址 - 使用127.0.0.1替代localhost
-  // baseURL: '', // 设置后端服务地址
+  baseURL: 'http://localhost:8080', // 修改为localhost，与前端域名保持一致
   timeout: 15000, // 请求超时时间
+  withCredentials: true, // 重要：启用Cookie传递，支持跨域Cookie
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
   }
 });
 
-// 请求拦截器 - 自动添加JWT token和处理不同类型的请求数据
+// 请求拦截器 - 处理不同类型的请求数据（移除JWT token头设置，使用Cookie认证）
 request.interceptors.request.use(
   async (config) => {
     // 检查并确保令牌有效（每次API调用时刷新令牌状态）
     const isTokenValid = await TokenManager.ensureValidToken();
     
-    if (isTokenValid) {
-      // 从localStorage获取JWT token
-      const accessToken = localStorage.getItem('accessToken');
-      const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-      
-      // 如果存在token，添加到请求头
-      if (accessToken) {
-        config.headers.Authorization = `${tokenType} ${accessToken}`;
-      }
-    } else {
-      // 如果令牌无效且无法刷新，可以选择拦截请求或让其继续
+    if (!isTokenValid) {
+      // 如果令牌无效且无法刷新，记录警告但让请求继续
       console.warn('⚠️ 令牌无效且无法刷新，请求将继续但可能失败');
     }
     

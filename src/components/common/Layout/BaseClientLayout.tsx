@@ -8,7 +8,6 @@
 import { ThemeProvider } from 'next-themes';
 import LanguageProvider from './LanguageProvider';
 import UserStateInitializer from '@/components/common/UserStateInitializer';
-import { TokenStatusDebug } from '@/components/common/TokenStatusDebug';
 
 /**
  * 主题包装组件Props
@@ -32,7 +31,6 @@ export default function BaseClientLayout({ children }: ThemeWrapperProps) {
       <LanguageProvider />
       <UserStateInitializer />
       {children}
-      <TokenStatusDebug />
     </ThemeProvider>
   );
 } 
