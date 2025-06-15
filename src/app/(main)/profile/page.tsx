@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { UserActivity, UserActivityType, PostType } from '@/types/userType';
+import PostList from '@/components/features/post/PostList';
 
 /**
  * 标签页类型
@@ -513,17 +514,11 @@ export default function ProfilePage() {
 
             {/* 我的收藏 */}
             {activeTab === 'favorites' && (
-              <div className="text-center py-12">
-                <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">
-                  暂无收藏内容
-                </h3>
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  您还没有收藏过任何内容
-                </p>
-              </div>
+              <PostList 
+                showFavourites={true}
+                pageSize={10}
+                userId={user?.id}
+              />
             )}
           </div>
         </div>

@@ -61,7 +61,7 @@ textarea:focus {
 /* 按钮的focus样式 */
 button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3) !important;
+  box-shadow: none !important;
 }
 
 /* 特殊处理：下拉选择器在不同浏览器中的一致性 */
@@ -87,7 +87,7 @@ select:focus {
   }
   
   button:focus {
-    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.4) !important;
+    box-shadow: none !important;
   }
 }
 

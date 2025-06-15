@@ -4,10 +4,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
 import { getPostListApi, getPostsByCategoryIdApi } from '@/lib/api/postsApi';
+import { getUserFavouritesApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { usePaginationStore } from '@/store/paginationStore';
 import type { Post, PageResponse, Tag } from '@/types/postType';
 import type { User } from '@/types/userType';
+import LanguageText from '@/components/common/LanguageText/LanguageText';
+import Pagination from '@/components/common/Pagination/Pagination';
 
 /**
  * 帖子列表组件属性接口
@@ -28,14 +31,22 @@ interface PostListProps {
    * 分类ID，如果提供则只显示该分类下的帖子
    */
   categoryId?: string;
+  
+  /**
+   * 是否显示收藏列表
+   */
+  showFavourites?: boolean;
+  
+  /**
+   * 用户ID，当显示收藏列表时使用，为空时使用当前登录用户
+   */
+  userId?: string;
 }
-import LanguageText from '@/components/common/LanguageText/LanguageText';
-import Pagination from '@/components/common/Pagination/Pagination';
 
 /**
  * 帖子列表组件
  * 
- * 显示帖子列表，支持分页、搜索和分类过滤功能
+ * 显示帖子列表，支持分页、搜索、分类过滤和收藏列表功能
  *
  * @component
  * @example
@@ -47,11 +58,16 @@ import Pagination from '@/components/common/Pagination/Pagination';
  * 
  * // 带搜索功能的帖子列表
  * <PostList searchKeyword="Next.js" pageSize={10} />
+ * 
+ * // 显示用户收藏列表
+ * <PostList showFavourites={true} userId="user-123" pageSize={10} />
  */
 export default function PostList({ 
   pageSize = 10, 
   searchKeyword,
-  categoryId
+  categoryId,
+  showFavourites = false,
+  userId = ''
 }: PostListProps) {
   /**
    * 帖子列表数据
@@ -79,13 +95,19 @@ export default function PostList({
   const [fetchingUserIds, setFetchingUserIds] = useState<Set<string>>(new Set());
 
   // 使用ref来跟踪上一次的props，避免不必要的重置
-  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize });
+  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, userId });
 
   // 分页状态管理
   const { getPage, setPage, resetPage } = usePaginationStore();
   
   // 生成页面唯一标识
-  const pageKey = categoryId ? `category-${categoryId}` : searchKeyword ? `search-${searchKeyword}` : 'home';
+  const pageKey = showFavourites 
+    ? `favourites-${userId || 'current'}` 
+    : categoryId 
+      ? `category-${categoryId}` 
+      : searchKeyword 
+        ? `search-${searchKeyword}` 
+        : 'home';
   
   // 从store获取当前页码
   const currentPage = getPage(pageKey);
@@ -135,7 +157,14 @@ export default function PostList({
     try {
       let response: PageResponse<Post>;
       
-      if (categoryId) {
+      if (showFavourites) {
+        // 获取收藏列表
+        response = await getUserFavouritesApi({
+          pageNum: page,
+          pageSize,
+          userId
+        });
+      } else if (categoryId) {
         // 获取分类下的帖子
         response = await getPostsByCategoryIdApi(categoryId, page, pageSize);
       } else {
@@ -167,20 +196,22 @@ export default function PostList({
     } finally {
       setIsLoading(false);
     }
-  }, [categoryId, pageSize, searchKeyword, fetchUserInfo]);
+  }, [categoryId, pageSize, searchKeyword, showFavourites, userId, fetchUserInfo]);
 
   /**
    * 组件初始化和关键props变化时获取数据
    */
   useEffect(() => {
     const prevProps = prevPropsRef.current;
-    const currentProps = { categoryId, searchKeyword, pageSize };
+    const currentProps = { categoryId, searchKeyword, pageSize, showFavourites, userId };
     
     // 检查是否是真正需要重置页码的变化
     const shouldResetPage = (
       prevProps.categoryId !== currentProps.categoryId ||
       prevProps.searchKeyword !== currentProps.searchKeyword ||
-      prevProps.pageSize !== currentProps.pageSize
+      prevProps.pageSize !== currentProps.pageSize ||
+      prevProps.showFavourites !== currentProps.showFavourites ||
+      prevProps.userId !== currentProps.userId
     );
     
     if (shouldResetPage) {
@@ -194,7 +225,7 @@ export default function PostList({
     
     // 更新ref
     prevPropsRef.current = currentProps;
-  }, [searchKeyword, pageSize, categoryId, fetchPosts, currentPage, pageKey, resetPage]);
+  }, [searchKeyword, pageSize, categoryId, showFavourites, userId, fetchPosts, currentPage, pageKey, resetPage]);
 
   /**
    * 处理分页变化
@@ -320,6 +351,34 @@ export default function PostList({
 
   // 空状态
   if (posts.length === 0) {
+    if (showFavourites) {
+      return (
+        <div className="text-center py-12">
+          <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">
+            <LanguageText 
+              texts={{
+                'zh-CN': '暂无收藏内容',
+                'zh-TW': '暫無收藏內容',
+                'en': 'No favorites yet'
+              }}
+            />
+          </h3>
+          <p className="text-neutral-500 dark:text-neutral-400">
+            <LanguageText 
+              texts={{
+                'zh-CN': '您还没有收藏过任何内容',
+                'zh-TW': '您還沒有收藏過任何內容',
+                'en': 'You haven\'t favorited any content yet'
+              }}
+            />
+          </p>
+        </div>
+      );
+    }
+    
     return (
       <div className="text-center py-12">
         <div className="text-neutral-500 dark:text-neutral-400">
@@ -404,18 +463,33 @@ export default function PostList({
                 />
               </button>
               
-              <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                <LanguageText 
-                  texts={{
-                    'zh-CN': '收藏',
-                    'zh-TW': '收藏',
-                    'en': 'Save'
-                  }}
-                />
-              </button>
+              {showFavourites ? (
+                <span className="flex items-center px-2 py-1 rounded ml-2 text-yellow-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <LanguageText 
+                    texts={{
+                      'zh-CN': '已收藏',
+                      'zh-TW': '已收藏',
+                      'en': 'Favorited'
+                    }}
+                  />
+                </span>
+              ) : (
+                <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <LanguageText 
+                    texts={{
+                      'zh-CN': '收藏',
+                      'zh-TW': '收藏',
+                      'en': 'Save'
+                    }}
+                  />
+                </button>
+              )}
             </div>
           </div>
         </article>
