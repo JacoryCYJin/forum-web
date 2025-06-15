@@ -157,3 +157,29 @@ export async function checkFavouriteApi(favouriteForm: FavouriteForm): Promise<b
     throw error;
   }
 }
+
+/**
+ * 切换收藏状态
+ * 
+ * 如果已收藏则取消收藏，如果未收藏则添加收藏
+ *
+ * @async
+ * @param {FavouriteForm} favouriteForm - 收藏表单数据
+ * @returns {Promise<boolean>} 操作后的收藏状态（true表示已收藏，false表示已取消收藏）
+ * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 切换收藏状态
+ * const newFavouriteStatus = await toggleFavouriteApi({ postId: 'post123' });
+ * console.log(newFavouriteStatus ? '已收藏' : '已取消收藏');
+ */
+export async function toggleFavouriteApi(favouriteForm: FavouriteForm): Promise<boolean> {
+  try {
+    console.log('🔄 切换收藏状态:', favouriteForm);
+    const response = await post('/favourites/toggle', favouriteForm);
+    console.log('✅ 切换收藏响应:', response);
+    return response.data;
+  } catch (error) {
+    console.error('❌ 切换收藏状态失败:', error);
+    throw error;
+  }
+}

@@ -7,6 +7,7 @@ import type { Tag, PostDetailQueryParams } from '@/types/postType';
 import type { User } from '@/types/userType';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer/MarkdownRenderer';
 import PostDetailClient from '@/components/features/post/PostDetailClient';
+import FavouriteButton from '@/components/features/post/FavouriteButton';
 
 
 /**
@@ -242,12 +243,11 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                   分享
                 </button>
 
-                <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-3 py-2 rounded ml-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                  收藏
-                </button>
+                <FavouriteButton 
+                  postId={id} 
+                  variant="default"
+                  className="ml-3"
+                />
               </div>
             </div>
           </div>

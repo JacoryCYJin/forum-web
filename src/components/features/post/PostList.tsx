@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
 import { getPostListApi, getPostsByCategoryIdApi } from '@/lib/api/postsApi';
-import { getUserFavouritesApi } from '@/lib/api/favouriteApi';
+import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { usePaginationStore } from '@/store/paginationStore';
 import type { Post, PageResponse, Tag } from '@/types/postType';
@@ -93,6 +93,11 @@ export default function PostList({
   const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
   // 正在请求中的用户ID集合，避免重复请求
   const [fetchingUserIds, setFetchingUserIds] = useState<Set<string>>(new Set());
+  
+  // 收藏状态缓存：postId -> boolean
+  const [favouriteCache, setFavouriteCache] = useState<Map<string, boolean>>(new Map());
+  // 正在切换收藏状态的帖子ID集合
+  const [togglingFavouriteIds, setTogglingFavouriteIds] = useState<Set<string>>(new Set());
 
   // 使用ref来跟踪上一次的props，避免不必要的重置
   const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, userId });
@@ -146,6 +151,66 @@ export default function PostList({
   }, [userCache, fetchingUserIds]);
 
   /**
+   * 获取帖子收藏状态
+   * 
+   * @param postId - 帖子ID
+   */
+  const fetchFavouriteStatus = useCallback(async (postId: string) => {
+    // 如果已经缓存，直接返回
+    if (favouriteCache.has(postId)) {
+      return;
+    }
+
+    try {
+      const isFavourited = await checkFavouriteApi({ postId });
+      setFavouriteCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(postId, isFavourited);
+        return newCache;
+      });
+    } catch (error) {
+      console.error(`获取收藏状态失败 (postId: ${postId}):`, error);
+    }
+  }, [favouriteCache]);
+
+  /**
+   * 切换收藏状态
+   * 
+   * @param postId - 帖子ID
+   */
+  const handleToggleFavourite = useCallback(async (postId: string) => {
+    // 如果正在切换中，直接返回
+    if (togglingFavouriteIds.has(postId)) {
+      return;
+    }
+
+    // 标记为正在切换中
+    setTogglingFavouriteIds(prev => new Set(prev).add(postId));
+
+    try {
+      const newFavouriteStatus = await toggleFavouriteApi({ postId });
+      
+      // 更新缓存
+      setFavouriteCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(postId, newFavouriteStatus);
+        return newCache;
+      });
+      
+      console.log(`${newFavouriteStatus ? '已收藏' : '已取消收藏'} 帖子: ${postId}`);
+    } catch (error) {
+      console.error(`切换收藏状态失败 (postId: ${postId}):`, error);
+    } finally {
+      // 移除切换中标记
+      setTogglingFavouriteIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+    }
+  }, [togglingFavouriteIds]);
+
+  /**
    * 获取帖子列表数据
    * 
    * @param page - 页码
@@ -185,11 +250,18 @@ export default function PostList({
         setPageInfo(response);
       });
 
-      // 异步获取所有用户信息
+      // 异步获取所有用户信息和收藏状态
       const userIds = [...new Set(newPosts.map(post => post.userId))];
       userIds.forEach(userId => {
         fetchUserInfo(userId);
       });
+      
+      // 如果不是收藏列表页面，获取收藏状态
+      if (!showFavourites) {
+        newPosts.forEach(post => {
+          fetchFavouriteStatus(post.postId);
+        });
+      }
     } catch (err: any) {
       setError(err.message || '获取帖子列表失败');
       console.error('获取帖子列表错误:', err);
@@ -477,15 +549,31 @@ export default function PostList({
                   />
                 </span>
               ) : (
-                <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
+                <button 
+                  onClick={() => handleToggleFavourite(post.postId)}
+                  disabled={togglingFavouriteIds.has(post.postId)}
+                  className={`flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2 transition-colors ${
+                    favouriteCache.get(post.postId) ? 'text-yellow-500' : 'text-neutral-400'
+                  } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {togglingFavouriteIds.has(post.postId) ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current mr-1"></div>
+                  ) : (
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5 mr-1" 
+                      fill={favouriteCache.get(post.postId) ? "currentColor" : "none"} 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                  )}
                   <LanguageText 
                     texts={{
-                      'zh-CN': '收藏',
-                      'zh-TW': '收藏',
-                      'en': 'Save'
+                      'zh-CN': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
+                      'zh-TW': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
+                      'en': favouriteCache.get(post.postId) ? 'Favorited' : 'Save'
                     }}
                   />
                 </button>
