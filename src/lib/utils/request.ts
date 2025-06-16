@@ -18,7 +18,7 @@ const request: AxiosInstance = axios.create({
   }
 });
 
-// 请求拦截器 - 处理不同类型的请求数据（移除JWT token头设置，使用Cookie认证）
+// 请求拦截器 - 处理不同类型的请求数据
 request.interceptors.request.use(
   async (config) => {
     // 检查并确保令牌有效（每次API调用时刷新令牌状态）
@@ -59,21 +59,21 @@ request.interceptors.response.use(
       // 统一的错误处理
       let message = '请求失败，请稍后重试';
   
-      console.error('=== 详细错误信息 ===');
-      console.error('错误对象:', error);
-      console.error('错误类型:', error.name);
-      console.error('错误消息:', error.message);
-      console.error('错误代码:', error.code);
-      console.error('错误config:', error.config);
-      console.error('错误request:', error.request);
-      console.error('错误response:', error.response);
+      // console.error('=== 详细错误信息 ===');
+      // console.error('错误对象:', error);
+      // console.error('错误类型:', error.name);
+      // console.error('错误消息:', error.message);
+      // console.error('错误代码:', error.code);
+      // console.error('错误config:', error.config);
+      // console.error('错误request:', error.request);
+      // console.error('错误response:', error.response);
 
       if (error.response) {
         // 服务器返回了错误状态码（如 4xx、5xx）
         const status = error.response.status;
-        console.error('服务器响应状态:', status);
-        console.error('服务器响应数据:', error.response.data);
-        console.error('服务器响应头:', error.response.headers);
+        // console.error('服务器响应状态:', status);
+        // console.error('服务器响应数据:', error.response.data);
+        // console.error('服务器响应头:', error.response.headers);
         
         if (status === 401) {
           // token过期或无效，清除本地存储的认证信息
@@ -89,20 +89,20 @@ request.interceptors.response.use(
         }
       } else if (error.request) {
         // 请求已发送，但没有收到响应（如网络错误、超时）
-        console.error('网络请求详情:');
-        console.error('  - readyState:', error.request.readyState);
-        console.error('  - status:', error.request.status);
-        console.error('  - statusText:', error.request.statusText);
-        console.error('  - responseURL:', error.request.responseURL);
-        console.error('  - timeout:', error.request.timeout);
+        // console.error('网络请求详情:');
+        // console.error('  - readyState:', error.request.readyState);
+        // console.error('  - status:', error.request.status);
+        // console.error('  - statusText:', error.request.statusText);
+        // console.error('  - responseURL:', error.request.responseURL);
+        // console.error('  - timeout:', error.request.timeout);
         message = '网络错误，请检查网络连接';
       } else {
         // 请求未发出（如请求配置错误）
-        console.error('请求配置错误:', error.message);
+        // console.error('请求配置错误:', error.message);
         message = error.message || '请求配置错误';
       }
   
-      console.error('请求错误：', error); // 仍然打印完整错误，便于调试
+      // console.error('请求错误：', error); // 仍然打印完整错误，便于调试
   
       // 返回一个包含 message 的 Promise.reject
       return Promise.reject({ message });

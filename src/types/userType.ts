@@ -129,6 +129,11 @@ export interface LoginRequest {
  */
 export interface UpdateAvatarAndUsernameAndProfileRequest {
   /**
+   * 用户ID
+   */
+  userId: string;
+  
+  /**
    * 新昵称
    */
   username?: string;
@@ -264,7 +269,7 @@ export interface ApiResponse<T = any> {
  */
 export interface UserInfo {
   /** 用户唯一标识符 */
-  id: string;
+  userId: string;
   /** 用户名 */
   username: string;
   /** 昵称 */
@@ -322,7 +327,7 @@ export interface Post {
   /** 作者ID */
   authorId: string;
   /** 作者信息 */
-  author: Pick<UserInfo, 'id' | 'username' | 'nickname' | 'avatar'>;
+  author: Pick<UserInfo, 'userId' | 'username' | 'nickname' | 'avatar'>;
   /** 创建时间 */
   createdAt: Date;
   /** 更新时间 */
@@ -496,6 +501,11 @@ export interface UserActivity {
  */
 export interface ChangePasswordRequest {
   /**
+   * 用户ID
+   */
+  userId: string;
+  
+  /**
    * 当前密码
    */
   currentPassword: string;
@@ -531,9 +541,14 @@ export interface ChangePhoneRequest {
  */
 export interface ChangeEmailRequest {
   /**
+   * 用户ID
+   */
+  userId: string;
+  
+  /**
    * 新邮箱
    */
-  newEmail: string;
+  email: string;
   
   /**
    * 验证码
@@ -555,6 +570,26 @@ export interface SendPhoneCodeRequest {
  * 更新隐私设置请求参数
  */
 export interface UpdatePrivacySettingsRequest {
+  /**
+   * 用户ID
+   */
+  userId: string;
+  
+  /**
+   * 是否显示邮箱
+   */
+  showEmail?: boolean;
+  
+  /**
+   * 是否显示手机号
+   */
+  showPhone?: boolean;
+  
+  /**
+   * 是否允许好友请求
+   */
+  allowFriendRequests?: boolean;
+  
   /**
    * 是否展示收藏
    */
@@ -580,6 +615,21 @@ export interface UpdatePrivacySettingsRequest {
  * 隐私设置响应数据
  */
 export interface PrivacySettings {
+  /**
+   * 是否显示邮箱
+   */
+  showEmail: boolean;
+  
+  /**
+   * 是否显示手机号
+   */
+  showPhone: boolean;
+  
+  /**
+   * 是否允许好友请求
+   */
+  allowFriendRequests: boolean;
+  
   /**
    * 是否展示收藏
    */

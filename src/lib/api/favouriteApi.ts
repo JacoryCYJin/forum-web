@@ -62,15 +62,15 @@ export interface GetUserFavouritesParams {
 export async function getUserFavouritesApi(params: GetUserFavouritesParams = {}): Promise<PageResponse<Post>> {
   const { pageNum = 1, pageSize = 10, userId } = params;
   
-  // 构建请求参数，如果userId为空则不传递该参数
+  // 构建请求参数，转换为下划线格式
   const requestParams: any = {
-    pageNum,
-    pageSize
+    page_num: pageNum,
+    page_size: pageSize
   };
   
   // 只有当userId有值时才添加到请求参数中
   if (userId && userId.trim() !== '') {
-    requestParams.userId = userId;
+    requestParams.user_id = userId;
   }
   
   try {
@@ -106,7 +106,12 @@ export async function getUserFavouritesApi(params: GetUserFavouritesParams = {})
  */
 export async function addFavouriteApi(favouriteForm: FavouriteForm): Promise<void> {
   try {
-    await post('/favourites/add', favouriteForm);
+    // 转换为下划线格式
+    const requestData = {
+      post_id: favouriteForm.postId
+    };
+    
+    await post('/favourites/add', requestData);
   } catch (error) {
     console.error('添加收藏失败:', error);
     throw error;
@@ -128,7 +133,12 @@ export async function addFavouriteApi(favouriteForm: FavouriteForm): Promise<voi
  */
 export async function deleteFavouriteApi(favouriteForm: FavouriteForm): Promise<void> {
   try {
-    await del('/favourites/delete', { data: favouriteForm });
+    // 转换为下划线格式
+    const requestData = {
+      post_id: favouriteForm.postId
+    };
+    
+    await del('/favourites/delete', { data: requestData });
   } catch (error) {
     console.error('取消收藏失败:', error);
     throw error;
@@ -150,7 +160,12 @@ export async function deleteFavouriteApi(favouriteForm: FavouriteForm): Promise<
  */
 export async function checkFavouriteApi(favouriteForm: FavouriteForm): Promise<boolean> {
   try {
-    const response = await post('/favourites/check', favouriteForm);
+    // 转换为下划线格式
+    const requestData = {
+      post_id: favouriteForm.postId
+    };
+    
+    const response = await post('/favourites/check', requestData);
     return response.data;
   } catch (error) {
     console.error('检查收藏状态失败:', error);
@@ -175,7 +190,13 @@ export async function checkFavouriteApi(favouriteForm: FavouriteForm): Promise<b
 export async function toggleFavouriteApi(favouriteForm: FavouriteForm): Promise<boolean> {
   try {
     console.log('🔄 切换收藏状态:', favouriteForm);
-    const response = await post('/favourites/toggle', favouriteForm);
+    
+    // 转换为下划线格式
+    const requestData = {
+      post_id: favouriteForm.postId
+    };
+    
+    const response = await post('/favourites/toggle', requestData);
     console.log('✅ 切换收藏响应:', response);
     return response.data;
   } catch (error) {

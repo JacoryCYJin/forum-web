@@ -40,10 +40,10 @@ export async function addCommentApi(commentData: AddCommentRequest): Promise<Com
       throw new Error('评论内容不能超过500个字符');
     }
     
-    // 转换为后端期望的CommentForm格式
+    // 转换为后端期望的CommentForm格式（下划线命名）
     const commentForm = {
-      commentId: null, // 后端会自动生成
-      postId: commentData.postId,
+      comment_id: null, // 后端会自动生成
+      post_id: commentData.postId,
       content: commentData.content
     };
     

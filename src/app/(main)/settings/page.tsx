@@ -69,6 +69,9 @@ export default function SettingsPage() {
 
   // 普通设置状态
   const [generalSettings, setGeneralSettings] = useState<PrivacySettings>({
+    showEmail: true,
+    showPhone: true,
+    allowFriendRequests: true,
     showCollections: true,
     showLikes: true,
     showFollowers: true,
@@ -181,11 +184,34 @@ export default function SettingsPage() {
     
     setIsLoading(true);
     try {
-      const updatedUser = await updateAvatarAndUsernameAndProfileApi({
-        username: userSettings.nickname || undefined,
-        avatarUrl: userSettings.avatar || undefined,
-        profile: userSettings.bio || undefined
-      });
+      // 构建更新参数，只包含实际修改的字段
+      const updateParams: any = {
+        userId: user.userId
+      };
+      
+      // 只有当昵称实际发生变化时才传递username
+      if (userSettings.nickname !== originalUserSettings.nickname) {
+        updateParams.username = userSettings.nickname || undefined;
+      }
+      
+      // 只有当头像实际发生变化时才传递avatarUrl
+      if (userSettings.avatar !== originalUserSettings.avatar) {
+        updateParams.avatarUrl = userSettings.avatar || undefined;
+      }
+      
+      // 只有当简介实际发生变化时才传递profile
+      if (userSettings.bio !== originalUserSettings.bio) {
+        updateParams.profile = userSettings.bio || undefined;
+      }
+      
+      // 如果没有任何字段需要更新，直接返回
+      if (Object.keys(updateParams).length === 1) { // 只有userId
+        alert('没有检测到任何更改');
+        setIsLoading(false);
+        return;
+      }
+      
+      const updatedUser = await updateAvatarAndUsernameAndProfileApi(updateParams);
 
       const newUserInfo = {
         ...user,
@@ -223,7 +249,12 @@ export default function SettingsPage() {
   const handleSaveGeneralSettings = async () => {
     setIsLoading(true);
     try {
-      await updatePrivacySettingsApi(generalSettings);
+      if (!user) return;
+      
+      await updatePrivacySettingsApi({
+        userId: user.userId,
+        ...generalSettings
+      });
       alert('普通设置已保存成功！');
     } catch (error: any) {
       console.error('保存普通设置失败:', error);
@@ -261,9 +292,12 @@ export default function SettingsPage() {
       return;
     }
 
+    if (!user) return;
+    
     setIsLoading(true);
     try {
       await changePasswordApi({
+        userId: user.userId,
         currentPassword: securitySettings.currentPassword,
         newPassword: securitySettings.newPassword,
         newPasswordConfirm: securitySettings.newPasswordConfirm
@@ -442,7 +476,8 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       await changeEmailApi({
-        newEmail: securitySettings.newEmail,
+        userId: user.userId,
+        email: securitySettings.newEmail,
         verificationCode: securitySettings.emailVerificationCode
       });
       

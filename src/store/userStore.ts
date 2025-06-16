@@ -145,6 +145,7 @@ export const useUserStore = create<UserState>()(
         try {
           // 调用真实的后端API更新用户资料
           const updatedUserData = await updateAvatarAndUsernameAndProfileApi({
+            userId: user.userId, // 使用userId字段
             username: data.username,
             avatarUrl: data.avatar,
             profile: data.bio // 前端的bio字段映射到后端的profile字段
@@ -255,7 +256,7 @@ export const useUserStore = create<UserState>()(
             
             // 转换为User格式
             const user: User = {
-              id: userInfo.userId,
+              userId: userInfo.userId,
               username: userInfo.username,
               nickname: userInfo.username,
               email: userInfo.email || '',

@@ -122,7 +122,7 @@ export class LoginDialogUtils {
 
           // 转换LoginVO为User格式并保存到userStore
           const userInfo: User = {
-            id: loginResult.userId,
+            userId: loginResult.userId,
             username: loginResult.username,
             nickname: loginResult.username, // 使用username作为nickname
             email: loginResult.email || '',
@@ -226,7 +226,7 @@ export class LoginDialogUtils {
 
           // 转换LoginVO为User格式并保存到userStore
           const userInfo: User = {
-            id: registerResult.userId,
+            userId: registerResult.userId,
             username: registerResult.username,
             nickname: registerResult.username, // 使用username作为nickname
             email: registerResult.email || '',
@@ -322,7 +322,7 @@ export class LoginDialogUtils {
 
           // 转换LoginVO为User格式并保存到userStore
           const userInfo: User = {
-            id: registerResult.userId,
+            userId: registerResult.userId,
             username: registerResult.username,
             nickname: registerResult.username,
             email: registerResult.email || '',
@@ -418,7 +418,7 @@ export class LoginDialogUtils {
 
           // 转换LoginVO为User格式并保存到userStore
           const userInfo: User = {
-            id: registerResult.userId,
+            userId: registerResult.userId,
             username: registerResult.username,
             nickname: registerResult.username,
             email: registerResult.email || '',
@@ -711,8 +711,15 @@ export class LoginDialogUtils {
             avatar: formData.avatar 
           });
 
+          // 获取当前用户ID
+          const { user: currentUser } = useUserStore.getState();
+          if (!currentUser?.userId) {
+            throw new Error('用户未登录');
+          }
+
           // 调用更新资料API
           const updatedUser = await updateAvatarAndUsernameAndProfileApi({
+            userId: currentUser.userId,
             username: formData.nickname || undefined,
             avatarUrl: formData.avatar || undefined,
             profile: formData.bio || undefined

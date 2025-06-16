@@ -36,7 +36,15 @@ import type {
  */
 export async function getPostListApi(params: PostQueryParams = {}): Promise<PageResponse<Post>> {
   try {
-    const response: ApiResponse<PageResponse<Post>> = await get('/posts/list', params);
+    // 转换为下划线格式
+    const requestParams = {
+      title: params.title,
+      page_num: params.page_num,
+      page_size: params.page_size,
+      fetch_all: params.fetch_all
+    };
+
+    const response: ApiResponse<PageResponse<Post>> = await get('/posts/list', requestParams);
     
     if (response.code === 0 && response.data) {
       return response.data;
@@ -115,8 +123,8 @@ export async function getPostsByCategoryIdApi(
   try {
     const url = `/posts/category/${categoryId}`;
     const params = { 
-      pageNum: pageNum,  // 修改为与后端一致的参数名
-      pageSize: pageSize // 修改为与后端一致的参数名
+      page_num: pageNum,
+      page_size: pageSize
     };
     
     const response: ApiResponse<PageResponse<Post>> = await get(url, params);

@@ -28,9 +28,9 @@ export async function getCategoryListApi(): Promise<Category[]> {
   try {
     console.log('正在调用分类API...');
     const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
-      page: 1,
-      pageSize: 10,
-      fetchAll: true,
+      page_num: 1,
+      page_size: 10,
+      fetch_all: true,
     });
     
     console.log("✅ 获取分类列表响应:", response);
@@ -148,9 +148,9 @@ export async function getCategoryByNameApi(categoryName: string): Promise<Catego
     
     const response: ApiResponse<CategoryListResponse> = await get("/categories/list", {
       category_name: categoryName,
-      page: 1,
-      pageSize: 10,
-      fetchAll: true,
+      page_num: 1,
+      page_size: 10,
+      fetch_all: true,
     });
     
     console.log("✅ 根据名称获取分类响应:", response);
