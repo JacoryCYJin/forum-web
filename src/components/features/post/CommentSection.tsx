@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { getUserInfoApi } from "@/lib/api/userApi";
 import { addCommentApi } from "@/lib/api/commentApi";
 import Pagination from "@/components/common/Pagination/Pagination";
+import ReportDialog from "@/components/common/ReportDialog/ReportDialog";
 import type { User } from "@/types/userType";
 import type { Comment, PageResponse } from "@/types/postType";
 import type { AddCommentRequest } from "@/types/commentTypes";
@@ -66,6 +67,7 @@ interface CommentSectionProps {
 function CommentItem({ comment }: CommentItemProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   /**
    * 获取评论用户信息
@@ -105,53 +107,91 @@ function CommentItem({ comment }: CommentItemProps) {
   }
 
   return (
-    <div className="flex space-x-3 p-4 hover:bg-neutral-50 dark:hover:bg-zinc-800/50 transition-colors">
-      {/* 用户头像 */}
-      <div className="flex-shrink-0">
-        <img
-          src={user?.avatarUrl || "/images/avatars/cjp.png"}
-          alt={user?.username || "用户头像"}
-          className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
-        />
+    <>
+      <div className="flex space-x-3 p-4 hover:bg-neutral-50 dark:hover:bg-zinc-800/50 transition-colors">
+        {/* 用户头像 */}
+        <div className="flex-shrink-0">
+          <img
+            src={user?.avatarUrl || "/images/avatars/cjp.png"}
+            alt={user?.username || "用户头像"}
+            className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
+          />
+        </div>
+
+        {/* 评论内容 */}
+        <div className="flex-1 min-w-0">
+          {/* 用户名和时间 */}
+          <div className="flex items-center space-x-2 mb-1">
+            <span className="font-medium text-neutral-800 dark:text-white text-sm">
+              {user?.username || `用户${comment.userId.slice(-6)}`}
+            </span>
+            <span className="text-xs text-neutral-400 flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              刚刚
+            </span>
+          </div>
+
+          {/* 评论文本 */}
+          <div className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap leading-relaxed mb-2 text-sm">
+            {comment.content}
+          </div>
+
+          {/* 评论操作按钮 */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-primary transition-colors">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                <span>回复</span>
+              </button>
+              <button className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-red-500 transition-colors">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span>点赞</span>
+              </button>
+            </div>
+
+            {/* 更多操作按钮（包含举报） */}
+            <div className="relative group">
+              <button className="flex items-center justify-center w-6 h-6 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+              
+              {/* 下拉菜单 */}
+              <div className="absolute right-0 top-full mt-1 w-24 bg-white dark:bg-zinc-800 border border-neutral-200 dark:border-zinc-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                <button
+                  onClick={() => setShowReportDialog(true)}
+                  className="w-full px-3 py-2 text-left text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-700 rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span>举报</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* 评论内容 */}
-      <div className="flex-1 min-w-0">
-        {/* 用户名和时间 */}
-        <div className="flex items-center space-x-2 mb-1">
-          <span className="font-medium text-neutral-800 dark:text-white text-sm">
-            {user?.username || `用户${comment.userId.slice(-6)}`}
-          </span>
-          <span className="text-xs text-neutral-400 flex items-center">
-            <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            刚刚
-          </span>
-        </div>
-
-        {/* 评论文本 */}
-        <div className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap leading-relaxed mb-2 text-sm">
-          {comment.content}
-        </div>
-
-        {/* 评论操作按钮 */}
-        <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-primary transition-colors">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-            </svg>
-            <span>回复</span>
-          </button>
-          <button className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-red-500 transition-colors">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span>点赞</span>
-          </button>
-        </div>
-      </div>
-    </div>
+      {/* 举报弹窗 */}
+      <ReportDialog
+        visible={showReportDialog}
+        onClose={() => setShowReportDialog(false)}
+        componentType="COMMENT"
+        componentId={comment.commentId}
+        title={`评论: ${comment.content.slice(0, 50)}${comment.content.length > 50 ? '...' : ''}`}
+        onSuccess={() => {
+          // 评论举报提交成功，可以在这里添加其他处理逻辑
+        }}
+      />
+    </>
   );
 }
 
