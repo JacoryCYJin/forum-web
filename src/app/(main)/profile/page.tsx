@@ -13,7 +13,7 @@ import PostList from '@/components/features/post/PostList';
 /**
  * 标签页类型
  */
-type TabType = 'activities' | 'posts' | 'videos' | 'likes' | 'favorites';
+type TabType = 'activities' | 'posts' | 'videos' | 'favorites';
 
 /**
  * 帖子/视频数据接口
@@ -259,7 +259,6 @@ export default function ProfilePage() {
     { key: 'activities' as TabType, label: '我的动态', count: activities.length },
     { key: 'posts' as TabType, label: '我的帖子', count: userPosts.filter(p => p.type === PostType.TEXT_IMAGE).length },
     { key: 'videos' as TabType, label: '我的视频', count: userPosts.filter(p => p.type === PostType.VIDEO).length },
-    { key: 'likes' as TabType, label: '我的点赞', count: 0 },
     { key: 'favorites' as TabType, label: '我的收藏', count: 0 }
   ];
 
@@ -377,18 +376,10 @@ export default function ProfilePage() {
             {activeTab === 'activities' && (
               <div>
                 {isLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, index) => (
-                      <div key={index} className="animate-pulse">
-                        <div className="flex items-start space-x-3">
-                          <div className="w-10 h-10 bg-neutral-200 dark:bg-zinc-700 rounded-full"></div>
-                          <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-3/4"></div>
-                            <div className="h-3 bg-neutral-200 dark:bg-zinc-700 rounded w-1/2"></div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="text-center py-8">
+                    <div className="text-neutral-500 dark:text-neutral-400">
+                      加载中...
+                    </div>
                   </div>
                 ) : activities.length > 0 ? (
                   <div className="space-y-4">
@@ -428,18 +419,10 @@ export default function ProfilePage() {
             {(activeTab === 'posts' || activeTab === 'videos') && (
               <div>
                 {isLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, index) => (
-                      <div key={index} className="animate-pulse">
-                        <div className="flex items-start space-x-3">
-                          <div className="w-10 h-10 bg-neutral-200 dark:bg-zinc-700 rounded-full"></div>
-                          <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-3/4"></div>
-                            <div className="h-3 bg-neutral-200 dark:bg-zinc-700 rounded w-1/2"></div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="text-center py-8">
+                    <div className="text-neutral-500 dark:text-neutral-400">
+                      加载中...
+                    </div>
                   </div>
                 ) : getFilteredPosts().length > 0 ? (
                   <div className="space-y-4">
@@ -497,27 +480,14 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* 我的点赞 */}
-            {activeTab === 'likes' && (
-              <div className="text-center py-12">
-                <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">
-                  暂无点赞记录
-                </h3>
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  您还没有点赞过任何内容
-                </p>
-              </div>
-            )}
+
 
             {/* 我的收藏 */}
             {activeTab === 'favorites' && (
               <PostList 
                 showFavourites={true}
                 pageSize={10}
-                userId={user?.id}
+                userId={user?.userId}
               />
             )}
           </div>

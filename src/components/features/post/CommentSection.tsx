@@ -105,40 +105,49 @@ function CommentItem({ comment }: CommentItemProps) {
   }
 
   return (
-    <div className="flex space-x-3 p-4 border-b border-neutral-100 dark:border-zinc-700 last:border-b-0">
+    <div className="flex space-x-3 p-4 hover:bg-neutral-50 dark:hover:bg-zinc-800/50 transition-colors">
       {/* 用户头像 */}
       <div className="flex-shrink-0">
         <img
           src={user?.avatarUrl || "/images/avatars/cjp.png"}
           alt={user?.username || "用户头像"}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
         />
       </div>
 
       {/* 评论内容 */}
       <div className="flex-1 min-w-0">
-        {/* 用户名 */}
+        {/* 用户名和时间 */}
         <div className="flex items-center space-x-2 mb-1">
-          <span className="text-sm font-medium text-neutral-800 dark:text-white">
+          <span className="font-medium text-neutral-800 dark:text-white text-sm">
             {user?.username || `用户${comment.userId.slice(-6)}`}
           </span>
-          <span className="text-xs text-neutral-400">
-            {/* 这里可以添加评论时间，如果后端提供的话 */}
+          <span className="text-xs text-neutral-400 flex items-center">
+            <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            刚刚
           </span>
         </div>
 
         {/* 评论文本 */}
-        <div className="text-sm text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap">
+        <div className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap leading-relaxed mb-2 text-sm">
           {comment.content}
         </div>
 
         {/* 评论操作按钮 */}
-        <div className="flex items-center space-x-4 mt-2">
-          <button className="text-xs text-neutral-400 hover:text-primary transition-colors">
-            回复
+        <div className="flex items-center space-x-4">
+          <button className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-primary transition-colors">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            <span>回复</span>
           </button>
-          <button className="text-xs text-neutral-400 hover:text-primary transition-colors">
-            点赞
+          <button className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-red-500 transition-colors">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span>点赞</span>
           </button>
         </div>
       </div>
@@ -278,49 +287,67 @@ export default function CommentSection({
   const totalPages = comments.page_count || 1;
 
   return (
-    <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-6 text-neutral-800 dark:text-white">
-        评论 ({totalComments})
-      </h2>
+    <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-lg border border-neutral-100 dark:border-zinc-700">
+      {/* 评论区头部 */}
+      <div className="px-6 py-4 border-b border-neutral-100 dark:border-zinc-700">
+        <h2 className="text-xl font-bold text-neutral-800 dark:text-white flex items-center">
+          <svg className="w-5 h-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          评论 
+          <span className="ml-2 px-2 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            {totalComments}
+          </span>
+        </h2>
+      </div>
 
       {/* 评论输入区域 */}
-      <div className="mb-8">
+      <div className="px-6 py-4 bg-neutral-50 dark:bg-zinc-800/50">
         {!isCommentExpanded ? (
           /* 收起状态：显示简单的点击区域 */
           <div
             onClick={handleCommentClick}
-            className="w-full border border-neutral-200 dark:border-zinc-700 rounded-md p-4 bg-white dark:bg-zinc-800 text-neutral-400 cursor-text hover:border-primary transition-colors"
+            className="w-full border-2 border-dashed border-neutral-200 dark:border-zinc-600 rounded-lg p-4 bg-white dark:bg-zinc-800 text-neutral-400 cursor-text hover:border-primary hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-all duration-200 text-center"
           >
-            添加评论...
+            <svg className="w-6 h-6 mx-auto mb-1 text-neutral-300 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span>添加评论...</span>
           </div>
         ) : (
           /* 展开状态：显示完整的输入框和操作按钮 */
-          <div className="space-y-3">
+          <div className="bg-white dark:bg-zinc-800 rounded-lg border border-neutral-200 dark:border-zinc-700 p-3">
             <textarea
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
-              className="w-full border border-neutral-200 dark:border-zinc-700 rounded-md p-4 bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-              rows={4}
+              className="w-full border-0 bg-transparent text-neutral-800 dark:text-white placeholder-neutral-400 focus:ring-0 resize-none text-base leading-relaxed"
+              rows={3}
               placeholder="写下你的评论..."
               autoFocus
             />
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-neutral-400">
-                {commentContent.length}/500
+            <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-zinc-700 mt-3">
+              <div className="text-sm text-neutral-400">
+                <span className={commentContent.length > 450 ? 'text-orange-500' : commentContent.length > 500 ? 'text-red-500' : ''}>
+                  {commentContent.length}
+                </span>
+                <span>/500</span>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-3">
                 <button
                   onClick={handleCancelComment}
-                  className="px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors"
+                  className="px-3 py-1 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-zinc-700 rounded transition-colors"
                 >
                   取消
                 </button>
                 <button
                   onClick={handlePublishComment}
-                  disabled={!commentContent.trim() || isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-full hover:bg-primary-hover transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed"
+                  disabled={!commentContent.trim() || isSubmitting || commentContent.length > 500}
+                  className="px-4 py-1 text-sm font-medium text-white bg-primary rounded hover:bg-primary-hover transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
-                  {isSubmitting ? "发布中..." : "发布评论"}
+                  {isSubmitting && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  <span>{isSubmitting ? "发布中..." : "发布评论"}</span>
                 </button>
               </div>
             </div>
@@ -329,23 +356,33 @@ export default function CommentSection({
       </div>
 
       {/* 评论列表 */}
-      {comments.list && comments.list.length > 0 ? (
-        <div className="space-y-0">
-          {comments.list.map((comment) => (
-            <CommentItem key={comment.commentId} comment={comment} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <div className="text-neutral-500 dark:text-neutral-400">
-            暂无评论，快来发表第一条评论吧！
+      <div className="px-6 pb-4">
+        {comments.list && comments.list.length > 0 ? (
+          <div className="space-y-0">
+            {comments.list.map((comment, index) => (
+              <div key={comment.commentId} className={`${index !== 0 ? 'border-t border-neutral-100 dark:border-zinc-700' : ''}`}>
+                <CommentItem comment={comment} />
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-8">
+            <svg className="w-12 h-12 mx-auto mb-3 text-neutral-300 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <h3 className="text-lg font-medium text-neutral-500 dark:text-neutral-400 mb-1">
+              暂无评论
+            </h3>
+            <p className="text-neutral-400 dark:text-neutral-500">
+              快来发表第一条评论吧！
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* 分页组件 */}
       {totalPages > 1 && (
-        <div className="mt-6">
+        <div className="px-6 pb-4 border-t border-neutral-100 dark:border-zinc-700 pt-4">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

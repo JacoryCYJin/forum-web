@@ -7,7 +7,7 @@ import { getPostListApi, getPostsByCategoryIdApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { usePaginationStore } from '@/store/paginationStore';
-import type { Post, PageResponse, Tag } from '@/types/postType';
+import type { Post, PageResponse } from '@/types/postType';
 import type { User } from '@/types/userType';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import Pagination from '@/components/common/Pagination/Pagination';
@@ -98,6 +98,11 @@ export default function PostList({
   const [favouriteCache, setFavouriteCache] = useState<Map<string, boolean>>(new Map());
   // 正在切换收藏状态的帖子ID集合
   const [togglingFavouriteIds, setTogglingFavouriteIds] = useState<Set<string>>(new Set());
+
+  // 点赞状态缓存：postId -> boolean
+  const [likeCache, setLikeCache] = useState<Map<string, boolean>>(new Map());
+  // 正在切换点赞状态的帖子ID集合
+  const [togglingLikeIds, setTogglingLikeIds] = useState<Set<string>>(new Set());
 
   // 使用ref来跟踪上一次的props，避免不必要的重置
   const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, userId });
@@ -209,6 +214,88 @@ export default function PostList({
       });
     }
   }, [togglingFavouriteIds]);
+
+  /**
+   * 切换点赞状态
+   * 
+   * @param postId - 帖子ID
+   */
+  const handleToggleLike = useCallback(async (postId: string) => {
+    // 如果正在切换中，直接返回
+    if (togglingLikeIds.has(postId)) {
+      return;
+    }
+
+    // 标记为正在切换中
+    setTogglingLikeIds(prev => new Set(prev).add(postId));
+
+    try {
+      // 这里暂时模拟点赞功能，后续可以替换为真实API
+      const currentLikeStatus = likeCache.get(postId) || false;
+      const newLikeStatus = !currentLikeStatus;
+      
+      // 模拟API延迟
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // 更新缓存
+      setLikeCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(postId, newLikeStatus);
+        return newCache;
+      });
+      
+      console.log(`${newLikeStatus ? '已点赞' : '已取消点赞'} 帖子: ${postId}`);
+    } catch (error) {
+      console.error(`切换点赞状态失败 (postId: ${postId}):`, error);
+    } finally {
+      // 移除切换中标记
+      setTogglingLikeIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+    }
+  }, [togglingLikeIds, likeCache]);
+
+  /**
+   * 分享帖子 - 复制链接到剪贴板
+   * 
+   * @param postId - 帖子ID
+   * @param title - 帖子标题
+   */
+  const handleShare = useCallback(async (postId: string, title: string) => {
+    try {
+      const url = `${window.location.origin}/post/${postId}`;
+      await navigator.clipboard.writeText(url);
+      
+      // 这里可以添加一个toast提示，暂时用console.log
+      console.log(`已复制链接到剪贴板: ${title}`);
+      
+      // 可以添加一个临时的成功提示
+      const button = document.activeElement as HTMLButtonElement;
+      if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = `
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="text-xs">已复制</span>
+        `;
+        setTimeout(() => {
+          button.innerHTML = originalText;
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('复制链接失败:', error);
+      // 降级方案：选择文本
+      const textArea = document.createElement('textarea');
+      textArea.value = `${window.location.origin}/post/${postId}`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+  }, []);
 
   /**
    * 获取帖子列表数据
@@ -353,49 +440,77 @@ export default function PostList({
   };
 
   /**
-   * 渲染标签列表
+   * 获取用户头像
    * 
-   * @param tags - 标签数组
-   * @returns JSX元素
+   * @param userId - 用户ID
+   * @returns 用户头像URL或默认头像
    */
-  const renderTags = (tags: Tag[]) => {
-    if (!tags || tags.length === 0) {
-      return null;
-    }
+  const getUserAvatar = (userId: string): string => {
+    const user = userCache.get(userId);
+    return user?.avatarUrl || '/images/avatars/default-avatar.png';
+  };
 
-    return (
-      <div className="flex flex-wrap gap-1 mt-2">
-        {tags.slice(0, 3).map((tag) => (
-          <span
-            key={tag.tagId}
-            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-          >
-            #{tag.tagName}
-          </span>
-        ))}
-        {tags.length > 3 && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-            +{tags.length - 3}
-          </span>
-        )}
-      </div>
-    );
+  /**
+   * 格式化发布时间
+   * 
+   * @param postId - 帖子ID，用于生成模拟时间
+   * @returns 格式化后的时间显示
+   */
+  const formatPostTime = (postId: string): string => {
+    // 由于Post接口中没有createdAt字段，这里使用postId生成模拟时间
+    const hash = postId.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    const randomHours = Math.abs(hash) % 72; // 0-72小时前
+    const now = new Date();
+    const mockDate = new Date(now.getTime() - randomHours * 60 * 60 * 1000);
+    
+    const diffInMinutes = Math.floor((now.getTime() - mockDate.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) {
+      return '刚刚';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes}分钟前`;
+    } else if (diffInMinutes < 1440) {
+      const hours = Math.floor(diffInMinutes / 60);
+      return `${hours}小时前`;
+    } else if (diffInMinutes < 10080) {
+      const days = Math.floor(diffInMinutes / 1440);
+      return `${days}天前`;
+    } else {
+      return mockDate.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
   };
 
   // 加载状态
   if (isLoading && posts.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="ml-2 text-neutral-600 dark:text-neutral-300">
-          <LanguageText 
-            texts={{
-              'zh-CN': '加载中...',
-              'zh-TW': '載入中...',
-              'en': 'Loading...'
-            }}
-          />
-        </span>
+      <div className="space-y-4">
+        {/* 简化的加载状态 */}
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
+            <div className="animate-pulse">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-neutral-200 dark:bg-zinc-700 rounded-full"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-20"></div>
+                    <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-16"></div>
+                  </div>
+                  <div className="h-6 bg-neutral-200 dark:bg-zinc-700 rounded w-3/4"></div>
+                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-full"></div>
+                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-2/3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -469,118 +584,205 @@ export default function PostList({
   return (
     <div className="space-y-4">
       {/* 帖子列表 */}
-              {posts.map((post) => {
-          return (
+      {posts.map((post) => {
+        return (
           <article 
             key={post.postId} 
-            className="bg-white dark:bg-dark-secondary rounded-md shadow hover:shadow-md transition-shadow p-4"
+            className="bg-white dark:bg-dark-secondary rounded-lg shadow hover:shadow-md transition-all duration-200 border border-neutral-100 dark:border-zinc-700 hover:border-neutral-200 dark:hover:border-zinc-600"
           >
-          <div className="flex-1 px-2">
-            <div className="flex items-center text-xs text-neutral-400 mb-1">
-              <span className="px-2 py-1 bg-neutral-100 dark:bg-zinc-700 rounded-full text-xs text-neutral-600 dark:text-neutral-300 mr-2">
-                {post.category.categoryName}
-              </span>
-              <span>
-                <LanguageText 
-                  texts={{
-                    'zh-CN': `由 ${getUserDisplayName(post.userId)} 发布`,
-                    'zh-TW': `由 ${getUserDisplayName(post.userId)} 發布`,
-                    'en': `Posted by ${getUserDisplayName(post.userId)}`
-                  }}
+            <div className="p-4">
+              {/* 用户头像和信息 - 放在最上方 */}
+              <div className="flex items-center space-x-3 mb-3">
+                <img
+                  src={getUserAvatar(post.userId)}
+                  alt={getUserDisplayName(post.userId)}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
                 />
-              </span>
-            </div>
-            
-            <Link 
-              href={`/post/${post.postId}`} 
-              className="text-lg font-medium text-neutral-800 dark:text-white hover:text-primary dark:hover:text-primary mb-2 block"
-            >
-              {post.title}
-            </Link>
-            
-            <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3 line-clamp-2">
-              {post.content.length > 100 
-                ? `${post.content.substring(0, 100)}...` 
-                : post.content
-              }
-            </div>
-            
-            {/* 标签显示区域 */}
-            {renderTags(post.tags)}
-            
-            <div className="flex items-center text-sm text-neutral-400 mt-3">
-              <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                0 <LanguageText 
-                  texts={{
-                    'zh-CN': '评论',
-                    'zh-TW': '評論',
-                    'en': 'comments'
-                  }}
-                />
-              </button>
-              
-              <button className="flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                <LanguageText 
-                  texts={{
-                    'zh-CN': '分享',
-                    'zh-TW': '分享',
-                    'en': 'Share'
-                  }}
-                />
-              </button>
-              
-              {showFavourites ? (
-                <span className="flex items-center px-2 py-1 rounded ml-2 text-yellow-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                  <LanguageText 
-                    texts={{
-                      'zh-CN': '已收藏',
-                      'zh-TW': '已收藏',
-                      'en': 'Favorited'
-                    }}
-                  />
-                </span>
-              ) : (
-                <button 
-                  onClick={() => handleToggleFavourite(post.postId)}
-                  disabled={togglingFavouriteIds.has(post.postId)}
-                  className={`flex items-center hover:bg-neutral-100 dark:hover:bg-zinc-700 px-2 py-1 rounded ml-2 transition-colors ${
-                    favouriteCache.get(post.postId) ? 'text-yellow-500' : 'text-neutral-400'
-                  } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {togglingFavouriteIds.has(post.postId) ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current mr-1"></div>
-                  ) : (
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-5 w-5 mr-1" 
-                      fill={favouriteCache.get(post.postId) ? "currentColor" : "none"} 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-neutral-700 dark:text-neutral-300 text-sm">
+                    {getUserDisplayName(post.userId)}
+                  </div>
+                  <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400">
+                    <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
+                    {formatPostTime(post.postId)}
+                  </div>
+                </div>
+              </div>
+              
+              {/* 帖子标题和分类 */}
+              <div className="mb-3">
+                <Link 
+                  href={`/post/${post.postId}`} 
+                  className="block group"
+                >
+                  <div className="flex items-start flex-wrap gap-2">
+                    <h2 className="text-lg font-semibold text-neutral-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                      {post.title}
+                    </h2>
+                    <span className="flex-shrink-0 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium ml-2">
+                      {post.category.categoryName}
+                    </span>
+                  </div>
+                </Link>
+              </div>
+              
+              {/* 帖子内容预览 */}
+              <div className="text-neutral-600 dark:text-neutral-400 mb-3 line-clamp-2 leading-relaxed text-sm">
+                {post.content.length > 120 
+                  ? `${post.content.substring(0, 120)}...` 
+                  : post.content
+                }
+              </div>
+              
+              {/* 标签显示区域 - 只显示前3个，改为灰色 */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {post.tags.slice(0, 3).map((tag) => (
+                    <span
+                      key={tag.tagId}
+                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600 transition-colors cursor-pointer"
+                    >
+                      #{tag.tagName}
+                    </span>
+                  ))}
+                  {post.tags.length > 3 && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
+                      +{post.tags.length - 3}
+                    </span>
                   )}
-                  <LanguageText 
-                    texts={{
-                      'zh-CN': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
-                      'zh-TW': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
-                      'en': favouriteCache.get(post.postId) ? 'Favorited' : 'Save'
-                    }}
-                  />
-                </button>
+                </div>
               )}
+              
+              {/* 帖子统计和操作区域 */}
+              <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-zinc-700">
+                <div className="flex items-center space-x-4 text-sm text-neutral-500 dark:text-neutral-400">
+                  {/* 评论数 */}
+                  <div className="flex items-center space-x-1">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span>0</span>
+                  </div>
+                  
+                  {/* 浏览数 */}
+                  <div className="flex items-center space-x-1">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>{Math.floor(Math.random() * 500) + 50}</span>
+                  </div>
+                </div>
+                
+                {/* 操作按钮 */}
+                <div className="flex items-center space-x-2">
+                  {/* 点赞按钮 */}
+                  <button 
+                    onClick={() => handleToggleLike(post.postId)}
+                    disabled={togglingLikeIds.has(post.postId)}
+                    className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                      likeCache.get(post.postId) 
+                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20' 
+                        : 'text-neutral-500 dark:text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                    } ${togglingLikeIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {togglingLikeIds.has(post.postId) ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    ) : (
+                      <svg 
+                        className="w-4 h-4" 
+                        fill={likeCache.get(post.postId) ? "currentColor" : "none"} 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    )}
+                    <span className="text-xs">
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': likeCache.get(post.postId) ? '已点赞' : '点赞',
+                          'zh-TW': likeCache.get(post.postId) ? '已點讚' : '點讚',
+                          'en': likeCache.get(post.postId) ? 'Liked' : 'Like'
+                        }}
+                      />
+                    </span>
+                  </button>
+                  
+                  {/* 分享按钮 */}
+                  <button 
+                    onClick={() => handleShare(post.postId, post.title)}
+                    className="flex items-center space-x-1 px-2 py-1 text-neutral-500 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:bg-neutral-50 dark:hover:bg-zinc-700 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span className="text-xs">
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': '分享',
+                          'zh-TW': '分享',
+                          'en': 'Share'
+                        }}
+                      />
+                    </span>
+                  </button>
+                  
+                  {/* 收藏按钮 */}
+                  {showFavourites ? (
+                    <span className="flex items-center space-x-1 px-2 py-1 text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 rounded">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                      </svg>
+                      <span className="text-xs">
+                        <LanguageText 
+                          texts={{
+                            'zh-CN': '已收藏',
+                            'zh-TW': '已收藏',
+                            'en': 'Favorited'
+                          }}
+                        />
+                      </span>
+                    </span>
+                  ) : (
+                    <button 
+                      onClick={() => handleToggleFavourite(post.postId)}
+                      disabled={togglingFavouriteIds.has(post.postId)}
+                      className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                        favouriteCache.get(post.postId) 
+                          ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' 
+                          : 'text-neutral-500 dark:text-neutral-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                      } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {togglingFavouriteIds.has(post.postId) ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                      ) : (
+                        <svg 
+                          className="w-4 h-4" 
+                          fill={favouriteCache.get(post.postId) ? "currentColor" : "none"} 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                      )}
+                      <span className="text-xs">
+                        <LanguageText 
+                          texts={{
+                            'zh-CN': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
+                            'zh-TW': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
+                            'en': favouriteCache.get(post.postId) ? 'Favorited' : 'Save'
+                          }}
+                        />
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </article>
+          </article>
         );
       })}
       

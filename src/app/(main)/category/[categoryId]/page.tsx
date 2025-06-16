@@ -43,67 +43,43 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
   return (
     <div className="space-y-6">
       {/* 分类信息卡片 */}
-      <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
-              <LanguageText 
-                texts={{
-                  'zh-CN': `分类: ${category.categoryName}`,
-                  'zh-TW': `分類: ${category.categoryName}`,
-                  'en': `Category: ${category.categoryName}`
-                }}
-              />
-            </h1>
-            <p className="text-neutral-600 dark:text-neutral-400">
-              <LanguageText 
-                texts={{
-                  'zh-CN': '浏览该分类下的所有文章',
-                  'zh-TW': '瀏覽該分類下的所有文章',
-                  'en': 'Browse all posts in this category'
-                }}
-              />
-            </p>
-          </div>
-          
-          {/* 分类徽章 */}
-          <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-            {category.categoryName}
-          </div>
-        </div>
-        
-        {/* 分类详细信息 */}
-        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-zinc-700">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="text-center">
-              <span className="block text-neutral-500 dark:text-neutral-400">
+      <div className="bg-white dark:bg-dark-secondary rounded-lg shadow border border-neutral-200 dark:border-zinc-700">
+        <div className="p-6">
+          <div className="flex items-center space-x-4">
+            {/* 分类图标 */}
+            <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            </div>
+            
+            <div className="">
+              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
+                {category.categoryName}
+              </h1>
+              <p className="text-neutral-600 dark:text-neutral-400">
                 <LanguageText 
                   texts={{
-                    'zh-CN': '分类ID',
-                    'zh-TW': '分類ID',
-                    'en': 'Category ID'
+                    'zh-CN': '浏览该分类下的所有文章',
+                    'zh-TW': '瀏覽該分類下的所有文章',
+                    'en': 'Browse all posts in this category'
                   }}
                 />
-              </span>
-              <span className="block text-neutral-900 dark:text-white font-mono text-xs mt-1">
-                {categoryId}
-              </span>
+              </p>
+            </div>
+            
+            {/* 分类徽章 */}
+            <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
+              <LanguageText 
+                texts={{
+                  'zh-CN': '分类',
+                  'zh-TW': '分類',
+                  'en': 'Category'
+                }}
+              />
             </div>
           </div>
         </div>
-      </div>
-
-      {/* 帖子列表标题 */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-neutral-800 dark:text-white">
-          <LanguageText 
-            texts={{
-              'zh-CN': '相关帖子',
-              'zh-TW': '相關貼文',
-              'en': 'Related Posts'
-            }}
-          />
-        </h2>
       </div>
 
       {/* 帖子列表 */}
