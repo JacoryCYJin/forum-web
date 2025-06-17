@@ -395,12 +395,22 @@ export default function ProfilePage() {
             )}
 
             {/* 我的帖子 */}
-            {activeTab === 'posts' && (
+            {activeTab === 'posts' && user?.userId && (
               <PostList 
                 showUserPosts={true}
+                userId={user.userId}
                 pageSize={10}
                 showDeleteButton={true}
               />
+            )}
+            
+            {/* 如果用户ID不存在，显示提示 */}
+            {activeTab === 'posts' && !user?.userId && (
+              <div className="text-center py-8">
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  无法获取用户信息，请重新登录
+                </p>
+              </div>
             )}
 
             {/* 我的收藏 */}

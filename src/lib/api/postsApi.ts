@@ -17,7 +17,7 @@ import type {
 /**
  * 获取帖子列表API
  * 
- * 从服务器获取分页的帖子列表数据
+ * 从服务器获取分页的帖子列表数据，支持按用户ID过滤
  *
  * @async
  * @param {PostQueryParams} params - 查询参数
@@ -33,12 +33,20 @@ import type {
  *   page_num: 1, 
  *   page_size: 20 
  * });
+ * 
+ * // 获取指定用户的帖子数据
+ * const userPosts = await getPostListApi({ 
+ *   user_id: 'user-123',
+ *   page_num: 1, 
+ *   page_size: 10 
+ * });
  */
 export async function getPostListApi(params: PostQueryParams = {}): Promise<PageResponse<Post>> {
   try {
     // 转换为下划线格式
     const requestParams = {
       title: params.title,
+      user_id: params.user_id,
       page_num: params.page_num,
       page_size: params.page_size,
       fetch_all: params.fetch_all
@@ -219,43 +227,7 @@ export async function getUserPostCountApi(params: {
   return response.data;
 }
 
-/**
- * 获取用户的帖子列表API
- * 
- * 获取当前登录用户发布的帖子列表（只能查询自己的帖子）
- *
- * @async
- * @param {Object} params - 查询参数
- * @param {number} [params.pageNum=1] - 页码，从1开始
- * @param {number} [params.pageSize=10] - 每页大小
- * @returns {Promise<PageResponse<Post>>} 分页帖子列表数据
- * @throws {Error} 当API请求失败时抛出错误
- * @example
- * // 获取当前用户的帖子列表
- * const userPosts = await getUserPostsApi({ pageNum: 1, pageSize: 10 });
- */
-export async function getUserPostsApi(params: {
-  pageNum?: number;
-  pageSize?: number;
-} = {}): Promise<PageResponse<Post>> {
-  try {
-    const queryParams = {
-      page_num: params.pageNum || 1,
-      page_size: params.pageSize || 10
-    };
-    
-    const response: ApiResponse<PageResponse<Post>> = await get('/posts/getPostByUserId', queryParams);
-    
-    if (response.code === 0 && response.data) {
-      return response.data;
-    } else {
-      throw new Error(response.message || '获取用户帖子列表失败');
-    }
-  } catch (error) {
-    console.error('获取用户帖子列表失败:', error);
-    throw error;
-  }
-}
+
 
 /**
  * 删除帖子API

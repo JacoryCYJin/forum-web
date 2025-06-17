@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
-import { getPostListApi, getPostsByCategoryIdApi, deletePostApi, getUserPostsApi } from '@/lib/api/postsApi';
+import { getPostListApi, getPostsByCategoryIdApi, deletePostApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { getFollowedUsersPostsApi } from '@/lib/api/followApi';
@@ -320,6 +320,24 @@ export default function PostList({
         return newCache;
       });
       
+      // 如果在收藏页面且取消了收藏，从列表中移除该帖子
+      if (showFavourites && !newFavouriteStatus) {
+        setPosts(prev => prev.filter(post => post.postId !== postId));
+        
+        // 清除相关缓存
+        setCommentCountCache(prev => {
+          const newCache = new Map(prev);
+          newCache.delete(postId);
+          return newCache;
+        });
+        
+        setLikeCache(prev => {
+          const newCache = new Map(prev);
+          newCache.delete(postId);
+          return newCache;
+        });
+      }
+      
       console.log(`${newFavouriteStatus ? '已收藏' : '已取消收藏'} 帖子: ${postId}`);
     } catch (error) {
       console.error(`切换收藏状态失败 (postId: ${postId}):`, error);
@@ -331,7 +349,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingFavouriteIds]);
+  }, [togglingFavouriteIds, showFavourites]);
 
   /**
    * 切换点赞状态
@@ -527,11 +545,23 @@ export default function PostList({
           pageSize
         });
       } else if (showUserPosts) {
-        // 获取当前用户的帖子
-        response = await getUserPostsApi({
-          pageNum: page,
-          pageSize
-        });
+        // 获取指定用户的帖子
+        if (!userId || userId.trim() === '') {
+          // 如果没有提供userId或userId为空字符串，返回空结果
+          response = {
+            list: [],
+            total_count: 0,
+            page_num: page,
+            page_size: pageSize,
+            page_count: 0
+          };
+        } else {
+          response = await getPostListApi({
+            user_id: userId,
+            page_num: page,
+            page_size: pageSize
+          });
+        }
       } else if (categoryId) {
         // 获取分类下的帖子
         response = await getPostsByCategoryIdApi(categoryId, page, pageSize);
@@ -560,8 +590,20 @@ export default function PostList({
         fetchUserInfo(userId);
       });
       
-      // 如果不是收藏列表页面，获取收藏状态
-      if (!showFavourites) {
+      // 设置收藏状态缓存
+      if (showFavourites) {
+        // 在收藏页面，所有帖子都是已收藏状态
+        flushSync(() => {
+          setFavouriteCache(prev => {
+            const newCache = new Map(prev);
+            newPosts.forEach(post => {
+              newCache.set(post.postId, true);
+            });
+            return newCache;
+          });
+        });
+      } else {
+        // 在其他页面，异步获取收藏状态
         newPosts.forEach(post => {
           fetchFavouriteStatus(post.postId);
         });

@@ -436,6 +436,7 @@ export default function UserProfilePage() {
       {activeTab === 'posts' && (
         <div>
           <PostList 
+            showUserPosts={true}
             userId={userId}
             pageSize={10}
           />
@@ -445,6 +446,7 @@ export default function UserProfilePage() {
       {activeTab === 'about' && (
         <div>
           <PostList 
+            showUserPosts={true}
             userId={userId}
             pageSize={10}
           />
