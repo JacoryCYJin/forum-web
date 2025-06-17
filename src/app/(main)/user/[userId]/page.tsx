@@ -26,12 +26,10 @@ interface UserStats {
   postsCount: number;
 }
 
-
-
 /**
  * 用户主页组件
  * 
- * 显示用户详细信息、发布的帖子和关注功能
+ * 显示用户详细信息、发布的帖子和关注功能，采用现代简约设计
  *
  * @component
  */
@@ -197,22 +195,25 @@ export default function UserProfilePage() {
     }
   }, [userId, currentUser]);
 
-  // 加载状态
+  // 加载状态 - 简洁的骨架屏
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="animate-pulse">
-          {/* 用户信息骨架屏 */}
-          <div className="bg-white dark:bg-zinc-800 rounded-lg p-6 mb-6">
-            <div className="flex items-center space-x-6">
-              <div className="w-24 h-24 bg-neutral-200 dark:bg-zinc-700 rounded-full"></div>
-              <div className="flex-1 space-y-3">
-                <div className="h-6 bg-neutral-200 dark:bg-zinc-700 rounded w-1/4"></div>
-                <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-1/2"></div>
-                <div className="flex space-x-4">
-                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-16"></div>
-                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-16"></div>
-                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-16"></div>
+      <div className="min-h-screen">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="animate-pulse">
+            {/* 用户信息骨架屏 */}
+            <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
+              <div className="flex items-start space-x-6">
+                <div className="w-24 h-24 bg-neutral-200 dark:bg-neutral-700 rounded-full"></div>
+                <div className="flex-1 space-y-4">
+                  <div className="h-6 bg-neutral-200 dark:bg-neutral-700 rounded w-1/3"></div>
+                  <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-2/3"></div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="h-12 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+                    <div className="h-12 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+                    <div className="h-12 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+                    <div className="h-12 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -222,195 +223,236 @@ export default function UserProfilePage() {
     );
   }
 
-  // 错误状态
+  // 错误状态 - 简洁的错误页面
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-12">
-          <div className="text-red-500 mb-4">{error}</div>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover transition-colors"
-          >
-            <LanguageText 
-              texts={{
-                'zh-CN': '重试',
-                'zh-TW': '重試',
-                'en': 'Retry'
-              }}
-            />
-          </button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">出现错误</h2>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-hover transition-colors font-medium"
+            >
+              <LanguageText 
+                texts={{
+                  'zh-CN': '重试',
+                  'zh-TW': '重試',
+                  'en': 'Retry'
+                }}
+              />
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // 用户不存在 - 简洁的404页面
   if (!userInfo) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-neutral-800 dark:text-white mb-2">
-            <LanguageText 
-              texts={{
-                'zh-CN': '用户不存在',
-                'zh-TW': '用戶不存在',
-                'en': 'User not found'
-              }}
-            />
-          </h2>
-          <p className="text-neutral-500 dark:text-neutral-400">
-            <LanguageText 
-              texts={{
-                'zh-CN': '该用户可能已被删除或不存在',
-                'zh-TW': '該用戶可能已被刪除或不存在',
-                'en': 'This user may have been deleted or does not exist'
-              }}
-            />
-          </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">
+              <LanguageText 
+                texts={{
+                  'zh-CN': '用户不存在',
+                  'zh-TW': '用戶不存在',
+                  'en': 'User not found'
+                }}
+              />
+            </h2>
+            <p className="text-neutral-500 dark:text-neutral-400">
+              <LanguageText 
+                texts={{
+                  'zh-CN': '该用户可能已被删除或不存在',
+                  'zh-TW': '該用戶可能已被刪除或不存在',
+                  'en': 'This user may have been deleted or does not exist'
+                }}
+              />
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* 用户信息卡片 */}
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow border border-neutral-200 dark:border-zinc-700 p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            {/* 用户头像 */}
-            <img
-              src={userInfo.avatarUrl || '/images/avatars/default-avatar.svg'}
-              alt={userInfo.username}
-              className="w-24 h-24 rounded-full object-cover border-4 border-neutral-200 dark:border-zinc-600"
-            />
-            
-            {/* 用户信息 */}
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-2">
-                {userInfo.username}
-              </h1>
+    <div className="min-h-screen">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* 用户信息卡片 - 简洁设计 */}
+        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-6">
+              {/* 用户头像 */}
+              <img
+                src={userInfo.avatarUrl || '/images/avatars/default-avatar.svg'}
+                alt={userInfo.username}
+                className="w-24 h-24 rounded-full border-4 border-primary"
+              />
               
-              {/* 用户简介 */}
-              {userInfo.profile && (
-                <p className="text-neutral-600 dark:text-neutral-400 mb-3 max-w-md">
-                  {userInfo.profile}
-                </p>
-              )}
-              
-              {/* 统计信息 */}
-              <div className="flex items-center space-x-6 text-sm">
-                <div className="text-center">
-                  <div className="font-semibold text-neutral-800 dark:text-white">
-                    {userStats.postsCount}
+              {/* 用户信息 */}
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-2">
+                  {userInfo.username}
+                </h1>
+                
+                {/* 用户简介 */}
+                {userInfo.profile && (
+                  <p className="text-neutral-600 dark:text-neutral-400 mb-4 max-w-2xl">
+                    {userInfo.profile}
+                  </p>
+                )}
+                
+                {/* 统计信息 - 简洁布局 */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary">
+                      {userStats.postsCount}
+                    </div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': '帖子',
+                          'zh-TW': '貼文',
+                          'en': 'Posts'
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="text-neutral-500 dark:text-neutral-400">
-                    <LanguageText 
-                      texts={{
-                        'zh-CN': '帖子',
-                        'zh-TW': '貼文',
-                        'en': 'Posts'
-                      }}
-                    />
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary">
+                      {userStats.followingCount}
+                    </div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': '关注',
+                          'zh-TW': '關注',
+                          'en': 'Following'
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-neutral-800 dark:text-white">
-                    {userStats.followingCount}
-                  </div>
-                  <div className="text-neutral-500 dark:text-neutral-400">
-                    <LanguageText 
-                      texts={{
-                        'zh-CN': '关注',
-                        'zh-TW': '關注',
-                        'en': 'Following'
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-neutral-800 dark:text-white">
-                    {userStats.followersCount}
-                  </div>
-                  <div className="text-neutral-500 dark:text-neutral-400">
-                    <LanguageText 
-                      texts={{
-                        'zh-CN': '粉丝',
-                        'zh-TW': '粉絲',
-                        'en': 'Followers'
-                      }}
-                    />
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary">
+                      {userStats.followersCount}
+                    </div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': '粉丝',
+                          'zh-TW': '粉絲',
+                          'en': 'Followers'
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            
+            {/* 关注按钮 - 简洁设计 */}
+            {currentUser && currentUser.userId !== userId && (
+              <button
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                  isFollowing
+                    ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                    : 'bg-primary text-white hover:bg-primary-hover'
+                } ${followLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {followLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    <span>
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': '处理中...',
+                          'zh-TW': '處理中...',
+                          'en': 'Processing...'
+                        }}
+                      />
+                    </span>
+                  </div>
+                ) : isFollowing ? (
+                  <LanguageText 
+                    texts={{
+                      'zh-CN': '已关注',
+                      'zh-TW': '已關注',
+                      'en': 'Following'
+                    }}
+                  />
+                ) : (
+                  <LanguageText 
+                    texts={{
+                      'zh-CN': '关注',
+                      'zh-TW': '關注',
+                      'en': 'Follow'
+                    }}
+                  />
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 用户帖子列表 - 简洁容器 */}
+        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-2">
+              <LanguageText 
+                texts={{
+                  'zh-CN': '用户动态',
+                  'zh-TW': '用戶動態',
+                  'en': 'User Posts'
+                }}
+              />
+            </h2>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              <LanguageText 
+                texts={{
+                  'zh-CN': `查看 ${userInfo.username} 发布的所有内容`,
+                  'zh-TW': `查看 ${userInfo.username} 發布的所有內容`,
+                  'en': `View all content posted by ${userInfo.username}`
+                }}
+              />
+            </p>
           </div>
           
-          {/* 关注按钮 */}
-          {currentUser && currentUser.userId !== userId && (
-            <button
-              onClick={handleFollowToggle}
-              disabled={followLoading}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                isFollowing
-                  ? 'bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-zinc-600'
-                  : 'bg-primary text-white hover:bg-primary-hover'
-              } ${followLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {followLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  <span>
-                    <LanguageText 
-                      texts={{
-                        'zh-CN': '处理中...',
-                        'zh-TW': '處理中...',
-                        'en': 'Processing...'
-                      }}
-                    />
-                  </span>
-                </div>
-              ) : isFollowing ? (
-                <LanguageText 
-                  texts={{
-                    'zh-CN': '已关注',
-                    'zh-TW': '已關注',
-                    'en': 'Following'
-                  }}
-                />
-              ) : (
-                <LanguageText 
-                  texts={{
-                    'zh-CN': '关注',
-                    'zh-TW': '關注',
-                    'en': 'Follow'
-                  }}
-                />
-              )}
-            </button>
-          )}
+          <PostList 
+            showUserPosts={true}
+            userId={userId}
+            pageSize={10}
+          />
         </div>
-      </div>
 
-      {/* 用户帖子列表 */}
-      <div>
-        <PostList 
-          showUserPosts={true}
-          userId={userId}
-          pageSize={10}
+        {/* 取消关注确认弹窗 */}
+        <ConfirmDialog
+          visible={showUnfollowDialog}
+          title="取消关注"
+          message={`确定要取消关注 ${userInfo?.username || '该用户'} 吗？`}
+          confirmText="确定取消关注"
+          loading={followLoading}
+          onConfirm={handleConfirmUnfollow}
+          onCancel={() => setShowUnfollowDialog(false)}
         />
       </div>
-
-      {/* 取消关注确认弹窗 */}
-      <ConfirmDialog
-        visible={showUnfollowDialog}
-        title="取消关注"
-        message={`确定要取消关注 ${userInfo?.username || '该用户'} 吗？`}
-        confirmText="确定取消关注"
-        loading={followLoading}
-        onConfirm={handleConfirmUnfollow}
-        onCancel={() => setShowUnfollowDialog(false)}
-      />
     </div>
   );
 } 

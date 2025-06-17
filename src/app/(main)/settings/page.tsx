@@ -557,20 +557,25 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* 页面标题 */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-neutral-800 dark:text-white">设置</h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-2">
-            管理您的账户设置和偏好
+    <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 页面标题 - 简化设计 */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-neutral-800 dark:text-white mb-2">
+            账户设置
+          </h1>
+          <p className="text-neutral-600 dark:text-neutral-400">
+            管理您的个人信息、隐私设置和账户安全
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* 侧边栏导航 */}
-          <div className="lg:w-64">
-            <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-4">
+        <div className="flex flex-col xl:flex-row gap-8">
+          {/* 侧边栏导航 - 简化设计 */}
+          <div className="xl:w-80">
+            <div className="bg-white dark:bg-zinc-800 rounded-lg shadow border border-neutral-200 dark:border-zinc-700 p-6">
+              <h3 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-4">
+                设置分类
+              </h3>
               <nav className="space-y-2">
                 {categories.map(category => (
                   <button
@@ -582,9 +587,7 @@ export default function SettingsPage() {
                         : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-zinc-700'
                     }`}
                   >
-                    <span className={activeCategory === category.key ? 'text-white' : 'text-neutral-500 dark:text-neutral-400'}>
-                      {category.icon}
-                    </span>
+                    {category.icon}
                     <span className="font-medium">{category.label}</span>
                   </button>
                 ))}
@@ -592,37 +595,45 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* 主要内容区域 */}
+          {/* 主要内容区域 - 简化设计 */}
           <div className="flex-1">
-            <div className="bg-white dark:bg-dark-secondary rounded-lg shadow">
-              {/* 用户设置 */}
+            <div className="bg-white dark:bg-zinc-800 rounded-lg shadow border border-neutral-200 dark:border-zinc-700">
+              {/* 用户设置 - 简化设计 */}
               {activeCategory === 'user' && (
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-neutral-800 dark:text-white">
-                      用户设置
-                    </h2>
+                    <div>
+                      <h2 className="text-xl font-bold text-neutral-800 dark:text-white">
+                        用户设置
+                      </h2>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        管理您的个人资料和基本信息
+                      </p>
+                    </div>
                     {!isEditingUser && (
                       <button
                         onClick={handleStartEditUser}
-                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
                       >
-                        修改设置
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>修改设置</span>
                       </button>
                     )}
                   </div>
                   
                   <div className="space-y-6">
-                    {/* 头像设置 */}
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
-                        头像
+                    {/* 头像设置 - 简化设计 */}
+                    <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-4">
+                      <label className="block text-sm font-medium text-neutral-800 dark:text-white mb-3">
+                        头像设置
                       </label>
                       <div className="flex items-center space-x-4">
                         <img
                           src={userSettings.avatar}
                           alt="头像"
-                          className="w-20 h-20 rounded-full border-4 border-primary"
+                          className="w-16 h-16 rounded-lg border border-neutral-200 dark:border-zinc-600 object-cover"
                         />
                         {isEditingUser && (
                           <div>
@@ -634,11 +645,14 @@ export default function SettingsPage() {
                             />
                             <label
                               htmlFor="avatar-upload"
-                              className="px-4 py-2 bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-zinc-600 cursor-pointer transition-colors"
+                              className="inline-flex items-center space-x-2 px-4 py-2 bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-zinc-600 cursor-pointer transition-colors"
                             >
-                              更换头像
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                              <span>更换头像</span>
                             </label>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
                               支持 JPG、PNG 格式，文件大小不超过 5MB
                             </p>
                           </div>
@@ -646,63 +660,82 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {/* 昵称设置 */}
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                        昵称
+                    {/* 昵称设置 - 简化设计 */}
+                    <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-4">
+                      <label className="block text-sm font-medium text-neutral-800 dark:text-white mb-3">
+                        显示昵称
                       </label>
                       {isEditingUser ? (
                         <input
                           type="text"
                           value={userSettings.nickname}
                           onChange={(e) => setUserSettings(prev => ({ ...prev, nickname: e.target.value }))}
-                          className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="请输入昵称"
+                          className="w-full px-3 py-2 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
+                          placeholder="请输入您的昵称..."
                         />
                       ) : (
-                        <div className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-                          {userSettings.nickname || '未设置'}
+                        <div className="w-full px-3 py-2 bg-neutral-50 dark:bg-zinc-700 border border-neutral-200 dark:border-zinc-600 rounded-lg">
+                          <span className="text-neutral-800 dark:text-white">
+                            {userSettings.nickname || (
+                              <span className="text-neutral-400 dark:text-neutral-500 italic">未设置昵称</span>
+                            )}
+                          </span>
                         </div>
                       )}
                     </div>
 
-                    {/* 个人简介 */}
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                    {/* 个人简介 - 简化设计 */}
+                    <div className="border border-neutral-200 dark:border-zinc-700 rounded-lg p-4">
+                      <label className="block text-sm font-medium text-neutral-800 dark:text-white mb-3">
                         个人简介
                       </label>
                       {isEditingUser ? (
-                        <textarea
-                          value={userSettings.bio}
-                          onChange={(e) => setUserSettings(prev => ({ ...prev, bio: e.target.value }))}
-                          rows={4}
-                          className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="请输入个人简介"
-                        />
+                        <div className="space-y-2">
+                          <textarea
+                            value={userSettings.bio}
+                            onChange={(e) => setUserSettings(prev => ({ ...prev, bio: e.target.value }))}
+                            rows={3}
+                            maxLength={500}
+                            className="w-full px-3 py-2 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                            placeholder="介绍一下您自己..."
+                          />
+                          <div className="flex justify-between">
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                              简洁的自我介绍有助于建立个人形象
+                            </p>
+                            <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                              {userSettings.bio.length}/500
+                            </span>
+                          </div>
+                        </div>
                       ) : (
-                        <div className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-neutral-50 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300 min-h-[100px]">
-                          {userSettings.bio || '未设置'}
+                        <div className="w-full px-3 py-2 bg-neutral-50 dark:bg-zinc-700 border border-neutral-200 dark:border-zinc-600 rounded-lg min-h-[80px]">
+                          <p className="text-neutral-800 dark:text-white">
+                            {userSettings.bio || (
+                              <span className="text-neutral-400 dark:text-neutral-500 italic">暂未填写个人简介</span>
+                            )}
+                          </p>
                         </div>
                       )}
                     </div>
 
-                    {/* 保存/取消按钮 */}
+                    {/* 保存/取消按钮 - 简化设计 */}
                     {isEditingUser && (
-                      <div className="flex justify-end space-x-4">
+                      <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-200 dark:border-zinc-700">
                         <button
                           onClick={handleCancelEditUser}
-                          className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"
+                          className="px-4 py-2 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-zinc-600 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors"
                         >
                           取消
                         </button>
                         <button
                           onClick={handleSaveUserSettings}
                           disabled={isLoading}
-                          className={`px-6 py-3 rounded-lg transition-colors ${
+                          className={`px-6 py-2 rounded-lg transition-colors ${
                             isLoading
-                              ? 'bg-neutral-400 cursor-not-allowed'
-                              : 'bg-primary hover:bg-primary-hover'
-                          } text-white`}
+                              ? 'bg-neutral-400 cursor-not-allowed opacity-70'
+                              : 'bg-primary hover:bg-primary-hover text-white'
+                          }`}
                         >
                           {isLoading ? '保存中...' : '保存更改'}
                         </button>

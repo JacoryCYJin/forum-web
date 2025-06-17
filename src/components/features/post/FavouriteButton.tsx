@@ -17,7 +17,7 @@ interface FavouriteButtonProps {
    * 按钮样式类型
    * @default 'default'
    */
-  variant?: 'default' | 'large';
+  variant?: 'default' | 'large' | 'full-width';
   
   /**
    * 自定义CSS类名
@@ -100,11 +100,15 @@ export default function FavouriteButton({
 
   // 根据variant确定样式
   const getButtonStyles = () => {
-    const baseStyles = "flex items-center transition-colors rounded";
+    const baseStyles = "flex items-center transition-all duration-200 rounded-lg";
     const disabledStyles = isToggling ? "opacity-50 cursor-not-allowed" : "";
     const colorStyles = isFavourited 
-      ? "text-yellow-500 hover:text-yellow-600" 
-      : "text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-400";
+      ? "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800" 
+      : "text-neutral-600 dark:text-neutral-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 border-neutral-200 dark:border-zinc-700 hover:border-yellow-200 dark:hover:border-yellow-800";
+    
+    if (variant === 'full-width') {
+      return `${baseStyles} ${colorStyles} ${disabledStyles} justify-center space-x-3 px-4 py-3 text-base font-medium border w-full ${className}`;
+    }
     
     if (variant === 'large') {
       return `${baseStyles} ${colorStyles} ${disabledStyles} hover:bg-neutral-100 dark:hover:bg-zinc-700 px-4 py-3 text-base font-medium ${className}`;

@@ -4,7 +4,7 @@
  * @description 提供帖子相关的API调用函数
  */
 
-import { get, del } from '@/lib/utils/request';
+import { get, del, post } from '@/lib/utils/request';
 import type { 
   Post, 
   PostDetail,
@@ -237,8 +237,6 @@ export async function getUserPostCountApi(params: {
   return response.data;
 }
 
-
-
 /**
  * 删除帖子API
  * 
@@ -267,5 +265,90 @@ export async function deletePostApi(postId: string): Promise<void> {
   } catch (error) {
     console.error(`删除帖子(ID: ${postId})失败:`, error);
     throw error;
+  }
+}
+
+/**
+ * 创建帖子API
+ * 
+ * 创建一个新的帖子，支持文件上传
+ *
+ * @async
+ * @param {Object} params - 创建帖子的参数
+ * @param {string} params.title - 帖子标题
+ * @param {string} params.content - 帖子内容
+ * @param {string} params.categoryId - 分类ID
+ * @param {string[]} [params.tagIds] - 标签ID列表
+ * @param {string} [params.location] - 发帖位置
+ * @param {File[]} [params.files] - 上传的文件列表
+ * @returns {Promise<boolean>} 创建结果
+ * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 创建图文帖子
+ * await createPostApi({
+ *   title: '我的帖子',
+ *   content: '帖子内容',
+ *   categoryId: 'category-123',
+ *   location: '116.4074,39.9042',
+ *   files: [file1, file2]
+ * });
+ */
+export async function createPostApi(params: FormData | {
+  title: string;
+  content: string;
+  categoryId: string;
+  tagIds?: string[];
+  location?: string;
+  files?: File[];
+}): Promise<boolean> {
+  console.log('📤 createPostApi请求参数:', params);
+
+  try {
+    let formData: FormData;
+    
+    if (params instanceof FormData) {
+      // 如果已经是FormData，直接使用
+      formData = params;
+    } else {
+      // 如果是普通对象，转换为FormData
+      formData = new FormData();
+      
+      // 添加基本字段
+      formData.append('title', params.title);
+      formData.append('content', params.content);
+      formData.append('categoryId', params.categoryId);
+      
+      // 添加可选字段
+      if (params.location) {
+        formData.append('location', params.location);
+      }
+      
+      if (params.tagIds && params.tagIds.length > 0) {
+        params.tagIds.forEach(tagId => {
+          formData.append('tagIds', tagId);
+        });
+      }
+      
+      // 添加文件
+      if (params.files && params.files.length > 0) {
+        params.files.forEach(file => {
+          formData.append('files', file);
+        });
+      }
+    }
+
+    const response = await post('/posts/add', formData);
+    
+    console.log('📥 createPostApi响应:', response);
+    
+    if (response.code === 0) {
+      console.log('✅ 创建帖子成功');
+      return true;
+    } else {
+      throw new Error(response.message || '创建帖子失败');
+    }
+  } catch (error: any) {
+    console.error('❌ createPostApi错误:', error);
+    throw new Error(error.message || '创建帖子失败');
   }
 }

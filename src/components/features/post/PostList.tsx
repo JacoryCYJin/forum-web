@@ -510,8 +510,6 @@ export default function PostList({
     setPostToDelete(null);
   }, []);
 
-
-
   /**
    * 分享帖子 - 复制链接到剪贴板
    * 
@@ -915,108 +913,111 @@ export default function PostList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* 帖子列表 */}
       {posts.map((post) => {
         return (
           <article 
             key={post.postId} 
-            className="bg-white dark:bg-dark-secondary rounded-lg shadow hover:shadow-md transition-all duration-200 border border-neutral-100 dark:border-zinc-700 hover:border-neutral-200 dark:hover:border-zinc-600"
+            className="bg-white dark:bg-dark-secondary rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-neutral-200/50 dark:border-zinc-700/50 hover:border-neutral-300 dark:hover:border-zinc-600 group overflow-hidden"
           >
-            <div className="p-4">
+            <div className="p-6">
               {/* 用户头像和信息 - 放在最上方 */}
-              <div className="flex items-center mb-3">
+              <div className="flex items-center justify-between mb-4">
                 <UserLink
                   userId={post.userId}
                   avatarUrl={getUserAvatar(post.userId)}
                   username={getUserDisplayName(post.userId)}
                   className="flex-1"
                 />
-                <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400 ml-3">
-                  <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-zinc-800 px-3 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {formatPostTime(post.postId)}
                 </div>
               </div>
               
-              {/* 帖子标题和分类 */}
-              <div className="mb-3">
+              {/* 帖子标题 */}
+              <div className="mb-4">
                 <Link 
                   href={`/post/${post.postId}`} 
-                  className="block group"
+                  className="block group/title"
                 >
-                  <div className="flex items-start flex-wrap gap-2">
-                    <h2 className="text-lg font-semibold text-neutral-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                      {post.title}
-                    </h2>
-                    {post.category && (
-                      <span className="flex-shrink-0 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium ml-2">
-                        {post.category.categoryName}
-                      </span>
-                    )}
-                  </div>
+                  <h2 className="text-xl font-bold text-neutral-800 dark:text-white group-hover/title:text-primary dark:group-hover/title:text-primary transition-colors line-clamp-2 leading-tight">
+                    {post.title}
+                  </h2>
                 </Link>
               </div>
               
               {/* 帖子内容预览 */}
-              <div className="text-neutral-600 dark:text-neutral-400 mb-3 line-clamp-2 leading-relaxed text-sm">
-                {post.content.length > 120 
-                  ? `${post.content.substring(0, 120)}...` 
+              <div className="text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-3 leading-relaxed text-base">
+                {post.content.length > 150 
+                  ? `${post.content.substring(0, 150)}...` 
                   : post.content
                 }
               </div>
               
-              {/* 标签显示区域 - 只显示前3个，改为灰色 */}
-              {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {post.tags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag.tagId}
-                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600 transition-colors cursor-pointer"
-                    >
-                      #{tag.tagName}
-                    </span>
-                  ))}
-                  {post.tags.length > 3 && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300">
-                      +{post.tags.length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
+              {/* 分类和标签显示区域 - 分类在标签左边 */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                {/* 分类标签 - 在最左边 */}
+                {post.category && (
+                  <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 text-primary rounded-full text-sm font-medium border border-primary/20">
+                    {post.category.categoryName}
+                  </span>
+                )}
+                
+                {/* 标签列表 - 在分类标签右边 */}
+                {post.tags && post.tags.length > 0 && (
+                  <>
+                    {post.tags.slice(0, 4).map((tag) => (
+                      <span
+                        key={tag.tagId}
+                        className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600 transition-all duration-200 cursor-pointer border border-neutral-200 dark:border-zinc-600"
+                      >
+                        #{tag.tagName}
+                      </span>
+                    ))}
+                    {post.tags.length > 4 && (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-zinc-600">
+                        +{post.tags.length - 4}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
               
               {/* 帖子统计和操作区域 */}
-              <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-zinc-700">
-                <div className="flex items-center space-x-4 text-sm text-neutral-500 dark:text-neutral-400">
+              <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-zinc-700">
+                <div className="flex items-center space-x-6 text-sm text-neutral-500 dark:text-neutral-400">
                   {/* 评论数 */}
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-2 bg-neutral-50 dark:bg-zinc-800 px-3 py-1.5 rounded-lg">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span>{getCommentCountDisplay(post.postId)}</span>
+                    <span className="font-medium">{getCommentCountDisplay(post.postId)}</span>
                   </div>
                   
                   {/* 浏览数 */}
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-2 bg-neutral-50 dark:bg-zinc-800 px-3 py-1.5 rounded-lg">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    <span>{Math.floor(Math.random() * 500) + 50}</span>
+                    <span className="font-medium">{Math.floor(Math.random() * 500) + 50}</span>
                   </div>
                 </div>
                 
                 {/* 操作按钮 */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   {/* 点赞按钮 */}
                   <button 
                     onClick={() => handleToggleLike(post.postId)}
                     disabled={togglingLikeIds.has(post.postId)}
-                    className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium ${
                       likeCache.get(post.postId) 
-                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20' 
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
+                        : 'text-neutral-600 dark:text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800'
                     } ${togglingLikeIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {togglingLikeIds.has(post.postId) ? (
@@ -1045,7 +1046,7 @@ export default function PostList({
                   {/* 分享按钮 */}
                   <button 
                     onClick={() => handleShare(post.postId, post.title)}
-                    className="flex items-center space-x-1 px-2 py-1 text-neutral-500 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:bg-neutral-50 dark:hover:bg-zinc-700 rounded transition-colors"
+                    className="flex items-center space-x-1.5 px-3 py-2 text-neutral-600 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:bg-neutral-50 dark:hover:bg-zinc-700 rounded-lg transition-all duration-200 border border-transparent hover:border-neutral-200 dark:hover:border-zinc-600 font-medium"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -1065,10 +1066,10 @@ export default function PostList({
                   <button 
                     onClick={() => handleToggleFavourite(post.postId)}
                     disabled={togglingFavouriteIds.has(post.postId)}
-                    className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium ${
                       favouriteCache.get(post.postId) || showFavourites
-                        ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' 
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                        ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' 
+                        : 'text-neutral-600 dark:text-neutral-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 border border-transparent hover:border-yellow-200 dark:hover:border-yellow-800'
                     } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {togglingFavouriteIds.has(post.postId) ? (
@@ -1099,7 +1100,7 @@ export default function PostList({
                     <button 
                       onClick={() => showDeleteConfirm(post.postId)}
                       disabled={deletingPostIds.has(post.postId)}
-                      className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 ${
+                      className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800 ${
                         deletingPostIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
@@ -1130,12 +1131,10 @@ export default function PostList({
       
       {/* 分页组件 */}
       {pageInfo && pageInfo.total_count > 0 && (
-        <div className="mt-8">
+        <div className="mt-12 flex justify-center">
           <Pagination
             currentPage={currentPage}
             totalPages={pageInfo.page_count}
-            total={pageInfo.total_count}
-            pageSize={pageSize}
             onPageChange={handlePageChange}
             showWhenSinglePage={true}
           />

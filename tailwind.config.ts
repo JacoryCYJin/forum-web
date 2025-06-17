@@ -102,7 +102,28 @@ export default {
             dark: "#4B5563",
           }
         },
-
+        
+        // 评论区域颜色
+        comment: {
+          icon: "#FF4500", // 使用主题色
+          background: {
+            light: "#F6F7F8",
+            dark: "#374151",
+          },
+          border: {
+            light: "#E5E7EB", 
+            dark: "#4B5563",
+          }
+        },
+        
+        // 互动面板颜色
+        interaction: {
+          icon: "#FF4500", // 统一使用主题色
+          background: {
+            light: "#FFF3E0", // 主题色的浅色版本
+            dark: "#2A1A0D",  // 主题色的深色版本
+          }
+        },
       },
       fontFamily: {
         sans: [

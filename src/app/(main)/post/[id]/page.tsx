@@ -2,13 +2,14 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import AvatarLink from '@/components/common/AvatarLink/AvatarLink';
+import BackButton from '@/components/common/BackButton/BackButton';
+import PostSidebar from '@/components/features/post/PostSidebar';
+import PostReportButton from '@/components/features/post/PostReportButton';
 import { getPostByIdApi } from '@/lib/api/postsApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
-import type { Tag, PostDetailQueryParams } from '@/types/postTypes';
+import type { PostDetailQueryParams } from '@/types/postTypes';
 import type { User } from '@/types/userTypes';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer/MarkdownRenderer';
-import PostDetailClient from '@/components/features/post/PostDetailClient';
-import PostActions from '@/components/features/post/PostActions';
 
 
 /**
@@ -81,33 +82,7 @@ export async function generateMetadata({ params }: PostPageParams): Promise<Meta
   }
 }
 
-/**
- * 渲染标签列表
- * 
- * @param tags - 标签数组
- * @returns JSX元素
- */
-function renderTags(tags: Tag[]) {
-  if (!tags || tags.length === 0) {
-    return null;
-  }
 
-  return (
-    <div className="mb-4">
-      {/* <h3 className="text-lg font-semibold text-neutral-800 dark:text-white mb-2">标签</h3> */}
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <span
-            key={tag.tagId}
-            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600 transition-colors cursor-pointer"
-          >
-            #{tag.tagName}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /**
  * 帖子详情页面组件
@@ -144,148 +119,217 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
     ]);
 
     return (
-      <div className="space-y-6">
-        {/* 返回链接 */}
-        <div className="mb-6">
-          <Link href="/" className="flex items-center text-secondary hover:text-secondary-hover">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            返回首页
-          </Link>
+      <div className="relative">
+        {/* 返回按钮 */}
+        <div className="max-w-7xl mx-auto mb-6">
+          <BackButton />
         </div>
 
-        {/* 帖子卡片 */}
-        <article className="bg-white dark:bg-dark-secondary rounded-lg shadow-lg border border-neutral-100 dark:border-zinc-700">
-          {/* 帖子头部 */}
-          <div className="p-6">
-            {/* 作者信息 */}
-            <div className="flex items-center space-x-3 mb-4">
-              {userInfo && (
-                <AvatarLink
-                  userId={post.userId}
-                  avatarUrl={userInfo.avatarUrl}
-                  username={userDisplayName}
-                  sizeClass="w-12 h-12"
-                />
-              )}
-              <div className="flex-1">
-                <Link 
-                  href={`/user/${post.userId}`}
-                  className="font-semibold text-neutral-800 dark:text-white hover:text-primary transition-colors"
-                >
-                  {userDisplayName}
-                </Link>
-                <div className="flex items-center text-sm text-neutral-500 dark:text-neutral-400">
-                  <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>发布时间</span>
+        <div className="max-w-[1400px] mx-auto flex gap-8">
+          {/* 主要内容区域 */}
+          <div className="flex-1 max-w-5xl">
+            <article className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg border border-neutral-100 dark:border-zinc-700">
+              <div className="flex flex-col lg:flex-row">
+                {/* 左侧图片区域 - 只显示图片文件 */}
+                {post.fileUrls && (() => {
+                  const imageUrls = post.fileUrls.split(',')
+                    .map(url => url.trim())
+                    .filter(url => /\.(jpg|jpeg|png|gif|webp)$/i.test(url));
+                  
+                  if (imageUrls.length === 0) return null;
+                  
+                  return (
+                    <div className="lg:w-1/2 p-6 border-b lg:border-b-0 lg:border-r border-neutral-100 dark:border-zinc-700">
+                      <h3 className="text-lg font-semibold text-neutral-800 dark:text-white mb-4">
+                        图片内容
+                      </h3>
+                      <div className="space-y-4">
+                        {imageUrls.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={url}
+                              alt={`图片 ${index + 1}`}
+                              className="w-full h-auto rounded-lg object-cover cursor-pointer hover:opacity-95 transition-opacity shadow-sm"
+                              onClick={() => window.open(url, '_blank')}
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
+                              <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-80 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 右侧内容区域 */}
+                <div className={`${post.fileUrls && post.fileUrls.split(',').some(url => /\.(jpg|jpeg|png|gif|webp)$/i.test(url.trim())) ? 'lg:w-1/2' : 'w-full'} p-6 relative`}>
+                  {/* 举报按钮 - 右上角 */}
+                  <div className="absolute top-4 right-4">
+                    <PostReportButton postId={id} postTitle={post.title} />
+                  </div>
+
+                  {/* 作者信息 */}
+                  <div className="flex items-center space-x-4 mb-6 pr-12">
+                    {userInfo && (
+                      <AvatarLink
+                        userId={post.userId}
+                        avatarUrl={userInfo.avatarUrl}
+                        username={userDisplayName}
+                        sizeClass="w-14 h-14"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <Link 
+                        href={`/user/${post.userId}`}
+                        className="font-semibold text-lg text-neutral-800 dark:text-white hover:text-primary transition-colors"
+                      >
+                        {userDisplayName}
+                      </Link>
+                      <div className="flex items-center text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>发布时间</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 帖子标题和分类 */}
+                  <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-neutral-800 dark:text-white leading-tight mb-3">
+                      {post.title}
+                    </h1>
+                    
+                    {/* 分类和标签区域 */}
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      {/* 分类标签 - 红色主题 */}
+                      <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-red-500/10 to-red-600/5 text-red-600 dark:text-red-400 rounded-full text-sm font-medium border border-red-200 dark:border-red-800">
+                        {post.category.categoryName}
+                      </span>
+                      
+                      {/* 标签列表 */}
+                      {post.tags && post.tags.length > 0 && post.tags.map((tag) => (
+                        <span
+                          key={tag.tagId}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600 transition-colors cursor-pointer"
+                        >
+                          #{tag.tagName}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    {/* 统计信息 - 移除评论数显示，避免重复 */}
+                    <div className="flex items-center space-x-6 text-sm text-neutral-500 dark:text-neutral-400">
+                      <div className="flex items-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>{Math.floor(Math.random() * 1000) + 100} 浏览</span>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+                  {/* 帖子内容 - 支持富文本HTML */}
+                  <div className="mt-6">
+                    <div className="prose prose-neutral dark:prose-invert max-w-none">
+                      {/* 如果内容包含HTML标签，直接渲染；否则使用Markdown */}
+                      {post.content.includes('<img') || post.content.includes('<div') || post.content.includes('<p') ? (
+                        <div 
+                          dangerouslySetInnerHTML={{ __html: post.content }}
+                          className="rich-content"
+                        />
+                      ) : (
+                        <MarkdownRenderer content={post.content} />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 位置信息 */}
+                  {post.location && (
+                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                          发布位置: {post.location}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 附件显示区域 - 只显示非图片文件 */}
+                  {post.fileUrls && (() => {
+                    const attachmentUrls = post.fileUrls.split(',')
+                      .map(url => url.trim())
+                      .filter(url => !/\.(jpg|jpeg|png|gif|webp)$/i.test(url));
+                    
+                    if (attachmentUrls.length === 0) return null;
+                    
+                    return (
+                      <div className="mt-6">
+                        <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+                          附件文件
+                        </h3>
+                        <div className="space-y-2">
+                          {attachmentUrls.map((fileUrl, index) => {
+                            const fileName = fileUrl.split('/').pop() || `文件${index + 1}`;
+                            return (
+                              <a
+                                key={index}
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-neutral-50 dark:bg-zinc-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-600 transition-colors group"
+                              >
+                                <svg className="w-5 h-5 text-neutral-400 dark:text-neutral-500 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span className="text-sm text-neutral-700 dark:text-neutral-300 flex-1">{fileName}</span>
+                                <svg className="w-4 h-4 text-neutral-400 dark:text-neutral-500 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </a>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
-            </div>
-
-            {/* 帖子标题和分类 */}
-            <div className="flex items-start flex-wrap gap-2 mb-4">
-              <h1 className="text-2xl font-bold text-neutral-800 dark:text-white leading-tight mr-2">
-                {post.title}
-              </h1>
-              <span className="flex-shrink-0 inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium ml-2">
-                {post.category.categoryName}
-              </span>
-            </div>
-
-            {/* 标签显示区域 */}
-            {renderTags(post.tags)}
+            </article>
           </div>
 
-          {/* 帖子内容 */}
-          <div className="px-6 pb-4">
-            <div className="prose prose-neutral dark:prose-invert max-w-none">
-              <MarkdownRenderer content={post.content} />
-            </div>
-          </div>
-
-          {/* 附件显示 */}
-          {post.fileUrls && (
-            <div className="px-6 pb-4">
-              <div className="bg-neutral-50 dark:bg-zinc-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-neutral-800 dark:text-white mb-3 flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                  </svg>
-                  附件
-                </h3>
-                <div className="space-y-2">
-                  {post.fileUrls.split(',').map((url, index) => (
-                    <a
-                      key={index}
-                      href={url.trim()}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-2 text-primary hover:text-primary-hover underline p-2 hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>附件 {index + 1}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 位置信息 */}
-          {post.location && (
-            <div className="px-6 pb-4">
-              <div className="bg-neutral-50 dark:bg-zinc-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-neutral-800 dark:text-white mb-2 flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  发布位置
-                </h3>
-                <p className="text-neutral-600 dark:text-neutral-400">{post.location}</p>
-              </div>
-            </div>
-          )}
-
-          {/* 帖子操作栏 */}
-          <div className="px-6 py-3 border-t border-neutral-100 dark:border-zinc-700 bg-neutral-50 dark:bg-zinc-800/50 rounded-b-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6 text-sm text-neutral-500 dark:text-neutral-400">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  <span className="font-medium">{post.comments.total_count} 评论</span>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <span>{Math.floor(Math.random() * 1000) + 100} 浏览</span>
-                </div>
-              </div>
-
-              {/* 使用新的PostActions组件 */}
-              <PostActions 
-                postId={id} 
+          {/* 右侧互动面板 - 固定定位 */}
+          <div className="hidden xl:block w-96 flex-shrink-0">
+            <div className="sticky top-20">
+              <PostSidebar 
+                postId={id}
                 postTitle={post.title}
+                commentCount={post.comments.total_count}
+                initialComments={post.comments}
               />
             </div>
           </div>
-        </article>
+        </div>
 
-        {/* 评论区 - 使用新的评论组件 */}
-        <PostDetailClient 
-          postId={id}
-          initialComments={post.comments}
-        />
+        {/* 移动设备上的互动面板 - 在内容下方 */}
+        <div className="xl:hidden max-w-5xl mx-auto mt-8">
+          <PostSidebar 
+            postId={id}
+            postTitle={post.title}
+            commentCount={post.comments.total_count}
+            initialComments={post.comments}
+          />
+        </div>
       </div>
     );
   } catch {

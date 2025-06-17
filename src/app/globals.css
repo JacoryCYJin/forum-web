@@ -472,3 +472,46 @@ a {
     line-height: 1.2;
   }
 }
+
+/* 富文本编辑器样式 */
+[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: #9CA3AF;
+  pointer-events: none;
+}
+
+[contenteditable]:focus:before {
+  content: '';
+}
+
+/* 富文本内容样式 */
+.rich-content {
+  line-height: 1.6;
+}
+
+.rich-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  display: block;
+}
+
+.rich-content p {
+  margin: 0.75rem 0;
+}
+
+.rich-content br {
+  display: block;
+  margin: 0.5rem 0;
+  content: "";
+}
+
+/* 深色模式下的富文本样式 */
+.dark .rich-content {
+  color: #e5e7eb;
+}
+
+.dark .rich-content img {
+  opacity: 0.9;
+}

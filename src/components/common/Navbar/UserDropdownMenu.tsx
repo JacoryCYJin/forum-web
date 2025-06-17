@@ -9,6 +9,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
+import { getFollowersCountApi } from '@/lib/api/followApi';
+import { getUserPostCountApi } from '@/lib/api/postsApi';
 
 /**
  * 菜单项接口
@@ -33,6 +35,14 @@ interface MenuItem {
 }
 
 /**
+ * 用户统计信息接口
+ */
+interface UserStats {
+  followersCount: number;
+  postsCount: number;
+}
+
+/**
  * 用户头像下拉菜单组件
  * 
  * @component
@@ -41,15 +51,42 @@ interface MenuItem {
  */
 export function UserDropdownMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [userStats, setUserStats] = useState<UserStats>({ followersCount: 0, postsCount: 0 });
+  const [statsLoading, setStatsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   
   const { 
     user, 
-    userStats, 
     unreadNotificationCount, 
     logout 
   } = useUserStore();
+
+  /**
+   * 获取用户统计数据
+   */
+  const fetchUserStats = async () => {
+    if (!user?.userId || statsLoading) return;
+    
+    setStatsLoading(true);
+    try {
+      const [followersCount, postsCount] = await Promise.all([
+        getFollowersCountApi(), // 获取当前用户的粉丝数
+        getUserPostCountApi({}) // 获取当前用户的帖子数
+      ]);
+      
+      setUserStats({
+        followersCount: followersCount || 0,
+        postsCount: postsCount || 0
+      });
+    } catch (error) {
+      console.error('获取用户统计数据失败:', error);
+      // 出错时设置默认值
+      setUserStats({ followersCount: 0, postsCount: 0 });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   /**
    * 处理退出登录
@@ -68,6 +105,17 @@ export function UserDropdownMenu() {
       item.onClick();
     }
     setIsOpen(false);
+  };
+
+  /**
+   * 处理下拉菜单打开
+   */
+  const handleToggleMenu = () => {
+    setIsOpen(!isOpen);
+    // 打开菜单时获取统计数据
+    if (!isOpen && user?.userId) {
+      fetchUserStats();
+    }
   };
 
   /**
@@ -164,7 +212,7 @@ export function UserDropdownMenu() {
     <div className="relative" ref={dropdownRef}>
       {/* 头像触发器 */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggleMenu}
         className="rounded-full p-1 hover:bg-neutral-100 dark:hover:bg-zinc-700 transition-colors"
       >
         <div className="h-8 w-8 rounded-full border-2 border-primary overflow-hidden bg-neutral-200 dark:bg-zinc-700">
@@ -178,11 +226,11 @@ export function UserDropdownMenu() {
 
       {/* 下拉菜单 */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-dark-secondary rounded-lg shadow-lg border border-neutral-200 dark:border-zinc-700 py-2 z-50">
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-dark-secondary rounded-xl shadow-xl border border-neutral-200 dark:border-zinc-700 py-3 z-50 backdrop-blur-sm">
           {/* 用户信息头部 */}
           <div className="px-4 py-3 border-b border-neutral-100 dark:border-zinc-700">
             <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 rounded-full overflow-hidden bg-neutral-200 dark:bg-zinc-700 flex-shrink-0">
+              <div className="h-14 w-14 rounded-full overflow-hidden bg-neutral-200 dark:bg-zinc-700 flex-shrink-0 border-2 border-primary/20">
                 <img
                   src={user.avatar}
                   alt={user.nickname}
@@ -190,43 +238,61 @@ export function UserDropdownMenu() {
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
+                <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
                   {user.nickname}
                 </p>
-                {/* <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
-                  @{user.username}
-                </p> */}
-                {userStats && (
-                  <div className="flex space-x-4 mt-2 text-xs text-neutral-500 dark:text-neutral-400">
-                    <span>{userStats.followersCount} 粉丝</span>
-                    <span>{userStats.postsCount} 帖子</span>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                  @{user.username || user.userId}
+                </p>
+                
+                {/* 统计信息 */}
+                <div className="flex space-x-4 mt-2">
+                  <div className="text-center">
+                    <div className="text-xs font-semibold text-neutral-800 dark:text-white">
+                      {statsLoading ? (
+                        <div className="w-4 h-3 bg-neutral-200 dark:bg-zinc-600 rounded animate-pulse"></div>
+                      ) : (
+                        userStats.followersCount
+                      )}
+                    </div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">粉丝</div>
                   </div>
-                )}
+                  <div className="text-center">
+                    <div className="text-xs font-semibold text-neutral-800 dark:text-white">
+                      {statsLoading ? (
+                        <div className="w-4 h-3 bg-neutral-200 dark:bg-zinc-600 rounded animate-pulse"></div>
+                      ) : (
+                        userStats.postsCount
+                      )}
+                    </div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">帖子</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* 菜单项 */}
-          <div className="py-1">
+          <div className="py-2">
             {menuItems.map((item, index) => (
               <React.Fragment key={item.key}>
                 {item.divider && index > 0 && (
-                  <div className="border-t border-neutral-100 dark:border-zinc-700 my-1" />
+                  <div className="border-t border-neutral-100 dark:border-zinc-700 my-2" />
                 )}
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className="flex items-center justify-between px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors"
+                    className="flex items-center justify-between px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     <div className="flex items-center space-x-3">
                       <span className="text-neutral-500 dark:text-neutral-400">
                         {item.icon}
                       </span>
-                      <span>{item.title}</span>
+                      <span className="font-medium">{item.title}</span>
                     </div>
                     {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
-                      <span className="bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      <span className="bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                         {item.badgeCount > 99 ? '99+' : item.badgeCount}
                       </span>
                     )}
@@ -234,16 +300,16 @@ export function UserDropdownMenu() {
                 ) : (
                   <button
                     onClick={() => handleMenuItemClick(item)}
-                    className="w-full flex items-center justify-between px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors text-left"
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors text-left"
                   >
                     <div className="flex items-center space-x-3">
                       <span className="text-neutral-500 dark:text-neutral-400">
                         {item.icon}
                       </span>
-                      <span>{item.title}</span>
+                      <span className="font-medium">{item.title}</span>
                     </div>
                     {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
-                      <span className="bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      <span className="bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                         {item.badgeCount > 99 ? '99+' : item.badgeCount}
                       </span>
                     )}
