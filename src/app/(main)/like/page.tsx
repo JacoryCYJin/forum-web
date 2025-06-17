@@ -211,7 +211,7 @@ export default function LikePage() {
                     className="flex items-center space-x-3 p-2 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
                   >
                     <img
-                      src={follow.user?.avatarUrl || '/images/avatars/default-avatar.png'}
+                      src={follow.user?.avatarUrl || '/images/avatars/default-avatar.svg'}
                       alt={follow.user?.username || '用户'}
                       className="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-zinc-600"
                     />

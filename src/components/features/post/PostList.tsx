@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
-import { getPostListApi, getPostsByCategoryIdApi, deletePostApi } from '@/lib/api/postsApi';
+import { getPostListApi, getPostsByCategoryIdApi, deletePostApi, getUserPostsApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { getFollowedUsersPostsApi } from '@/lib/api/followApi';
@@ -13,6 +13,7 @@ import type { Post, PageResponse } from '@/types/postTypes';
 import type { User } from '@/types/userTypes';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import Pagination from '@/components/common/Pagination/Pagination';
+import ConfirmDialog from '@/components/common/ConfirmDialog/ConfirmDialog';
 
 /**
  * 帖子列表组件属性接口
@@ -43,6 +44,11 @@ interface PostListProps {
    * 是否显示关注用户的帖子
    */
   showFollowedPosts?: boolean;
+  
+  /**
+   * 是否显示当前用户的帖子
+   */
+  showUserPosts?: boolean;
   
   /**
    * 用户ID，当显示收藏列表时使用，为空时使用当前登录用户
@@ -80,6 +86,7 @@ export default function PostList({
   categoryId,
   showFavourites = false,
   showFollowedPosts = false,
+  showUserPosts = false,
   userId = '',
   showDeleteButton = false
 }: PostListProps) {
@@ -103,8 +110,8 @@ export default function PostList({
    */
   const [error, setError] = useState<string | null>(null);
   
-  // 用户信息缓存：userId -> User
-  const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
+  // 用户信息缓存：userId -> User | null (null表示用户不存在)
+  const [userCache, setUserCache] = useState<Map<string, User | null>>(new Map());
   // 正在请求中的用户ID集合，避免重复请求
   const [fetchingUserIds, setFetchingUserIds] = useState<Set<string>>(new Set());
   
@@ -113,21 +120,25 @@ export default function PostList({
   // 正在切换收藏状态的帖子ID集合
   const [togglingFavouriteIds, setTogglingFavouriteIds] = useState<Set<string>>(new Set());
 
-  // 评论数缓存：postId -> number
-  const [commentCountCache, setCommentCountCache] = useState<Map<string, number>>(new Map());
-  // 正在获取评论数的帖子ID集合
-  const [fetchingCommentCountIds, setFetchingCommentCountIds] = useState<Set<string>>(new Set());
-
   // 点赞状态缓存：postId -> boolean
   const [likeCache, setLikeCache] = useState<Map<string, boolean>>(new Map());
   // 正在切换点赞状态的帖子ID集合
   const [togglingLikeIds, setTogglingLikeIds] = useState<Set<string>>(new Set());
 
+  // 评论数缓存：postId -> number
+  const [commentCountCache, setCommentCountCache] = useState<Map<string, number>>(new Map());
+  // 正在获取评论数的帖子ID集合
+  const [fetchingCommentIds, setFetchingCommentIds] = useState<Set<string>>(new Set());
+
   // 正在删除的帖子ID集合
   const [deletingPostIds, setDeletingPostIds] = useState<Set<string>>(new Set());
 
+  // 删除确认弹窗状态
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
+
   // 使用ref来跟踪上一次的props，避免不必要的重置
-  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, showFollowedPosts, userId });
+  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, showFollowedPosts, showUserPosts, userId });
 
   // 分页状态管理
   const { getPage, setPage, resetPage } = usePaginationStore();
@@ -150,13 +161,28 @@ export default function PostList({
    * @param userId - 用户ID
    */
   const fetchUserInfo = useCallback(async (userId: string) => {
-    // 如果已经缓存或正在请求中，直接返回
-    if (userCache.has(userId) || fetchingUserIds.has(userId)) {
+    // 使用函数式更新来避免依赖状态
+    let shouldFetch = true;
+    
+    setFetchingUserIds(prev => {
+      if (prev.has(userId)) {
+        shouldFetch = false;
+        return prev;
+      }
+      return new Set(prev).add(userId);
+    });
+    
+    setUserCache(prev => {
+      if (prev.has(userId)) {
+        shouldFetch = false;
+        return prev;
+      }
+      return prev;
+    });
+
+    if (!shouldFetch) {
       return;
     }
-
-    // 标记为正在请求中
-    setFetchingUserIds(prev => new Set(prev).add(userId));
 
     try {
       const userInfo = await getUserInfoApi({ userId });
@@ -167,6 +193,12 @@ export default function PostList({
       });
     } catch (error) {
       console.error(`获取用户信息失败 (userId: ${userId}):`, error);
+      // 当用户不存在时，在缓存中设置一个特殊值，避免重复请求
+      setUserCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(userId, null); // 设置null表示用户不存在
+        return newCache;
+      });
     } finally {
       // 移除请求中标记
       setFetchingUserIds(prev => {
@@ -175,7 +207,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [userCache, fetchingUserIds]);
+  }, []); // 移除所有依赖，使用函数式更新
 
   /**
    * 获取帖子收藏状态
@@ -183,8 +215,18 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const fetchFavouriteStatus = useCallback(async (postId: string) => {
-    // 如果已经缓存，直接返回
-    if (favouriteCache.has(postId)) {
+    // 使用函数式更新来避免依赖状态
+    let shouldFetch = true;
+    
+    setFavouriteCache(prev => {
+      if (prev.has(postId)) {
+        shouldFetch = false;
+        return prev;
+      }
+      return prev;
+    });
+
+    if (!shouldFetch) {
       return;
     }
 
@@ -198,7 +240,7 @@ export default function PostList({
     } catch (error) {
       console.error(`获取收藏状态失败 (postId: ${postId}):`, error);
     }
-  }, [favouriteCache]);
+  }, []); // 移除依赖，使用函数式更新
 
   /**
    * 获取帖子评论数
@@ -206,13 +248,28 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const fetchCommentCount = useCallback(async (postId: string) => {
-    // 如果已经缓存或正在请求中，直接返回
-    if (commentCountCache.has(postId) || fetchingCommentCountIds.has(postId)) {
+    // 使用函数式更新来避免依赖状态
+    let shouldFetch = true;
+    
+    setFetchingCommentIds(prev => {
+      if (prev.has(postId)) {
+        shouldFetch = false;
+        return prev;
+      }
+      return new Set(prev).add(postId);
+    });
+    
+    setCommentCountCache(prev => {
+      if (prev.has(postId)) {
+        shouldFetch = false;
+        return prev;
+      }
+      return prev;
+    });
+
+    if (!shouldFetch) {
       return;
     }
-
-    // 标记为正在请求中
-    setFetchingCommentCountIds(prev => new Set(prev).add(postId));
 
     try {
       const commentCount = await getCommentCountApi(postId);
@@ -223,21 +280,21 @@ export default function PostList({
       });
     } catch (error) {
       console.error(`获取评论数失败 (postId: ${postId}):`, error);
-      // 设置默认值为0
+      // 发生错误时设为0，避免影响显示
       setCommentCountCache(prev => {
         const newCache = new Map(prev);
         newCache.set(postId, 0);
         return newCache;
       });
     } finally {
-      // 移除请求中标记
-      setFetchingCommentCountIds(prev => {
+      // 移除获取中标记
+      setFetchingCommentIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(postId);
         return newSet;
       });
     }
-  }, [commentCountCache, fetchingCommentCountIds]);
+  }, []); // 移除所有依赖，使用函数式更新
 
   /**
    * 切换收藏状态
@@ -319,6 +376,16 @@ export default function PostList({
   }, [togglingLikeIds, likeCache]);
 
   /**
+   * 显示删除确认弹窗
+   * 
+   * @param postId - 帖子ID
+   */
+  const showDeleteConfirm = useCallback((postId: string) => {
+    setPostToDelete(postId);
+    setShowDeleteDialog(true);
+  }, []);
+
+  /**
    * 删除帖子
    * 
    * @param postId - 帖子ID
@@ -329,23 +396,38 @@ export default function PostList({
       return;
     }
 
-    // 确认删除
-    if (!confirm('确定要删除这篇帖子吗？删除后无法恢复。')) {
-      return;
-    }
-
     // 标记为正在删除中
     setDeletingPostIds(prev => new Set(prev).add(postId));
 
     try {
-      await deletePostApi({ postId });
+      // 调用真实的删除API
+      await deletePostApi(postId);
       
       // 从列表中移除已删除的帖子
       setPosts(prev => prev.filter(post => post.postId !== postId));
       
+      // 清除相关缓存
+      setCommentCountCache(prev => {
+        const newCache = new Map(prev);
+        newCache.delete(postId);
+        return newCache;
+      });
+      
+      setFavouriteCache(prev => {
+        const newCache = new Map(prev);
+        newCache.delete(postId);
+        return newCache;
+      });
+      
+      setLikeCache(prev => {
+        const newCache = new Map(prev);
+        newCache.delete(postId);
+        return newCache;
+      });
+      
       console.log(`已删除帖子: ${postId}`);
       
-      // 成功提示
+      // 可以添加成功提示，这里暂时用alert
       alert('帖子删除成功');
     } catch (error: any) {
       console.error(`删除帖子失败 (postId: ${postId}):`, error);
@@ -359,6 +441,25 @@ export default function PostList({
       });
     }
   }, [deletingPostIds]);
+
+  /**
+   * 确认删除帖子
+   */
+  const handleConfirmDelete = useCallback(async () => {
+    if (!postToDelete) return;
+    
+    setShowDeleteDialog(false);
+    await handleDeletePost(postToDelete);
+    setPostToDelete(null);
+  }, [postToDelete, handleDeletePost]);
+
+  /**
+   * 取消删除
+   */
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteDialog(false);
+    setPostToDelete(null);
+  }, []);
 
   /**
    * 分享帖子 - 复制链接到剪贴板
@@ -425,6 +526,12 @@ export default function PostList({
           pageNum: page,
           pageSize
         });
+      } else if (showUserPosts) {
+        // 获取当前用户的帖子
+        response = await getUserPostsApi({
+          pageNum: page,
+          pageSize
+        });
       } else if (categoryId) {
         // 获取分类下的帖子
         response = await getPostsByCategoryIdApi(categoryId, page, pageSize);
@@ -470,14 +577,14 @@ export default function PostList({
     } finally {
       setIsLoading(false);
     }
-  }, [categoryId, pageSize, searchKeyword, showFavourites, showFollowedPosts, userId, fetchUserInfo]);
+  }, [categoryId, pageSize, searchKeyword, showFavourites, showFollowedPosts, showUserPosts, userId, fetchUserInfo]);
 
   /**
    * 组件初始化和关键props变化时获取数据
    */
   useEffect(() => {
     const prevProps = prevPropsRef.current;
-    const currentProps = { categoryId, searchKeyword, pageSize, showFavourites, showFollowedPosts, userId };
+    const currentProps = { categoryId, searchKeyword, pageSize, showFavourites, showFollowedPosts, showUserPosts, userId };
     
     // 检查是否是真正需要重置页码的变化
     const shouldResetPage = (
@@ -486,6 +593,7 @@ export default function PostList({
       prevProps.pageSize !== currentProps.pageSize ||
       prevProps.showFavourites !== currentProps.showFavourites ||
       prevProps.showFollowedPosts !== currentProps.showFollowedPosts ||
+      prevProps.showUserPosts !== currentProps.showUserPosts ||
       prevProps.userId !== currentProps.userId
     );
     
@@ -500,7 +608,7 @@ export default function PostList({
     
     // 更新ref
     prevPropsRef.current = currentProps;
-  }, [searchKeyword, pageSize, categoryId, showFavourites, showFollowedPosts, userId, fetchPosts, currentPage, pageKey, resetPage]);
+  }, [searchKeyword, pageSize, categoryId, showFavourites, showFollowedPosts, showUserPosts, userId, fetchPosts, currentPage, pageKey, resetPage]);
 
   /**
    * 处理分页变化
@@ -546,6 +654,11 @@ export default function PostList({
       return user.username || `用户${userId}`;
     }
     
+    // 如果缓存中有null值，说明用户不存在
+    if (userCache.has(userId) && user === null) {
+      return `用户${userId}`;
+    }
+    
     // 如果正在获取用户信息，显示加载状态
     if (fetchingUserIds.has(userId)) {
       return '加载中...';
@@ -563,7 +676,20 @@ export default function PostList({
    */
   const getUserAvatar = (userId: string): string => {
     const user = userCache.get(userId);
-    return user?.avatarUrl || '/images/avatars/default-avatar.png';
+    return (user && user.avatarUrl) || '/images/avatars/default-avatar.svg';
+  };
+
+  /**
+   * 获取帖子评论数显示
+   * 
+   * @param postId - 帖子ID
+   * @returns 评论数显示文本
+   */
+  const getCommentCountDisplay = (postId: string): string => {
+    if (fetchingCommentIds.has(postId)) {
+      return '...';
+    }
+    return String(commentCountCache.get(postId) ?? 0);
   };
 
   /**
@@ -737,9 +863,11 @@ export default function PostList({
                     <h2 className="text-lg font-semibold text-neutral-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                       {post.title}
                     </h2>
-                    <span className="flex-shrink-0 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium ml-2">
-                      {post.category.categoryName}
-                    </span>
+                    {post.category && (
+                      <span className="flex-shrink-0 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium ml-2">
+                        {post.category.categoryName}
+                      </span>
+                    )}
                   </div>
                 </Link>
               </div>
@@ -779,7 +907,7 @@ export default function PostList({
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span>{commentCountCache.get(post.postId) ?? 0}</span>
+                    <span>{getCommentCountDisplay(post.postId)}</span>
                   </div>
                   
                   {/* 浏览数 */}
@@ -899,7 +1027,7 @@ export default function PostList({
                   {/* 删除按钮 */}
                   {showDeleteButton && (
                     <button 
-                      onClick={() => handleDeletePost(post.postId)}
+                      onClick={() => showDeleteConfirm(post.postId)}
                       disabled={deletingPostIds.has(post.postId)}
                       className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 ${
                         deletingPostIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''
@@ -943,6 +1071,17 @@ export default function PostList({
           />
         </div>
       )}
+
+      {/* 删除确认弹窗 */}
+      <ConfirmDialog
+        visible={showDeleteDialog}
+        title="确认删除"
+        message={`确定要删除帖子"${postToDelete ? posts.find(p => p.postId === postToDelete)?.title || '该帖子' : '该帖子'}"吗？删除后无法恢复。`}
+        confirmText="确认删除"
+        loading={postToDelete ? deletingPostIds.has(postToDelete) : false}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }

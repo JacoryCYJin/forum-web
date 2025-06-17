@@ -4,7 +4,7 @@
  * @description 提供帖子相关的API调用函数
  */
 
-import { get, post } from '@/lib/utils/request';
+import { get, del } from '@/lib/utils/request';
 import type { 
   Post, 
   PostDetail,
@@ -220,48 +220,70 @@ export async function getUserPostCountApi(params: {
 }
 
 /**
- * 删除帖子API
+ * 获取用户的帖子列表API
  * 
- * 删除指定的帖子（软删除，只有帖子作者可以删除自己的帖子）
+ * 获取当前登录用户发布的帖子列表（只能查询自己的帖子）
  *
  * @async
- * @param {Object} params - 删除参数
- * @param {string} params.postId - 帖子ID
- * @returns {Promise<boolean>} 删除是否成功
+ * @param {Object} params - 查询参数
+ * @param {number} [params.pageNum=1] - 页码，从1开始
+ * @param {number} [params.pageSize=10] - 每页大小
+ * @returns {Promise<PageResponse<Post>>} 分页帖子列表数据
+ * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 获取当前用户的帖子列表
+ * const userPosts = await getUserPostsApi({ pageNum: 1, pageSize: 10 });
+ */
+export async function getUserPostsApi(params: {
+  pageNum?: number;
+  pageSize?: number;
+} = {}): Promise<PageResponse<Post>> {
+  try {
+    const queryParams = {
+      page_num: params.pageNum || 1,
+      page_size: params.pageSize || 10
+    };
+    
+    const response: ApiResponse<PageResponse<Post>> = await get('/posts/getPostByUserId', queryParams);
+    
+    if (response.code === 0 && response.data) {
+      return response.data;
+    } else {
+      throw new Error(response.message || '获取用户帖子列表失败');
+    }
+  } catch (error) {
+    console.error('获取用户帖子列表失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 删除帖子API
+ * 
+ * 删除指定ID的帖子，需要用户权限验证
+ *
+ * @async
+ * @param {string} postId - 要删除的帖子ID
+ * @returns {Promise<void>}
  * @throws {Error} 当API请求失败时抛出错误
  * @example
  * // 删除指定帖子
- * const success = await deletePostApi({ postId: 'post-123' });
+ * await deletePostApi('post-123');
  */
-export async function deletePostApi(params: {
-  postId: string;
-}): Promise<boolean> {
+export async function deletePostApi(postId: string): Promise<void> {
   try {
-    if (!params.postId || params.postId.trim().length === 0) {
-      throw new Error('帖子ID不能为空');
-    }
+    // 使用正确的URL路径和请求体格式，匹配后端PostDeleteForm的SnakeCaseStrategy
+    const response: ApiResponse<void> = await del('/posts/delete', {
+      data: {
+        post_id: postId
+      }
+    });
     
-    const requestParams = {
-      post_id: params.postId
-    };
-    
-    const response: ApiResponse<boolean> = await post('/posts/delete', requestParams);
-    
-    if (response.code === 0) {
-      return response.data || true;
-    } else {
+    if (response.code !== 0) {
       throw new Error(response.message || '删除帖子失败');
     }
-  } catch (error: any) {
-    console.error(`删除帖子失败 (postId: ${params.postId}):`, error);
-    
-    // 提供更友好的错误信息
-    if (error.message && error.message.includes('权限')) {
-      throw new Error('您只能删除自己发布的帖子');
-    } else if (error.message && error.message.includes('不存在')) {
-      throw new Error('帖子不存在或已被删除');
-    }
-    
+  } catch (error) {
+    console.error(`删除帖子(ID: ${postId})失败:`, error);
     throw error;
   }
 }

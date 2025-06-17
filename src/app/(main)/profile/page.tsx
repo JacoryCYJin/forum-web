@@ -397,7 +397,7 @@ export default function ProfilePage() {
             {/* 我的帖子 */}
             {activeTab === 'posts' && (
               <PostList 
-                userId={user?.userId}
+                showUserPosts={true}
                 pageSize={10}
                 showDeleteButton={true}
               />

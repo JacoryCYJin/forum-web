@@ -284,7 +284,7 @@ export default function UserProfilePage() {
           <div className="flex items-center space-x-6">
             {/* 用户头像 */}
             <img
-              src={userInfo.avatarUrl || '/images/avatars/default-avatar.png'}
+              src={userInfo.avatarUrl || '/images/avatars/default-avatar.svg'}
               alt={userInfo.username}
               className="w-24 h-24 rounded-full object-cover border-4 border-neutral-200 dark:border-zinc-600"
             />

@@ -4,7 +4,7 @@
  * @description 提供评论相关的API调用函数
  */
 
-import { get, post } from '@/lib/utils/request';
+import { post, get } from '@/lib/utils/request';
 import type { AddCommentRequest, CommentApiResponse } from '@/types/commentTypes';
 
 /**
@@ -89,14 +89,16 @@ export async function addCommentApi(commentData: AddCommentRequest): Promise<Com
  */
 export async function getCommentCountApi(postId: string): Promise<number> {
   try {
-    if (!postId || postId.trim().length === 0) {
+    if (!postId) {
       throw new Error('帖子ID不能为空');
     }
-    
-    const response: CommentApiResponse<number> = await get('/comment/count', {
+
+    const queryParams = {
       post_id: postId
-    });
-    
+    };
+
+    const response: CommentApiResponse = await get('/comment/count', queryParams);
+
     if (response.code === 0) {
       return response.data || 0;
     } else {
@@ -106,11 +108,12 @@ export async function getCommentCountApi(postId: string): Promise<number> {
   } catch (error: any) {
     console.error('❌ 获取评论数失败:', error);
     
-    // 对于评论数获取失败，返回0而不是抛出错误，保证页面正常显示
-    if (error.message && error.message.includes('帖子ID不能为空')) {
-      throw error;
+    // 对于获取评论数的错误，我们返回0而不是抛出错误，避免影响帖子列表显示
+    if (error.message?.includes('网络') || error.message?.includes('连接')) {
+      console.warn('网络异常，评论数设为0');
+      return 0;
     }
     
-    return 0; // 静默失败，返回0评论数
+    throw error;
   }
 }

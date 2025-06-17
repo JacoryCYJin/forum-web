@@ -43,7 +43,7 @@ export interface AddCommentRequest {
 /**
  * 评论API响应数据类型
  */
-export interface CommentApiResponse<T = any> {
+export interface CommentApiResponse {
   /**
    * 响应状态码
    */
@@ -52,7 +52,7 @@ export interface CommentApiResponse<T = any> {
   /**
    * 响应数据
    */
-  data: T;
+  data: any;
   
   /**
    * 响应消息

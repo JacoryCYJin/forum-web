@@ -125,8 +125,15 @@ export function put<T = any>(url: string, data?: any): Promise<ResponseData<T>> 
 }
 
 // 封装 DELETE 请求
-export function del<T = any>(url: string, params?: any): Promise<ResponseData<T>> {
-  return request.delete(url, { params });
+export function del<T = any>(url: string, config?: { params?: any; data?: any }): Promise<ResponseData<T>> {
+  // 如果传入的是旧格式的params参数，保持向后兼容
+  if (config && !config.params && !config.data) {
+    // 旧格式兼容：del(url, params)
+    return request.delete(url, { params: config });
+  }
+  
+  // 新格式：del(url, { data: requestBody, params: queryParams })
+  return request.delete(url, config);
 }
 
 // 导出 axios 实例

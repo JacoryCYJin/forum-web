@@ -14,7 +14,7 @@
 export function processAvatarPath(avatarUrl?: string | null): string {
   // 如果没有头像URL，返回默认头像
   if (!avatarUrl) {
-    return '/images/default-avatar.png';
+    return '/images/avatars/default-avatar.svg';
   }
   
   // 如果已经是完整的URL（http或https开头），直接返回
