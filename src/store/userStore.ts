@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserInfo as User, UserStats, Notification } from '@/types/userType';
+import { UserInfo as User, UserStats, Notification } from '@/types/userTypes';
 import { processAvatarPath } from '@/lib/utils/avatarUtils';
 import { updateAvatarAndUsernameAndProfileApi } from '@/lib/api/userApi';
 

@@ -23,17 +23,17 @@ import type {
   ForgotPasswordPanelProps,
   AvatarPanelProps,
   TagsPanelProps,
-} from "@/types/loginDialogType";
+} from "@/types/loginDialogTypes";
 
 // 导入枚举
 import {
   AuthStep as AuthStepEnum,
   AnimationDirection as AnimationDirectionEnum,
-} from "@/types/loginDialogType";
+} from "@/types/loginDialogTypes";
 
 // 导入工具方法
 import { LoginDialogUtils } from "./LoginDialog.utils";
-import type { Category } from "@/types/categoryType";
+import type { Category } from "@/types/categoryTypes";
 
 /**
  * 验证码倒计时Hook

@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PostType } from '@/types/userType';
+import { PostType } from '@/types/userTypes';
 import { PostEditorText } from '@/components/features/post/PostEditorText';
 import { PostEditorVideo } from '@/components/features/post/PostEditorVideo';
 

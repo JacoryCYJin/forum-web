@@ -8,14 +8,14 @@ import {
   AnimationDirection, 
   DialogHandlersConfig, 
   DialogHandlers 
-} from "@/types/loginDialogType";
+} from "@/types/loginDialogTypes";
 import { loginUserApi, updateAvatarAndUsernameAndProfileApi, sendUnifiedEmailCodeApi, resetPasswordApi, registerWithCodeApi, sendPhoneCodeApi } from "@/lib/api/userApi";
 import { useUserStore } from "@/store/userStore";
 import { TokenManager } from "@/lib/utils/tokenManager";
-import type { UserInfo as User } from "@/types/userType";
+import type { UserInfo as User } from "@/types/userTypes";
 import { processAvatarPath, validateAvatarFile } from "@/lib/utils/avatarUtils";
 import { getCategoryListWithCacheApi } from "@/lib/api/categoryApi";
-import type { Category } from "@/types/categoryType";
+import type { Category } from "@/types/categoryTypes";
 
 /**
  * 登录对话框的工具方法集合

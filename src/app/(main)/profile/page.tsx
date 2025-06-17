@@ -6,28 +6,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
-import { UserActivity, UserActivityType, PostType } from '@/types/userType';
+import { UserActivity, UserActivityType } from '@/types/userTypes';
+import { getFollowingCountApi, getFollowersCountApi } from '@/lib/api/followApi';
+import { getUserPostCountApi } from '@/lib/api/postsApi';
 import PostList from '@/components/features/post/PostList';
 
 /**
  * 标签页类型
  */
-type TabType = 'activities' | 'posts' | 'videos' | 'favorites';
-
-/**
- * 帖子/视频数据接口
- */
-interface UserPost {
-  id: string;
-  title: string;
-  type: PostType;
-  content: string;
-  createdAt: Date;
-  upvotes: number;
-  comments: number;
-  category: string;
-}
+type TabType = 'activities' | 'posts' | 'favorites';
 
 /**
  * 用户个人主页组件
@@ -36,62 +25,55 @@ interface UserPost {
  */
 export default function ProfilePage() {
   const { user, userStats } = useUserStore();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('activities');
   const [activities, setActivities] = useState<UserActivity[]>([]);
-  const [userPosts, setUserPosts] = useState<UserPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [followStats, setFollowStats] = useState({
+    followingCount: 0,
+    followersCount: 0
+  });
+  const [userPostCount, setUserPostCount] = useState(0);
 
   /**
-   * 模拟获取用户帖子和视频
+   * 获取关注统计数据
    */
-  const fetchUserPosts = async () => {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  const fetchFollowStats = async () => {
+    if (!user) return;
     
-    const mockPosts: UserPost[] = [
-      {
-        id: '1',
-        title: 'Next.js 15 性能优化实践',
-        type: PostType.TEXT_IMAGE,
-        content: '分享一些Next.js 15的性能优化技巧...',
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
-        upvotes: 124,
-        comments: 15,
-        category: '技术'
-      },
-      {
-        id: '2',
-        title: 'React Hook最佳实践视频教程',
-        type: PostType.VIDEO,
-        content: '详细讲解React Hook的使用方法和注意事项',
-        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5小时前
-        upvotes: 89,
-        comments: 8,
-        category: '教程'
-      },
-      {
-        id: '3',
-        title: '前端开发工具推荐',
-        type: PostType.TEXT_IMAGE,
-        content: '推荐一些实用的前端开发工具',
-        createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12小时前
-        upvotes: 67,
-        comments: 12,
-        category: '工具'
-      },
-      {
-        id: '4',
-        title: 'TypeScript进阶技巧分享',
-        type: PostType.VIDEO,
-        content: 'TypeScript高级特性的使用技巧',
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1天前
-        upvotes: 156,
-        comments: 23,
-        category: '技术'
-      }
-    ];
+    try {
+      const [followingCount, followersCount] = await Promise.all([
+        getFollowingCountApi(user.userId),
+        getFollowersCountApi(user.userId)
+      ]);
+      
+      setFollowStats({
+        followingCount,
+        followersCount
+      });
+    } catch (error) {
+      console.error('获取关注统计失败:', error);
+      // 设置默认值
+      setFollowStats({
+        followingCount: 0,
+        followersCount: 0
+      });
+    }
+  };
+
+  /**
+   * 获取用户帖子数量
+   */
+  const fetchUserPostCount = async () => {
+    if (!user) return;
     
-    setUserPosts(mockPosts);
+    try {
+      const postCount = await getUserPostCountApi({ userId: user.userId });
+      setUserPostCount(postCount || 0);
+    } catch (error) {
+      console.error('获取用户帖子数量失败:', error);
+      setUserPostCount(0);
+    }
   };
 
   /**
@@ -100,13 +82,16 @@ export default function ProfilePage() {
   const fetchUserActivities = async () => {
     setIsLoading(true);
     try {
-      // 获取用户帖子
-      await fetchUserPosts();
+      // 获取关注统计
+      await fetchFollowStats();
+      
+      // 获取用户帖子数量
+      await fetchUserPostCount();
       
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // 基于帖子生成动态
+      // 模拟动态数据
       const mockActivities: UserActivity[] = [
         {
           id: '1',
@@ -163,7 +148,21 @@ export default function ProfilePage() {
    */
   useEffect(() => {
     fetchUserActivities();
-  }, []);
+  }, [user]);
+
+  /**
+   * 点击关注数跳转到关注页面
+   */
+  const handleFollowingClick = () => {
+    router.push('/like');
+  };
+
+  /**
+   * 点击粉丝数跳转到粉丝页面
+   */
+  const handleFollowersClick = () => {
+    router.push('/followers');
+  };
 
   /**
    * 获取活动类型对应的图标
@@ -206,24 +205,6 @@ export default function ProfilePage() {
   };
 
   /**
-   * 获取帖子类型图标
-   */
-  const getPostTypeIcon = (type: PostType) => {
-    if (type === PostType.VIDEO) {
-      return (
-        <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      );
-    }
-    return (
-      <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    );
-  };
-
-  /**
    * 格式化时间显示
    */
   const formatTimeAgo = (date: Date): string => {
@@ -241,24 +222,11 @@ export default function ProfilePage() {
   };
 
   /**
-   * 获取过滤后的帖子
-   */
-  const getFilteredPosts = () => {
-    if (activeTab === 'posts') {
-      return userPosts.filter(post => post.type === PostType.TEXT_IMAGE);
-    } else if (activeTab === 'videos') {
-      return userPosts.filter(post => post.type === PostType.VIDEO);
-    }
-    return userPosts;
-  };
-
-  /**
    * 标签页配置
    */
   const tabs = [
     { key: 'activities' as TabType, label: '我的动态', count: activities.length },
-    { key: 'posts' as TabType, label: '我的帖子', count: userPosts.filter(p => p.type === PostType.TEXT_IMAGE).length },
-    { key: 'videos' as TabType, label: '我的视频', count: userPosts.filter(p => p.type === PostType.VIDEO).length },
+    { key: 'posts' as TabType, label: '我的帖子', count: userPostCount },
     { key: 'favorites' as TabType, label: '我的收藏', count: 0 }
   ];
 
@@ -296,47 +264,58 @@ export default function ProfilePage() {
               <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-2">
                 {user.nickname}
               </h1>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-400 mb-2">
                 @{user.username}
               </p>
               
+              {/* 用户简介 */}
+              {user.bio && (
+                <p className="text-neutral-700 dark:text-neutral-300 mb-4 max-w-md">
+                  {user.bio}
+                </p>
+              )}
+              
               {/* 统计信息 */}
-              {userStats && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary">
-                      {userStats.followingCount}
-                    </div>
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                      关注
-                    </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button 
+                  onClick={handleFollowingClick}
+                  className="text-center hover:bg-neutral-50 dark:hover:bg-zinc-700 p-2 rounded-lg transition-colors"
+                >
+                  <div className="text-xl font-bold text-primary">
+                    {followStats.followingCount}
                   </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary">
-                      {userStats.followersCount}
-                    </div>
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                      粉丝
-                    </div>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                    关注
                   </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary">
-                      {userStats.postsCount}
-                    </div>
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                      发帖
-                    </div>
+                </button>
+                <button 
+                  onClick={handleFollowersClick}
+                  className="text-center hover:bg-neutral-50 dark:hover:bg-zinc-700 p-2 rounded-lg transition-colors"
+                >
+                  <div className="text-xl font-bold text-primary">
+                    {followStats.followersCount}
                   </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary">
-                      {userStats.viewsCount}
-                    </div>
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                      被浏览
-                    </div>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                    粉丝
+                  </div>
+                </button>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-primary">
+                    {userPostCount}
+                  </div>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                    发帖
                   </div>
                 </div>
-              )}
+                <div className="text-center">
+                  <div className="text-xl font-bold text-primary">
+                    {userStats?.viewsCount || 0}
+                  </div>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                    被浏览
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -416,71 +395,13 @@ export default function ProfilePage() {
             )}
 
             {/* 我的帖子 */}
-            {(activeTab === 'posts' || activeTab === 'videos') && (
-              <div>
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="text-neutral-500 dark:text-neutral-400">
-                      加载中...
-                    </div>
-                  </div>
-                ) : getFilteredPosts().length > 0 ? (
-                  <div className="space-y-4">
-                    {getFilteredPosts().map(post => (
-                      <div key={post.id} className="p-4 border border-neutral-200 dark:border-zinc-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-colors">
-                        <div className="flex items-start space-x-3">
-                          <div className="flex-shrink-0 w-10 h-10 bg-neutral-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                            {getPostTypeIcon(post.type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
-                                {post.title}
-                              </h3>
-                              <span className="px-2 py-1 bg-neutral-100 dark:bg-zinc-700 rounded-full text-xs text-neutral-600 dark:text-neutral-300">
-                                {post.category}
-                              </span>
-                            </div>
-                            <p className="text-neutral-600 dark:text-neutral-400 mb-3">
-                              {post.content}
-                            </p>
-                            <div className="flex items-center space-x-4 text-sm text-neutral-500 dark:text-neutral-400">
-                              <span className="flex items-center">
-                                <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                </svg>
-                                {post.upvotes}
-                              </span>
-                              <span className="flex items-center">
-                                <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
-                                </svg>
-                                {post.comments}
-                              </span>
-                              <span>{formatTimeAgo(post.createdAt)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <h3 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">
-                      暂无{activeTab === 'posts' ? '帖子' : '视频'}
-                    </h3>
-                    <p className="text-neutral-500 dark:text-neutral-400">
-                      开始创作您的第一个{activeTab === 'posts' ? '帖子' : '视频'}吧
-                    </p>
-                  </div>
-                )}
-              </div>
+            {activeTab === 'posts' && (
+              <PostList 
+                userId={user?.userId}
+                pageSize={10}
+                showDeleteButton={true}
+              />
             )}
-
-
 
             {/* 我的收藏 */}
             {activeTab === 'favorites' && (
@@ -495,4 +416,4 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-} 
+}

@@ -23,7 +23,7 @@ import {
   Chip,
 } from "@icon-park/react";
 import { getCategoryListWithCacheApi } from "@/lib/api/categoryApi";
-import { Category } from "@/types/categoryType";
+import { Category } from "@/types/categoryTypes";
 
 /**
  * 侧边栏组件属性接口

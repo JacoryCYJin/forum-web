@@ -4,7 +4,7 @@
  * @description 提供评论相关的API调用函数
  */
 
-import { post } from '@/lib/utils/request';
+import { get, post } from '@/lib/utils/request';
 import type { AddCommentRequest, CommentApiResponse } from '@/types/commentTypes';
 
 /**
@@ -71,5 +71,46 @@ export async function addCommentApi(commentData: AddCommentRequest): Promise<Com
     }
     
     throw error;
+  }
+}
+
+/**
+ * 获取帖子评论数API
+ * 
+ * 获取指定帖子的评论总数
+ *
+ * @async
+ * @param {string} postId - 帖子ID
+ * @returns {Promise<number>} 评论总数
+ * @throws {Error} 当API请求失败时抛出错误
+ * @example
+ * // 获取帖子评论数
+ * const commentCount = await getCommentCountApi('post-123');
+ */
+export async function getCommentCountApi(postId: string): Promise<number> {
+  try {
+    if (!postId || postId.trim().length === 0) {
+      throw new Error('帖子ID不能为空');
+    }
+    
+    const response: CommentApiResponse<number> = await get('/comment/count', {
+      post_id: postId
+    });
+    
+    if (response.code === 0) {
+      return response.data || 0;
+    } else {
+      console.error('❌ 获取评论数失败，服务器返回:', response);
+      throw new Error(response.message || '获取评论数失败');
+    }
+  } catch (error: any) {
+    console.error('❌ 获取评论数失败:', error);
+    
+    // 对于评论数获取失败，返回0而不是抛出错误，保证页面正常显示
+    if (error.message && error.message.includes('帖子ID不能为空')) {
+      throw error;
+    }
+    
+    return 0; // 静默失败，返回0评论数
   }
 }

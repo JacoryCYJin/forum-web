@@ -4,8 +4,8 @@
  */
 
 import { get } from "@/lib/utils/request";
-import { Category, CategoryListResponse } from "@/types/categoryType";
-import { ApiResponse } from "@/types/userType";
+import { Category, CategoryListResponse } from "@/types/categoryTypes";
+import { ApiResponse } from "@/types/userTypes";
 
 // 在文件顶部添加缓存
 let categoriesCache: Category[] | null = null;

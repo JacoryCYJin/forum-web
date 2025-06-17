@@ -3,7 +3,7 @@
  * @description 提供用户信息处理相关的工具函数
  */
 
-import type { UserInfo } from '@/types/userType';
+import type { UserInfo } from '@/types/userTypes';
 
 /**
  * 更新用户的updatedAt时间

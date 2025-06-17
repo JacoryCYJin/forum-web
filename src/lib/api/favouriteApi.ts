@@ -5,7 +5,7 @@
  */
 
 import { get, post, del} from '@/lib/utils/request';
-import type { PageResponse, Post } from '@/types/postType';
+import type { PageResponse, Post } from '@/types/postTypes';
 
 /**
  * 收藏表单数据接口

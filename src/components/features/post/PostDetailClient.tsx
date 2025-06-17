@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { getPostByIdApi } from '@/lib/api/postsApi';
 
 import CommentSection from './CommentSection';
-import type { PageResponse, Comment } from '@/types/postType';
+import type { PageResponse, Comment } from '@/types/postTypes';
 
 /**
  * 帖子详情客户端组件属性接口

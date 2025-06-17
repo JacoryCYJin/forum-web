@@ -20,7 +20,7 @@ import type {
   ChangeEmailRequest,
   UpdatePrivacySettingsRequest,
   PrivacySettings,
-} from "@/types/userType";
+} from "@/types/userTypes";
 
 /**
  * 设置认证Cookie

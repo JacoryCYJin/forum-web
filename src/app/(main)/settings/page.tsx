@@ -19,7 +19,7 @@ import {
 } from '@/lib/api/userApi';
 import { formatDateToChinese } from '@/lib/utils/dateUtils';
 import { updateUserAndSync } from '@/lib/utils/userUtils';
-import type { PrivacySettings } from '@/types/userType';
+import type { PrivacySettings } from '@/types/userTypes';
 
 /**
  * 设置分类类型

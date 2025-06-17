@@ -5,7 +5,7 @@
 
 import { notFound } from 'next/navigation';
 import { getCategoryByIdApi } from '@/lib/api/categoryApi';
-import { CategoryPageProps } from '@/types/categoryType';
+import { CategoryPageProps } from '@/types/categoryTypes';
 import PostList from '@/components/features/post/PostList';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 

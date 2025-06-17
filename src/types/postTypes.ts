@@ -169,6 +169,11 @@ export interface PostQueryParams {
   title?: string;
   
   /**
+   * 用户ID，用于查询特定用户的帖子
+   */
+  user_id?: string;
+  
+  /**
    * 页码，从1开始
    * @default 1
    */

@@ -11,8 +11,8 @@ import { getUserInfoApi } from "@/lib/api/userApi";
 import { addCommentApi } from "@/lib/api/commentApi";
 import Pagination from "@/components/common/Pagination/Pagination";
 import ReportDialog from "@/components/common/ReportDialog/ReportDialog";
-import type { User } from "@/types/userType";
-import type { Comment, PageResponse } from "@/types/postType";
+import type { User } from "@/types/userTypes";
+import type { Comment, PageResponse } from "@/types/postTypes";
 import type { AddCommentRequest } from "@/types/commentTypes";
 
 /**

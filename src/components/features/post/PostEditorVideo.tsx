@@ -8,7 +8,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginDialogUtils } from '@/components/common/Navbar/LoginDialog.utils';
-import type { Category } from '@/types/categoryType';
+import type { Category } from '@/types/categoryTypes';
 
 /**
  * 视频帖子编辑器Props

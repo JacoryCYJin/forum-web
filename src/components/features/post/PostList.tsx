@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
-import { getPostListApi, getPostsByCategoryIdApi } from '@/lib/api/postsApi';
+import { getPostListApi, getPostsByCategoryIdApi, deletePostApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
+import { getFollowedUsersPostsApi } from '@/lib/api/followApi';
+import { getCommentCountApi } from '@/lib/api/commentApi';
 import { usePaginationStore } from '@/store/paginationStore';
-import type { Post, PageResponse } from '@/types/postType';
-import type { User } from '@/types/userType';
+import type { Post, PageResponse } from '@/types/postTypes';
+import type { User } from '@/types/userTypes';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import Pagination from '@/components/common/Pagination/Pagination';
 
@@ -38,9 +40,19 @@ interface PostListProps {
   showFavourites?: boolean;
   
   /**
+   * 是否显示关注用户的帖子
+   */
+  showFollowedPosts?: boolean;
+  
+  /**
    * 用户ID，当显示收藏列表时使用，为空时使用当前登录用户
    */
   userId?: string;
+  
+  /**
+   * 是否显示删除按钮（仅在显示当前用户帖子时有效）
+   */
+  showDeleteButton?: boolean;
 }
 
 /**
@@ -67,7 +79,9 @@ export default function PostList({
   searchKeyword,
   categoryId,
   showFavourites = false,
-  userId = ''
+  showFollowedPosts = false,
+  userId = '',
+  showDeleteButton = false
 }: PostListProps) {
   /**
    * 帖子列表数据
@@ -99,13 +113,21 @@ export default function PostList({
   // 正在切换收藏状态的帖子ID集合
   const [togglingFavouriteIds, setTogglingFavouriteIds] = useState<Set<string>>(new Set());
 
+  // 评论数缓存：postId -> number
+  const [commentCountCache, setCommentCountCache] = useState<Map<string, number>>(new Map());
+  // 正在获取评论数的帖子ID集合
+  const [fetchingCommentCountIds, setFetchingCommentCountIds] = useState<Set<string>>(new Set());
+
   // 点赞状态缓存：postId -> boolean
   const [likeCache, setLikeCache] = useState<Map<string, boolean>>(new Map());
   // 正在切换点赞状态的帖子ID集合
   const [togglingLikeIds, setTogglingLikeIds] = useState<Set<string>>(new Set());
 
+  // 正在删除的帖子ID集合
+  const [deletingPostIds, setDeletingPostIds] = useState<Set<string>>(new Set());
+
   // 使用ref来跟踪上一次的props，避免不必要的重置
-  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, userId });
+  const prevPropsRef = useRef({ categoryId, searchKeyword, pageSize, showFavourites, showFollowedPosts, userId });
 
   // 分页状态管理
   const { getPage, setPage, resetPage } = usePaginationStore();
@@ -177,6 +199,45 @@ export default function PostList({
       console.error(`获取收藏状态失败 (postId: ${postId}):`, error);
     }
   }, [favouriteCache]);
+
+  /**
+   * 获取帖子评论数
+   * 
+   * @param postId - 帖子ID
+   */
+  const fetchCommentCount = useCallback(async (postId: string) => {
+    // 如果已经缓存或正在请求中，直接返回
+    if (commentCountCache.has(postId) || fetchingCommentCountIds.has(postId)) {
+      return;
+    }
+
+    // 标记为正在请求中
+    setFetchingCommentCountIds(prev => new Set(prev).add(postId));
+
+    try {
+      const commentCount = await getCommentCountApi(postId);
+      setCommentCountCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(postId, commentCount);
+        return newCache;
+      });
+    } catch (error) {
+      console.error(`获取评论数失败 (postId: ${postId}):`, error);
+      // 设置默认值为0
+      setCommentCountCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(postId, 0);
+        return newCache;
+      });
+    } finally {
+      // 移除请求中标记
+      setFetchingCommentCountIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+    }
+  }, [commentCountCache, fetchingCommentCountIds]);
 
   /**
    * 切换收藏状态
@@ -258,6 +319,48 @@ export default function PostList({
   }, [togglingLikeIds, likeCache]);
 
   /**
+   * 删除帖子
+   * 
+   * @param postId - 帖子ID
+   */
+  const handleDeletePost = useCallback(async (postId: string) => {
+    // 如果正在删除中，直接返回
+    if (deletingPostIds.has(postId)) {
+      return;
+    }
+
+    // 确认删除
+    if (!confirm('确定要删除这篇帖子吗？删除后无法恢复。')) {
+      return;
+    }
+
+    // 标记为正在删除中
+    setDeletingPostIds(prev => new Set(prev).add(postId));
+
+    try {
+      await deletePostApi({ postId });
+      
+      // 从列表中移除已删除的帖子
+      setPosts(prev => prev.filter(post => post.postId !== postId));
+      
+      console.log(`已删除帖子: ${postId}`);
+      
+      // 成功提示
+      alert('帖子删除成功');
+    } catch (error: any) {
+      console.error(`删除帖子失败 (postId: ${postId}):`, error);
+      alert(error.message || '删除帖子失败，请稍后重试');
+    } finally {
+      // 移除删除中标记
+      setDeletingPostIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+    }
+  }, [deletingPostIds]);
+
+  /**
    * 分享帖子 - 复制链接到剪贴板
    * 
    * @param postId - 帖子ID
@@ -316,6 +419,12 @@ export default function PostList({
           pageSize,
           userId
         });
+      } else if (showFollowedPosts) {
+        // 获取关注用户的帖子
+        response = await getFollowedUsersPostsApi({
+          pageNum: page,
+          pageSize
+        });
       } else if (categoryId) {
         // 获取分类下的帖子
         response = await getPostsByCategoryIdApi(categoryId, page, pageSize);
@@ -324,7 +433,8 @@ export default function PostList({
         const params = {
           page_num: page,
           page_size: pageSize,
-          ...(searchKeyword && { title: searchKeyword })
+          ...(searchKeyword && { title: searchKeyword }),
+          ...(userId && { user_id: userId })
         };
         response = await getPostListApi(params);
       }
@@ -349,20 +459,25 @@ export default function PostList({
           fetchFavouriteStatus(post.postId);
         });
       }
+      
+      // 获取评论数
+      newPosts.forEach(post => {
+        fetchCommentCount(post.postId);
+      });
     } catch (err: any) {
       setError(err.message || '获取帖子列表失败');
       console.error('获取帖子列表错误:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [categoryId, pageSize, searchKeyword, showFavourites, userId, fetchUserInfo]);
+  }, [categoryId, pageSize, searchKeyword, showFavourites, showFollowedPosts, userId, fetchUserInfo]);
 
   /**
    * 组件初始化和关键props变化时获取数据
    */
   useEffect(() => {
     const prevProps = prevPropsRef.current;
-    const currentProps = { categoryId, searchKeyword, pageSize, showFavourites, userId };
+    const currentProps = { categoryId, searchKeyword, pageSize, showFavourites, showFollowedPosts, userId };
     
     // 检查是否是真正需要重置页码的变化
     const shouldResetPage = (
@@ -370,6 +485,7 @@ export default function PostList({
       prevProps.searchKeyword !== currentProps.searchKeyword ||
       prevProps.pageSize !== currentProps.pageSize ||
       prevProps.showFavourites !== currentProps.showFavourites ||
+      prevProps.showFollowedPosts !== currentProps.showFollowedPosts ||
       prevProps.userId !== currentProps.userId
     );
     
@@ -384,7 +500,7 @@ export default function PostList({
     
     // 更新ref
     prevPropsRef.current = currentProps;
-  }, [searchKeyword, pageSize, categoryId, showFavourites, userId, fetchPosts, currentPage, pageKey, resetPage]);
+  }, [searchKeyword, pageSize, categoryId, showFavourites, showFollowedPosts, userId, fetchPosts, currentPage, pageKey, resetPage]);
 
   /**
    * 处理分页变化
@@ -663,7 +779,7 @@ export default function PostList({
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span>0</span>
+                    <span>{commentCountCache.get(post.postId) ?? 0}</span>
                   </div>
                   
                   {/* 浏览数 */}
@@ -774,6 +890,34 @@ export default function PostList({
                             'zh-CN': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
                             'zh-TW': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
                             'en': favouriteCache.get(post.postId) ? 'Favorited' : 'Save'
+                          }}
+                        />
+                      </span>
+                    </button>
+                  )}
+                  
+                  {/* 删除按钮 */}
+                  {showDeleteButton && (
+                    <button 
+                      onClick={() => handleDeletePost(post.postId)}
+                      disabled={deletingPostIds.has(post.postId)}
+                      className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 ${
+                        deletingPostIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {deletingPostIds.has(post.postId) ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      )}
+                      <span className="text-xs">
+                        <LanguageText 
+                          texts={{
+                            'zh-CN': deletingPostIds.has(post.postId) ? '删除中...' : '删除',
+                            'zh-TW': deletingPostIds.has(post.postId) ? '刪除中...' : '刪除',
+                            'en': deletingPostIds.has(post.postId) ? 'Deleting...' : 'Delete'
                           }}
                         />
                       </span>
