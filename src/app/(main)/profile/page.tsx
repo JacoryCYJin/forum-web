@@ -273,7 +273,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         {/* 用户信息卡片 */}
         <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
           <div className="flex items-start space-x-6">
