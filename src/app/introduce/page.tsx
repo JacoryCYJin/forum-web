@@ -435,28 +435,28 @@ export default function IntroducePage(): React.JSX.Element {
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="intro-section-title font-bold mb-8">我们的愿景</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">我们的愿景</h2>
             <p className="text-2xl mb-16 max-w-4xl mx-auto leading-relaxed">
               &ldquo;让每个人都能在数字世界中找到属于自己的声音，
               通过技术的力量连接彼此，分享知识，创造价值。&rdquo;
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              <div className="intro-glass rounded-2xl p-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
                 <div className="text-4xl text-white mb-6 mx-auto">🌍</div>
                 <h3 className="text-xl font-bold mb-4">连接世界</h3>
                 <p className="text-white/80 leading-relaxed">
                   打破地理界限，让全球用户能够无障碍地交流和分享，构建真正的全球化社区。
                 </p>
               </div>
-              <div className="intro-glass rounded-2xl p-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
                 <div className="text-4xl text-white mb-6 mx-auto">⚡</div>
                 <h3 className="text-xl font-bold mb-4">激发创造</h3>
                 <p className="text-white/80 leading-relaxed">
                   提供强大的创作工具和平台，激发每个用户的创造潜能，让优质内容得到更好的传播。
                 </p>
               </div>
-              <div className="intro-glass rounded-2xl p-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
                 <div className="text-4xl text-white mb-6 mx-auto">❤️</div>
                 <h3 className="text-xl font-bold mb-4">共享未来</h3>
                 <p className="text-white/80 leading-relaxed">
