@@ -110,7 +110,7 @@ function CommentItem({ comment }: CommentItemProps) {
   return (
     <>
       <div className="group hover:bg-neutral-25 dark:hover:bg-zinc-800/30 transition-all duration-200 border-b border-neutral-100 dark:border-zinc-700/50 last:border-b-0">
-        <div className="flex space-x-4 p-5">
+        <div className="flex space-x-4 px-5 pt-3 pb-2">
           {/* 用户信息和时间 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-3">
@@ -130,13 +130,13 @@ function CommentItem({ comment }: CommentItemProps) {
             </div>
 
             {/* 评论文本 */}
-            <div className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap leading-relaxed mb-4 text-sm bg-neutral-50 dark:bg-zinc-800/50 p-4 rounded-xl border border-neutral-200/50 dark:border-zinc-700/50">
+            <div className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap leading-relaxed mb-1 text-sm bg-neutral-50 dark:bg-zinc-800/50 p-4 rounded-xl border border-neutral-200/50 dark:border-zinc-700/50">
               {comment.content}
             </div>
 
             {/* 评论操作按钮 */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <button className="flex items-center space-x-1.5 text-xs text-neutral-500 hover:text-primary dark:hover:text-primary transition-all duration-200 px-3 py-1.5 rounded-lg hover:bg-primary/5 dark:hover:bg-primary/10">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -318,11 +318,6 @@ export default function CommentSection({
     );
   }
 
-  // const totalComments = comments.total_count || 0;
-  // const currentPage = comments.page_num || 1;
-  // const pageSize = comments.page_size || 10;
-  // const totalPages = comments.page_count || 1;
-
   return (
     <div>
       {/* 评论输入区域 */}
@@ -420,20 +415,6 @@ export default function CommentSection({
             </button>
           </div>
         )}
-
-        {/* 分页组件 */}
-        {/* {comments.list && comments.list.length > 0 && totalPages > 1 && (
-          <div className="mt-6 px-6 pb-6">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              total={totalComments}
-              pageSize={pageSize}
-              onPageChange={onPageChange}
-              showWhenSinglePage={false}
-            />
-          </div>
-        )} */}
       </div>
     </div>
   );

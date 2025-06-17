@@ -121,11 +121,11 @@ export default function PostSidebar({
                   'en': `Comments (${commentCount})`
                 }}
               />
-              {commentCount > 0 && (
+              {/* {commentCount > 0 && (
                 <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
                   {commentCount}
                 </span>
-              )}
+              )} */}
             </h4>
           </div>
           <div className="max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-zinc-600 scrollbar-track-transparent">

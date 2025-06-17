@@ -188,12 +188,12 @@ export default function ReportDialog({
       />
       
       {/* 弹窗内容 - 现代化设计，增加宽度适应三列布局 */}
-      <div className="relative bg-white dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col border border-neutral-200/50 dark:border-zinc-700/50 overflow-hidden animate-slideUp">
+      <div className="relative bg-white dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[70vh] flex flex-col border border-neutral-200/50 dark:border-zinc-700/50 overflow-hidden animate-slideUp">
         {/* 装饰性背景 */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-red-500/5 pointer-events-none"></div>
         
         {/* 弹窗头部 - 增强版 */}
-        <div className="relative flex items-center justify-between p-8 border-b border-gradient-to-r from-transparent via-neutral-200 dark:via-zinc-700 to-transparent bg-gradient-to-r from-white via-neutral-50 to-white dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800">
+        <div className="relative flex items-center justify-between p-6 border-b border-gradient-to-r from-transparent via-neutral-200 dark:via-zinc-700 to-transparent bg-gradient-to-r from-white via-neutral-50 to-white dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -222,7 +222,7 @@ export default function ReportDialog({
         {/* 弹窗内容区域 - 两列布局优化 */}
         <div className="flex flex-1 min-h-0">
           {/* 左侧：举报原因选择 */}
-          <div className="flex-1 p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-zinc-600">
+          <div className="flex-1 p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-zinc-600">
             {/* 成功消息 - 增强版 */}
             {successMessage && (
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 mb-6 animate-slideIn">
@@ -277,19 +277,19 @@ export default function ReportDialog({
               ) : (
                 <div className="space-y-8">
                   {getCategorizedReasons().map((category, categoryIndex) => (
-                    <div key={categoryIndex} className="space-y-4">
+                    <div key={categoryIndex} className="space-y-3">
                       {/* 分类标题 - 增强版 */}
-                      <h5 className="text-base font-bold text-neutral-700 dark:text-neutral-200 border-b-2 border-gradient-to-r from-primary/30 to-transparent pb-3 flex items-center">
-                        <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+                      <h5 className="text-base font-bold text-neutral-700 dark:text-neutral-200 border-b-2 border-gradient-to-r from-primary/30 to-transparent pb-2 flex items-center">
+                        <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
                         {category.title}
                       </h5>
                       
                       {/* 分类下的举报原因 - 一行三列布局 */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {category.availableReasons.map((reason) => (
                           <label
                             key={reason.reason}
-                            className={`group relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+                            className={`group relative flex items-start p-3 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
                               selectedReason === reason.reason
                                 ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg'
                                 : 'border-neutral-200 dark:border-zinc-700 hover:border-primary/50 hover:bg-neutral-50 dark:hover:bg-zinc-800/50'
@@ -332,7 +332,7 @@ export default function ReportDialog({
 
             {/* 自定义原因输入框 - 增强版 */}
             {selectedReason.endsWith('_OTHER') && (
-              <div className="mt-8 p-6 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-zinc-800/50 dark:to-zinc-700/50 rounded-xl border border-neutral-200 dark:border-zinc-700 animate-slideIn">
+              <div className="mt-4 p-4 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-zinc-800/50 dark:to-zinc-700/50 rounded-xl border border-neutral-200 dark:border-zinc-700 animate-slideIn">
                 <h4 className="text-base font-semibold text-neutral-700 dark:text-neutral-200 mb-4 flex items-center">
                   <svg className="w-5 h-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -360,10 +360,10 @@ export default function ReportDialog({
           </div>
 
           {/* 右侧：被举报内容信息和说明 */}
-          <div className="w-96 p-8 bg-gradient-to-br from-neutral-50/80 to-neutral-100/80 dark:from-zinc-800/50 dark:to-zinc-900/50 border-l border-neutral-200 dark:border-zinc-700">
+          <div className="w-96 p-6 bg-gradient-to-br from-neutral-50/80 to-neutral-100/80 dark:from-zinc-800/50 dark:to-zinc-900/50 border-l border-neutral-200 dark:border-zinc-700">
             {/* 被举报内容信息 */}
             {title && (
-              <div className="bg-white dark:bg-zinc-800 rounded-xl p-6 mb-8 shadow-sm border border-neutral-200 dark:border-zinc-700">
+              <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 mb-8 shadow-sm border border-neutral-200 dark:border-zinc-700">
                 <h4 className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 mb-3 flex items-center">
                   <svg className="w-4 h-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -377,7 +377,7 @@ export default function ReportDialog({
             )}
 
             {/* 举报说明 - 增强版 */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
               <div className="flex items-start space-x-3">
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -411,11 +411,11 @@ export default function ReportDialog({
         </div>
 
         {/* 弹窗底部按钮 - 增强版 */}
-        <div className="relative flex justify-end space-x-4 p-8 border-t border-neutral-200 dark:border-zinc-700 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800">
+        <div className="relative flex justify-end space-x-4 px-8 py-4 border-t border-neutral-200 dark:border-zinc-700 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800">
           <button
             onClick={handleClose}
             disabled={submitting}
-            className="px-6 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white border-2 border-neutral-300 dark:border-zinc-600 rounded-xl hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="px-4 py- text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white border-2 border-neutral-300 dark:border-zinc-600 rounded-xl hover:bg-neutral-50 dark:hover:bg-zinc-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             取消
           </button>
