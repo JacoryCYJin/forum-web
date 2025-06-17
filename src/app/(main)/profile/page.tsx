@@ -11,6 +11,7 @@ import { useUserStore } from '@/store/userStore';
 import { UserActivity, UserActivityType } from '@/types/userTypes';
 import { getFollowingCountApi, getFollowersCountApi } from '@/lib/api/followApi';
 import { getUserPostCountApi } from '@/lib/api/postsApi';
+import { getUserFavouritesApi } from '@/lib/api/favouriteApi';
 import PostList from '@/components/features/post/PostList';
 
 /**
@@ -34,6 +35,7 @@ export default function ProfilePage() {
     followersCount: 0
   });
   const [userPostCount, setUserPostCount] = useState(0);
+  const [userFavouriteCount, setUserFavouriteCount] = useState(0);
 
   /**
    * 获取关注统计数据
@@ -77,6 +79,26 @@ export default function ProfilePage() {
   };
 
   /**
+   * 获取用户收藏数量
+   */
+  const fetchUserFavouriteCount = async () => {
+    if (!user) return;
+    
+    try {
+      // 获取收藏列表的第一页，主要是为了得到 total_count
+      const favouriteData = await getUserFavouritesApi({
+        pageNum: 1,
+        pageSize: 1, // 只需要获取总数，所以页面大小设为1
+        userId: user.userId
+      });
+      setUserFavouriteCount(favouriteData.total_count || 0);
+    } catch (error) {
+      console.error('获取用户收藏数量失败:', error);
+      setUserFavouriteCount(0);
+    }
+  };
+
+  /**
    * 模拟获取用户动态数据
    */
   const fetchUserActivities = async () => {
@@ -87,6 +109,9 @@ export default function ProfilePage() {
       
       // 获取用户帖子数量
       await fetchUserPostCount();
+
+      // 获取用户收藏数量
+      await fetchUserFavouriteCount();
       
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -227,7 +252,7 @@ export default function ProfilePage() {
   const tabs = [
     { key: 'activities' as TabType, label: '我的动态', count: activities.length },
     { key: 'posts' as TabType, label: '我的帖子', count: userPostCount },
-    { key: 'favorites' as TabType, label: '我的收藏', count: 0 }
+    { key: 'favorites' as TabType, label: '我的收藏', count: userFavouriteCount }
   ];
 
   // 如果用户未登录，显示提示

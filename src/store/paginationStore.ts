@@ -5,7 +5,6 @@
  */
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 /**
  * 分页状态接口
@@ -48,44 +47,38 @@ interface PaginationState {
 /**
  * 分页状态管理store
  * 
- * 使用持久化中间件保存页码状态到localStorage
+ * 在内存中管理页码状态，不进行持久化存储
+ * 这样可以确保：
+ * 1. 切换页面时分页状态独立
+ * 2. 关闭网页重新打开时从第1页开始
  */
-export const usePaginationStore = create<PaginationState>()(
-  persist(
-    (set, get) => ({
-      pageStates: {},
-      
-      setPage: (pageKey: string, page: number) => {
-        set((state) => ({
-          pageStates: {
-            ...state.pageStates,
-            [pageKey]: page
-          }
-        }));
-      },
-      
-      getPage: (pageKey: string) => {
-        const state = get();
-        return state.pageStates[pageKey] || 1;
-      },
-      
-      resetPage: (pageKey: string) => {
-        set((state) => ({
-          pageStates: {
-            ...state.pageStates,
-            [pageKey]: 1
-          }
-        }));
-      },
-      
-      clearAll: () => {
-        set({ pageStates: {} });
+export const usePaginationStore = create<PaginationState>()((set, get) => ({
+  pageStates: {},
+  
+  setPage: (pageKey: string, page: number) => {
+    set((state) => ({
+      pageStates: {
+        ...state.pageStates,
+        [pageKey]: page
       }
-    }),
-    {
-      name: 'pagination-storage',
-      // 只持久化pageStates
-      partialize: (state) => ({ pageStates: state.pageStates }),
-    }
-  )
-); 
+    }));
+  },
+  
+  getPage: (pageKey: string) => {
+    const state = get();
+    return state.pageStates[pageKey] || 1;
+  },
+  
+  resetPage: (pageKey: string) => {
+    set((state) => ({
+      pageStates: {
+        ...state.pageStates,
+        [pageKey]: 1
+      }
+    }));
+  },
+  
+  clearAll: () => {
+    set({ pageStates: {} });
+  }
+})); 

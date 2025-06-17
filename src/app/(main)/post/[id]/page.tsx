@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import AvatarLink from '@/components/common/AvatarLink/AvatarLink';
 import { getPostByIdApi } from '@/lib/api/postsApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import type { Tag, PostDetailQueryParams } from '@/types/postTypes';
@@ -160,17 +161,21 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
           <div className="p-6">
             {/* 作者信息 */}
             <div className="flex items-center space-x-3 mb-4">
-              {userInfo?.avatarUrl && (
-                <img
-                  src={userInfo.avatarUrl}
-                  alt={userDisplayName}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
+              {userInfo && (
+                <AvatarLink
+                  userId={post.userId}
+                  avatarUrl={userInfo.avatarUrl}
+                  username={userDisplayName}
+                  sizeClass="w-12 h-12"
                 />
               )}
               <div className="flex-1">
-                <div className="font-semibold text-neutral-800 dark:text-white">
+                <Link 
+                  href={`/user/${post.userId}`}
+                  className="font-semibold text-neutral-800 dark:text-white hover:text-primary transition-colors"
+                >
                   {userDisplayName}
-                </div>
+                </Link>
                 <div className="flex items-center text-sm text-neutral-500 dark:text-neutral-400">
                   <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

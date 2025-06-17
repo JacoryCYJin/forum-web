@@ -52,11 +52,21 @@ export async function getPostListApi(params: PostQueryParams = {}): Promise<Page
       fetch_all: params.fetch_all
     };
 
+    console.log('📤 getPostListApi请求参数:', {
+      originalParams: params,
+      requestParams,
+      url: '/posts/list'
+    });
+
     const response: ApiResponse<PageResponse<Post>> = await get('/posts/list', requestParams);
     
+    console.log('📥 getPostListApi响应:', response);
+    
     if (response.code === 0 && response.data) {
+      console.log('✅ 返回数据:', response.data);
       return response.data;
     } else {
+      console.error('❌ API响应错误:', response);
       throw new Error(response.message || '获取帖子列表失败');
     }
   } catch (error) {

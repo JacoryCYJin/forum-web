@@ -26,10 +26,7 @@ interface UserStats {
   postsCount: number;
 }
 
-/**
- * 标签页类型
- */
-type TabType = 'posts' | 'about';
+
 
 /**
  * 用户主页组件
@@ -53,7 +50,6 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('posts');
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
 
   /**
@@ -396,62 +392,14 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* 标签页导航 */}
-      <div className="flex space-x-1 mb-6 bg-neutral-100 dark:bg-zinc-800 rounded-lg p-1">
-        <button
-          onClick={() => setActiveTab('posts')}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'posts'
-              ? 'bg-white dark:bg-zinc-700 text-primary shadow-sm'
-              : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
-          }`}
-        >
-          <LanguageText 
-            texts={{
-              'zh-CN': '用户帖子',
-              'zh-TW': '用戶貼文',
-              'en': 'User Posts'
-            }}
-          />
-        </button>
-        <button
-          onClick={() => setActiveTab('about')}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'about'
-              ? 'bg-white dark:bg-zinc-700 text-primary shadow-sm'
-              : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
-          }`}
-        >
-          <LanguageText 
-            texts={{
-              'zh-CN': '关于',
-              'zh-TW': '關於',
-              'en': 'About'
-            }}
-          />
-        </button>
+      {/* 用户帖子列表 */}
+      <div>
+        <PostList 
+          showUserPosts={true}
+          userId={userId}
+          pageSize={10}
+        />
       </div>
-
-      {/* 标签页内容 */}
-      {activeTab === 'posts' && (
-        <div>
-          <PostList 
-            showUserPosts={true}
-            userId={userId}
-            pageSize={10}
-          />
-        </div>
-      )}
-
-      {activeTab === 'about' && (
-        <div>
-          <PostList 
-            showUserPosts={true}
-            userId={userId}
-            pageSize={10}
-          />
-        </div>
-      )}
 
       {/* 取消关注确认弹窗 */}
       <ConfirmDialog

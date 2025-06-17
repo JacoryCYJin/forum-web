@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { getUserInfoApi } from "@/lib/api/userApi";
+import UserLink from "@/components/common/UserLink/UserLink";
 import { addCommentApi } from "@/lib/api/commentApi";
 import Pagination from "@/components/common/Pagination/Pagination";
 import ReportDialog from "@/components/common/ReportDialog/ReportDialog";
@@ -109,23 +110,17 @@ function CommentItem({ comment }: CommentItemProps) {
   return (
     <>
       <div className="flex space-x-3 p-4 hover:bg-neutral-50 dark:hover:bg-zinc-800/50 transition-colors">
-        {/* 用户头像 */}
-        <div className="flex-shrink-0">
-          <img
-            src={user?.avatarUrl || "/images/avatars/cjp.png"}
-            alt={user?.username || "用户头像"}
-            className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
-          />
-        </div>
-
-        {/* 评论内容 */}
+        {/* 用户信息和时间 */}
         <div className="flex-1 min-w-0">
-          {/* 用户名和时间 */}
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="font-medium text-neutral-800 dark:text-white text-sm">
-              {user?.username || `用户${comment.userId.slice(-6)}`}
-            </span>
-            <span className="text-xs text-neutral-400 flex items-center">
+          <div className="flex items-center justify-between mb-1">
+            <UserLink
+              userId={comment.userId}
+              avatarUrl={user?.avatarUrl || "/images/avatars/cjp.png"}
+              username={user?.username || `用户${comment.userId.slice(-6)}`}
+              usernameClass="font-medium text-neutral-800 dark:text-white text-sm"
+              spacing="space-x-2"
+            />
+            <span className="text-xs text-neutral-400 flex items-center ml-3">
               <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
+
 import { getPostListApi, getPostsByCategoryIdApi, deletePostApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
@@ -14,6 +15,7 @@ import type { User } from '@/types/userTypes';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import Pagination from '@/components/common/Pagination/Pagination';
 import ConfirmDialog from '@/components/common/ConfirmDialog/ConfirmDialog';
+import UserLink from '@/components/common/UserLink/UserLink';
 
 /**
  * 帖子列表组件属性接口
@@ -90,6 +92,19 @@ export default function PostList({
   userId = '',
   showDeleteButton = false
 }: PostListProps) {
+  
+  // 调试props传递
+  console.log('🚀 PostList组件渲染，接收到的props:', {
+    pageSize,
+    searchKeyword,
+    categoryId,
+    showFavourites,
+    showFollowedPosts,
+    showUserPosts,
+    userId,
+    showDeleteButton
+  });
+  
   /**
    * 帖子列表数据
    */
@@ -146,14 +161,30 @@ export default function PostList({
   // 生成页面唯一标识
   const pageKey = showFavourites 
     ? `favourites-${userId || 'current'}` 
-    : categoryId 
-      ? `category-${categoryId}` 
-      : searchKeyword 
-        ? `search-${searchKeyword}` 
-        : 'home';
+    : showUserPosts
+      ? `user-posts-${userId}`
+      : showFollowedPosts
+        ? 'followed-posts'
+        : categoryId 
+          ? `category-${categoryId}` 
+          : searchKeyword 
+            ? `search-${searchKeyword}` 
+            : 'home';
   
   // 从store获取当前页码
   const currentPage = getPage(pageKey);
+  
+  // 调试页面标识和页码
+  console.log('📍 分页调试信息:', {
+    pageKey,
+    currentPage,
+    showUserPosts,
+    showFavourites,
+    showFollowedPosts,
+    userId,
+    categoryId,
+    searchKeyword
+  });
 
   /**
    * 获取用户信息并缓存
@@ -479,6 +510,8 @@ export default function PostList({
     setPostToDelete(null);
   }, []);
 
+
+
   /**
    * 分享帖子 - 复制链接到剪贴板
    * 
@@ -546,7 +579,15 @@ export default function PostList({
         });
       } else if (showUserPosts) {
         // 获取指定用户的帖子
+        console.log('🔍 获取用户帖子:', {
+          userId,
+          showUserPosts,
+          page,
+          pageSize
+        });
+        
         if (!userId || userId.trim() === '') {
+          console.log('❌ 用户ID为空，返回空结果');
           // 如果没有提供userId或userId为空字符串，返回空结果
           response = {
             list: [],
@@ -556,11 +597,13 @@ export default function PostList({
             page_count: 0
           };
         } else {
+          console.log('✅ 调用API获取用户帖子:', { user_id: userId, page_num: page, page_size: pageSize });
           response = await getPostListApi({
             user_id: userId,
             page_num: page,
             page_size: pageSize
           });
+          console.log('📝 用户帖子API响应:', response);
         }
       } else if (categoryId) {
         // 获取分类下的帖子
@@ -640,11 +683,17 @@ export default function PostList({
     );
     
     if (shouldResetPage) {
+      console.log('🔄 检测到页面关键参数变化，重置分页到第1页:', {
+        prevProps,
+        currentProps,
+        pageKey
+      });
       // 只有在关键参数变化时才重置页码
       resetPage(pageKey);
       fetchPosts(1);
     } else {
       // 如果没有关键变化，使用当前页码获取数据
+      console.log('📄 使用当前页码获取数据:', { currentPage, pageKey });
       fetchPosts(currentPage);
     }
     
@@ -876,22 +925,18 @@ export default function PostList({
           >
             <div className="p-4">
               {/* 用户头像和信息 - 放在最上方 */}
-              <div className="flex items-center space-x-3 mb-3">
-                <img
-                  src={getUserAvatar(post.userId)}
-                  alt={getUserDisplayName(post.userId)}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200 dark:border-zinc-600"
+              <div className="flex items-center mb-3">
+                <UserLink
+                  userId={post.userId}
+                  avatarUrl={getUserAvatar(post.userId)}
+                  username={getUserDisplayName(post.userId)}
+                  className="flex-1"
                 />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-neutral-700 dark:text-neutral-300 text-sm">
-                    {getUserDisplayName(post.userId)}
-                  </div>
-                  <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400">
-                    <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {formatPostTime(post.postId)}
-                  </div>
+                <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400 ml-3">
+                  <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {formatPostTime(post.postId)}
                 </div>
               </div>
               
@@ -1017,54 +1062,37 @@ export default function PostList({
                   </button>
                   
                   {/* 收藏按钮 */}
-                  {showFavourites ? (
-                    <span className="flex items-center space-x-1 px-2 py-1 text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 rounded">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <button 
+                    onClick={() => handleToggleFavourite(post.postId)}
+                    disabled={togglingFavouriteIds.has(post.postId)}
+                    className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                      favouriteCache.get(post.postId) || showFavourites
+                        ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' 
+                        : 'text-neutral-500 dark:text-neutral-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                    } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {togglingFavouriteIds.has(post.postId) ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    ) : (
+                      <svg 
+                        className="w-4 h-4" 
+                        fill={favouriteCache.get(post.postId) || showFavourites ? "currentColor" : "none"} 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                       </svg>
-                      <span className="text-xs">
-                        <LanguageText 
-                          texts={{
-                            'zh-CN': '已收藏',
-                            'zh-TW': '已收藏',
-                            'en': 'Favorited'
-                          }}
-                        />
-                      </span>
+                    )}
+                    <span className="text-xs">
+                      <LanguageText 
+                        texts={{
+                          'zh-CN': favouriteCache.get(post.postId) || showFavourites ? '已收藏' : '收藏',
+                          'zh-TW': favouriteCache.get(post.postId) || showFavourites ? '已收藏' : '收藏',
+                          'en': favouriteCache.get(post.postId) || showFavourites ? 'Favorited' : 'Save'
+                        }}
+                      />
                     </span>
-                  ) : (
-                    <button 
-                      onClick={() => handleToggleFavourite(post.postId)}
-                      disabled={togglingFavouriteIds.has(post.postId)}
-                      className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
-                        favouriteCache.get(post.postId) 
-                          ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' 
-                          : 'text-neutral-500 dark:text-neutral-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                      } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {togglingFavouriteIds.has(post.postId) ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      ) : (
-                        <svg 
-                          className="w-4 h-4" 
-                          fill={favouriteCache.get(post.postId) ? "currentColor" : "none"} 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                        </svg>
-                      )}
-                      <span className="text-xs">
-                        <LanguageText 
-                          texts={{
-                            'zh-CN': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
-                            'zh-TW': favouriteCache.get(post.postId) ? '已收藏' : '收藏',
-                            'en': favouriteCache.get(post.postId) ? 'Favorited' : 'Save'
-                          }}
-                        />
-                      </span>
-                    </button>
-                  )}
+                  </button>
                   
                   {/* 删除按钮 */}
                   {showDeleteButton && (

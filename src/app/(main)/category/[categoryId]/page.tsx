@@ -67,17 +67,6 @@ async function CategoryPage({ params }: CategoryPageProps): Promise<React.ReactE
                 />
               </p>
             </div>
-            
-            {/* 分类徽章 */}
-            <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-              <LanguageText 
-                texts={{
-                  'zh-CN': '分类',
-                  'zh-TW': '分類',
-                  'en': 'Category'
-                }}
-              />
-            </div>
           </div>
         </div>
       </div>
