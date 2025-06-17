@@ -158,19 +158,6 @@ export default function Pagination({
           />
         </button>
 
-        {/* 页码显示 */}
-        <div className="flex items-center px-4 py-2 bg-neutral-100 dark:bg-zinc-700 border border-neutral-200 dark:border-zinc-600 rounded-lg">
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            <LanguageText
-              texts={{
-                "zh-CN": `第 ${currentPage} 页 / 共 ${totalPages} 页`,
-                "zh-TW": `第 ${currentPage} 頁 / 共 ${totalPages} 頁`,
-                en: `Page ${currentPage} of ${totalPages}`,
-              }}
-            />
-          </span>
-        </div>
-
         {/* 下一页 */}
         <button
           onClick={() => handlePageClick(currentPage + 1)}
@@ -245,7 +232,9 @@ export default function Pagination({
               1
             </button>
             {pageNumbers[0] > 2 && (
-              <span className="px-2 py-2 text-sm text-neutral-400 dark:text-neutral-500">...</span>
+              <span className="px-2 py-2 text-sm text-neutral-400 dark:text-neutral-500">
+                ...
+              </span>
             )}
           </>
         )}
@@ -255,7 +244,7 @@ export default function Pagination({
           <button
             key={page}
             onClick={() => handlePageClick(page)}
-            className={`px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 transform hover:scale-105 ${
+            className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 transform hover:scale-105 ${
               page === currentPage
                 ? "bg-gradient-to-r from-primary to-primary-hover text-white shadow-lg scale-105"
                 : "text-neutral-600 dark:text-neutral-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 hover:text-primary"
@@ -269,7 +258,9 @@ export default function Pagination({
         {pageNumbers[pageNumbers.length - 1] < totalPages && (
           <>
             {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
-              <span className="px-2 py-2 text-sm text-neutral-400 dark:text-neutral-500">...</span>
+              <span className="px-2 py-2 text-sm text-neutral-400 dark:text-neutral-500">
+                ...
+              </span>
             )}
             <button
               onClick={() => handlePageClick(totalPages)}
@@ -311,8 +302,8 @@ export default function Pagination({
         {/* 跳转功能 - 与上下页在同一行 */}
         {totalPages > 1 && (
           <>
-            <div className="w-px h-6 bg-neutral-200 dark:bg-zinc-600 mx-2"></div>
             <div className="flex items-center space-x-2 text-sm">
+              <div className="w-px h-6 bg-neutral-200 dark:bg-zinc-600 ml-1 mr-2"></div>
               <LanguageText
                 texts={{
                   "zh-CN": "跳转到",
@@ -339,7 +330,9 @@ export default function Pagination({
                   }
 
                   if (e.key === "Enter") {
-                    const value = parseInt((e.target as HTMLInputElement).value);
+                    const value = parseInt(
+                      (e.target as HTMLInputElement).value
+                    );
                     if (
                       value >= 1 &&
                       value <= totalPages &&
@@ -368,6 +361,7 @@ export default function Pagination({
                   "zh-TW": "頁",
                   en: "page",
                 }}
+                className="pr-3"
               />
             </div>
           </>
