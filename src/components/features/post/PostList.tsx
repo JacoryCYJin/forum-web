@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import { getPostListApi, getPostsByCategoryIdApi, deletePostApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
+import { toggleLikeApi, checkLikeApi } from '@/lib/api/likeApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { getFollowedUsersPostsApi } from '@/lib/api/followApi';
 import { getCommentCountApi } from '@/lib/api/commentApi';
@@ -274,6 +275,39 @@ export default function PostList({
   }, []); // 移除依赖，使用函数式更新
 
   /**
+   * 获取帖子点赞状态
+   * 
+   * @param postId - 帖子ID
+   */
+  const fetchLikeStatus = useCallback(async (postId: string) => {
+    // 使用函数式更新来避免依赖状态
+    let shouldFetch = true;
+    
+    setLikeCache(prev => {
+      if (prev.has(postId)) {
+        shouldFetch = false;
+        return prev;
+      }
+      return prev;
+    });
+
+    if (!shouldFetch) {
+      return;
+    }
+
+    try {
+      const isLiked = await checkLikeApi({ post_id: postId });
+      setLikeCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(postId, isLiked);
+        return newCache;
+      });
+    } catch (error) {
+      console.error(`获取点赞状态失败 (postId: ${postId}):`, error);
+    }
+  }, []); // 移除依赖，使用函数式更新
+
+  /**
    * 获取帖子评论数
    * 
    * @param postId - 帖子ID
@@ -397,12 +431,7 @@ export default function PostList({
     setTogglingLikeIds(prev => new Set(prev).add(postId));
 
     try {
-      // 这里暂时模拟点赞功能，后续可以替换为真实API
-      const currentLikeStatus = likeCache.get(postId) || false;
-      const newLikeStatus = !currentLikeStatus;
-      
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const newLikeStatus = await toggleLikeApi({ post_id: postId });
       
       // 更新缓存
       setLikeCache(prev => {
@@ -422,7 +451,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingLikeIds, likeCache]);
+  }, [togglingLikeIds]);
 
   /**
    * 显示删除确认弹窗
@@ -650,9 +679,10 @@ export default function PostList({
         });
       }
       
-      // 获取评论数
+      // 获取评论数和点赞状态
       newPosts.forEach(post => {
         fetchCommentCount(post.postId);
+        fetchLikeStatus(post.postId);
       });
     } catch (err: any) {
       setError(err.message || '获取帖子列表失败');
@@ -660,7 +690,7 @@ export default function PostList({
     } finally {
       setIsLoading(false);
     }
-  }, [categoryId, pageSize, searchKeyword, showFavourites, showFollowedPosts, showUserPosts, userId, fetchUserInfo]);
+  }, [categoryId, pageSize, searchKeyword, showFavourites, showFollowedPosts, showUserPosts, userId, fetchUserInfo, fetchLikeStatus]);
 
   /**
    * 组件初始化和关键props变化时获取数据

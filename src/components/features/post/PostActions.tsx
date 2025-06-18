@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import FavouriteButton from './FavouriteButton';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
+import { toggleLikeApi, checkLikeApi } from '@/lib/api/likeApi';
 
 /**
  * 帖子操作组件属性接口
@@ -48,6 +49,22 @@ export default function PostActions({
   const [isLiking, setIsLiking] = useState(false);
 
   /**
+   * 组件初始化时获取点赞状态
+   */
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      try {
+        const liked = await checkLikeApi({ post_id: postId });
+        setIsLiked(liked);
+      } catch (error) {
+        console.error('获取点赞状态失败:', error);
+      }
+    };
+
+    fetchLikeStatus();
+  }, [postId]);
+
+  /**
    * 处理点赞/取消点赞
    */
   const handleToggleLike = useCallback(async () => {
@@ -55,15 +72,14 @@ export default function PostActions({
     
     setIsLiking(true);
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 300));
-      setIsLiked(!isLiked);
+      const newLikeStatus = await toggleLikeApi({ post_id: postId });
+      setIsLiked(newLikeStatus);
     } catch (error) {
       console.error('点赞操作失败:', error);
     } finally {
       setIsLiking(false);
     }
-  }, [isLiked, isLiking]);
+  }, [postId, isLiking]);
 
   /**
    * 处理分享
