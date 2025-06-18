@@ -11,7 +11,7 @@ interface ResponseData<T = any> {
 // 创建 axios 实例
 const request: AxiosInstance = axios.create({
   baseURL: 'http://localhost:8080', // 修改为localhost，与前端域名保持一致
-  timeout: 15000, // 请求超时时间
+  timeout: 300000, // 请求超时时间 - 增加到5分钟（文件上传需要更长时间）
   withCredentials: true, // 重要：启用Cookie传递，支持跨域Cookie
   headers: {
     'Content-Type': 'application/json;charset=utf-8',

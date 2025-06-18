@@ -39,7 +39,6 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   
   // 图片上传状态（富文本中的图片）
   const [contentImages, setContentImages] = useState<File[]>([]);
-  const [imageUrlMap, setImageUrlMap] = useState<Map<string, File>>(new Map());
   
   // 附件上传状态（PDF、TXT等文件）
   const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
@@ -318,19 +317,11 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
     if (!file) return;
 
     try {
-      // 生成临时ID
-      const tempId = `temp-image-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 创建临时URL
+      // 创建临时URL用于预览
       const blobUrl = URL.createObjectURL(file);
       
-      // 保存文件映射
-      const newImageUrlMap = new Map(imageUrlMap);
-      newImageUrlMap.set(tempId, file);
-      setImageUrlMap(newImageUrlMap);
-      
-      // 添加到图片列表
-      setContentImages([...contentImages, file]);
+      // 添加到图片列表（顺序很重要，后端会按这个顺序处理）
+      setContentImages(prev => [...prev, file]);
       
       // 将图片插入到富文本编辑器中
       if (contentRef.current) {
@@ -338,9 +329,13 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
         img.src = blobUrl;
         img.className = 'max-w-full h-auto rounded-lg my-4 block cursor-pointer';
         img.alt = file.name;
-        img.setAttribute('data-temp-id', tempId); // 添加临时ID标识
+        // 添加一个标记以便后端替换时能找到对应的图片
+        img.setAttribute('data-image-placeholder', 'true');
         img.style.maxWidth = '100%';
         img.style.height = 'auto';
+        img.style.borderRadius = '8px';
+        img.style.margin = '16px auto';
+        img.style.display = 'block';
         
         // 添加图片点击事件用于调整大小
         img.addEventListener('click', (e) => {
@@ -376,7 +371,7 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
         contentRef.current.focus();
       }
       
-      console.log('✅ 图片插入成功:', tempId);
+      console.log('✅ 图片插入成功:', file.name);
     } catch (error: any) {
       console.error('❌ 图片插入失败:', error);
       alert(error.message || '图片插入失败，请稍后重试');
