@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import AvatarLink from '@/components/common/AvatarLink/AvatarLink';
 import BackButton from '@/components/common/BackButton/BackButton';
+import LocationDisplay from '@/components/common/LocationDisplay/LocationDisplay';
 import PostSidebar from '@/components/features/post/PostSidebar';
 import PostReportButton from '@/components/features/post/PostReportButton';
 import { getPostByIdApi } from '@/lib/api/postsApi';
@@ -132,16 +133,43 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
               <div className="flex flex-col lg:flex-row">
                 {/* 左侧图片区域 - 只显示图片文件 */}
                 {post.fileUrls && (() => {
-                  const imageUrls = post.fileUrls.split(',')
-                    .map(url => url.trim())
-                    .filter(url => /\.(jpg|jpeg|png|gif|webp)$/i.test(url));
+                  // 先清理fileUrls字符串，移除可能的JSON格式污染
+                  let cleanFileUrls = post.fileUrls;
+                  
+                  // 如果包含JSON格式的响应，尝试提取实际的URL
+                  if (cleanFileUrls.includes('"code":0') || cleanFileUrls.includes('"success":true}')) {
+                    // 尝试解析JSON格式的响应，提取data字段
+                    try {
+                      const jsonMatches = cleanFileUrls.match(/\{"code":0.*?"data":"([^"]+)".*?\}/g);
+                      if (jsonMatches && jsonMatches.length > 0) {
+                        const extractedUrls = jsonMatches.map(match => {
+                          const result = JSON.parse(match);
+                          return result.data;
+                        }).filter(url => url && typeof url === 'string');
+                        cleanFileUrls = extractedUrls.join(',');
+                      }
+                    } catch (e) {
+                      console.error('解析图片URL JSON失败:', e);
+                      // 如果解析失败，尝试简单的字符串清理
+                      cleanFileUrls = cleanFileUrls.replace(/\{"code":0[^}]*\}/g, '').replace(/,+/g, ',').replace(/^,|,$/g, '');
+                    }
+                  }
+                  
+                  const allUrls = cleanFileUrls.split(',').map(url => url.trim()).filter(url => url && !url.includes('"') && !url.includes('{'));
+                  const imageUrls = allUrls.filter(url => 
+                    /\.(jpg|jpeg|png|gif|webp|bmp|tiff|svg)$/i.test(url) ||
+                    url.includes('/image/') || 
+                    url.includes('image') ||
+                    // 检查URL中是否包含图片相关关键词
+                    /\.(JPG|JPEG|PNG|GIF|WEBP|BMP|TIFF|SVG)$/i.test(url)
+                  );
                   
                   if (imageUrls.length === 0) return null;
                   
                   return (
                     <div className="lg:w-1/2 p-6 border-b lg:border-b-0 lg:border-r border-neutral-100 dark:border-zinc-700">
                       <h3 className="text-lg font-semibold text-neutral-800 dark:text-white mb-4">
-                        图片内容
+                        图片内容 ({imageUrls.length})
                       </h3>
                       <div className="space-y-4">
                         {imageUrls.map((url, index) => (
@@ -151,6 +179,10 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                               alt={`图片 ${index + 1}`}
                               className="w-full h-auto rounded-lg object-cover cursor-pointer hover:opacity-95 transition-opacity shadow-sm"
                               onClick={() => window.open(url, '_blank')}
+                              onError={(e) => {
+                                console.error('图片加载失败:', url);
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
                               <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-80 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,7 +197,27 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                 })()}
 
                 {/* 右侧内容区域 */}
-                <div className={`${post.fileUrls && post.fileUrls.split(',').some(url => /\.(jpg|jpeg|png|gif|webp)$/i.test(url.trim())) ? 'lg:w-1/2' : 'w-full'} p-6 relative`}>
+                <div className={`${(() => {
+                  if (!post.fileUrls) return 'w-full';
+                  
+                  // 先清理fileUrls
+                  let cleanUrls = post.fileUrls;
+                  if (cleanUrls.includes('"code":0') || cleanUrls.includes('"success":true}')) {
+                    try {
+                      const jsonMatches = cleanUrls.match(/\{"code":0.*?"data":"([^"]+)".*?\}/g);
+                      if (jsonMatches && jsonMatches.length > 0) {
+                        const extractedUrls = jsonMatches.map(match => JSON.parse(match).data);
+                        cleanUrls = extractedUrls.join(',');
+                      }
+                    } catch {
+                      cleanUrls = cleanUrls.replace(/\{"code":0[^}]*\}/g, '').replace(/,+/g, ',').replace(/^,|,$/g, '');
+                    }
+                  }
+                  
+                  const urls = cleanUrls.split(',').map(url => url.trim()).filter(url => url && !url.includes('"') && !url.includes('{'));
+                  const hasImages = urls.some(url => /\.(jpg|jpeg|png|gif|webp|bmp|tiff|svg)$/i.test(url) || url.includes('/image/') || url.includes('image'));
+                  return hasImages ? 'lg:w-1/2' : 'w-full';
+                })()} p-6 relative`}>
                   {/* 举报按钮 - 右上角 */}
                   <div className="absolute top-4 right-4">
                     <PostReportButton postId={id} postTitle={post.title} />
@@ -254,33 +306,113 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                   {post.location && (
                     <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                       <div className="flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
                         <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                          发布位置: {post.location}
+                          发布位置:
                         </span>
+                        <LocationDisplay 
+                          location={post.location}
+                          showIcon={false}
+                          className="text-blue-700 dark:text-blue-300 font-medium"
+                          showFullAddress={true}
+                        />
                       </div>
                     </div>
                   )}
 
                   {/* 附件显示区域 - 只显示非图片文件 */}
                   {post.fileUrls && (() => {
-                    const attachmentUrls = post.fileUrls.split(',')
-                      .map(url => url.trim())
-                      .filter(url => !/\.(jpg|jpeg|png|gif|webp)$/i.test(url));
+                    // 先清理fileUrls字符串，移除可能的JSON格式污染
+                    let cleanFileUrls = post.fileUrls;
+                    
+                    // 如果包含JSON格式的响应，尝试提取实际的URL
+                    if (cleanFileUrls.includes('"code":0') || cleanFileUrls.includes('"success":true}')) {
+                      // 尝试解析JSON格式的响应，提取data字段
+                      try {
+                        const jsonMatches = cleanFileUrls.match(/\{"code":0.*?"data":"([^"]+)".*?\}/g);
+                        if (jsonMatches && jsonMatches.length > 0) {
+                          const extractedUrls = jsonMatches.map(match => {
+                            const result = JSON.parse(match);
+                            return result.data;
+                          }).filter(url => url && typeof url === 'string');
+                          cleanFileUrls = extractedUrls.join(',');
+                        }
+                      } catch (e) {
+                        console.error('解析文件URL JSON失败:', e);
+                        // 如果解析失败，尝试简单的字符串清理
+                        cleanFileUrls = cleanFileUrls.replace(/\{"code":0[^}]*\}/g, '').replace(/,+/g, ',').replace(/^,|,$/g, '');
+                      }
+                    }
+                    
+                    const allUrls = cleanFileUrls.split(',').map(url => url.trim()).filter(url => url && !url.includes('"') && !url.includes('{'));
+                    const attachmentUrls = allUrls.filter(url => 
+                      !(/\.(jpg|jpeg|png|gif|webp|bmp|tiff|svg)$/i.test(url) ||
+                        url.includes('/image/') || 
+                        url.includes('image') ||
+                        /\.(JPG|JPEG|PNG|GIF|WEBP|BMP|TIFF|SVG)$/i.test(url))
+                    );
+                    
+                    console.log('🔍 文件URL调试信息:');
+                    console.log('  - 原始fileUrls:', post.fileUrls);
+                    console.log('  - 清理后fileUrls:', cleanFileUrls);
+                    console.log('  - 所有URLs:', allUrls);
+                    console.log('  - 附件URLs:', attachmentUrls);
                     
                     if (attachmentUrls.length === 0) return null;
                     
                     return (
                       <div className="mt-6">
                         <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
-                          附件文件
+                          附件文件 ({attachmentUrls.length})
                         </h3>
                         <div className="space-y-2">
                           {attachmentUrls.map((fileUrl, index) => {
                             const fileName = fileUrl.split('/').pop() || `文件${index + 1}`;
+                            const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
+                            
+                            // 根据文件类型显示不同图标
+                            const getFileIcon = (ext: string) => {
+                              if (['pdf'].includes(ext)) {
+                                return (
+                                  <svg className="w-5 h-5 text-red-500 group-hover:text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3 3h5a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2h8zm-1 9V9a1 1 0 00-1-1H6a1 1 0 000 2h4a1 1 0 001-1zm0 4v-2a1 1 0 00-1-1H6a1 1 0 000 2h4a1 1 0 001-1z"/>
+                                  </svg>
+                                );
+                              } else if (['doc', 'docx'].includes(ext)) {
+                                return (
+                                  <svg className="w-5 h-5 text-blue-500 group-hover:text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                    <polyline points="14,2 14,8 20,8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10,9 9,9 8,9"/>
+                                  </svg>
+                                );
+                              } else if (['xls', 'xlsx'].includes(ext)) {
+                                return (
+                                  <svg className="w-5 h-5 text-green-500 group-hover:text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                    <polyline points="14,2 14,8 20,8"/>
+                                    <line x1="8" y1="13" x2="16" y2="13"/>
+                                    <line x1="8" y1="17" x2="16" y2="17"/>
+                                    <line x1="12" y1="13" x2="12" y2="17"/>
+                                  </svg>
+                                );
+                              } else if (['zip', 'rar', '7z'].includes(ext)) {
+                                return (
+                                  <svg className="w-5 h-5 text-purple-500 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
+                                  </svg>
+                                );
+                              } else {
+                                return (
+                                  <svg className="w-5 h-5 text-neutral-400 dark:text-neutral-500 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                );
+                              }
+                            };
+                            
                             return (
                               <a
                                 key={index}
@@ -289,11 +421,16 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                                 rel="noopener noreferrer"
                                 className="flex items-center space-x-3 p-3 bg-neutral-50 dark:bg-zinc-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-600 transition-colors group"
                               >
-                                <svg className="w-5 h-5 text-neutral-400 dark:text-neutral-500 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span className="text-sm text-neutral-700 dark:text-neutral-300 flex-1">{fileName}</span>
-                                <svg className="w-4 h-4 text-neutral-400 dark:text-neutral-500 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                {getFileIcon(fileExtension)}
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate">
+                                    {fileName}
+                                  </div>
+                                  <div className="text-xs text-neutral-500 dark:text-neutral-400 uppercase">
+                                    {fileExtension ? `${fileExtension} 文件` : '文件'}
+                                  </div>
+                                </div>
+                                <svg className="w-4 h-4 text-neutral-400 dark:text-neutral-500 group-hover:text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
                               </a>
