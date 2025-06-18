@@ -143,13 +143,19 @@ export const useUserStore = create<UserState>()(
         
         set({ isLoading: true, error: null });
         try {
+          // 准备API请求参数
+          const apiParams: any = {};
+          if (data.username) apiParams.username = data.username;
+          if (data.bio) apiParams.profile = data.bio;
+          
+          // 处理头像文件：如果avatar是string，表示是URL，不上传；如果是File，则上传
+          if (data.avatar && typeof data.avatar !== 'string') {
+            // 假设传入的是File对象
+            apiParams.avatar = data.avatar;
+          }
+          
           // 调用真实的后端API更新用户资料
-          const updatedUserData = await updateAvatarAndUsernameAndProfileApi({
-            userId: user.userId, // 使用userId字段
-            username: data.username,
-            avatarUrl: data.avatar,
-            profile: data.bio // 前端的bio字段映射到后端的profile字段
-          });
+          const updatedUserData = await updateAvatarAndUsernameAndProfileApi(apiParams);
           
           // 将后端返回的数据转换为UserInfo格式
           const updatedUser: User = {

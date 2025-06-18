@@ -16,6 +16,7 @@ import type { UserInfo as User } from "@/types/userTypes";
 import { processAvatarPath, validateAvatarFile } from "@/lib/utils/avatarUtils";
 import { getCategoryListWithCacheApi } from "@/lib/api/categoryApi";
 import type { Category } from "@/types/categoryTypes";
+import type { UpdateAvatarAndUsernameAndProfileRequest } from "@/types/userTypes";
 
 /**
  * 登录对话框的工具方法集合
@@ -634,7 +635,7 @@ export class LoginDialogUtils {
       },
 
       /**
-       * 处理头像上传 - 尝试获取最完整的路径信息
+       * 处理头像上传
        */
       handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -647,52 +648,14 @@ export class LoginDialogUtils {
               return;
             }
 
-            // 创建文件的本地预览URL（用于显示）
-            const fileURL = URL.createObjectURL(file);
+            // 直接保存File对象
+            setters.setAvatar(file);
             
-            // 尝试获取文件路径信息（受浏览器安全限制）
-            const pathInfo = {
-              // 标准File API属性
+            console.log('📁 文件信息:', {
               name: file.name,
               size: file.size,
-              type: file.type,
-              lastModified: file.lastModified,
-              
-              // 相对路径（如果是文件夹上传）
-              webkitRelativePath: file.webkitRelativePath || '',
-              
-              // 尝试从文件名提取路径信息
-              fullName: file.name,
-              fileName: file.name.split('/').pop() || file.name,
-              directory: file.name.includes('/') ? file.name.substring(0, file.name.lastIndexOf('/')) : '',
-              
-              // 预览URL
-              previewURL: fileURL,
-              
-              // 注意：出于安全考虑，浏览器不允许获取真实的绝对路径
-              // 真实路径类似：C:\Users\Username\Documents\image.jpg
-              // 但JavaScript无法访问这些信息
-              absolutePath: '无法获取（浏览器安全限制）'
-            };
-            
-            // 如果是通过文件夹选择器上传的，webkitRelativePath可能包含部分路径
-            let pathToUse = file.name;
-            if (file.webkitRelativePath) {
-              pathToUse = file.webkitRelativePath;
-              console.log('检测到文件夹上传，相对路径:', file.webkitRelativePath);
-            }
-            
-            // 设置头像路径
-            setters.setAvatar(pathToUse);
-            
-            console.log('📁 文件路径信息:', pathInfo);
-            console.log('🎯 使用的路径:', pathToUse);
-            console.log('⚠️  注意：浏览器安全限制，无法获取文件的真实绝对路径');
-            
-            // 如果您需要绝对路径，可能需要考虑以下方案：
-            // 1. 使用Electron等桌面应用框架
-            // 2. 让用户手动输入路径
-            // 3. 使用服务器端的文件选择器
+              type: file.type
+            });
 
           } catch (error: any) {
             console.error('头像处理失败:', error);
@@ -707,7 +670,7 @@ export class LoginDialogUtils {
       handleAvatarSubmit: async () => {
         try {
           console.log("提交头像和昵称:", { 
-            nickname: formData.nickname, 
+            nickname: formData.nickname,
             avatar: formData.avatar 
           });
 
@@ -717,13 +680,27 @@ export class LoginDialogUtils {
             throw new Error('用户未登录');
           }
 
+          // 构建请求参数
+          const updateParams: UpdateAvatarAndUsernameAndProfileRequest = {};
+          
+          // 添加昵称
+          if (formData.nickname) {
+            updateParams.username = formData.nickname;
+          }
+          
+          // 处理头像文件
+          if (formData.avatar) {
+            // 直接使用File对象
+            updateParams.avatar = formData.avatar;
+          }
+          
+          // 添加个人简介
+          if (formData.bio) {
+            updateParams.profile = formData.bio;
+          }
+
           // 调用更新资料API
-          const updatedUser = await updateAvatarAndUsernameAndProfileApi({
-            userId: currentUser.userId,
-            username: formData.nickname || undefined,
-            avatarUrl: formData.avatar || undefined,
-            profile: formData.bio || undefined
-          });
+          const updatedUser = await updateAvatarAndUsernameAndProfileApi(updateParams);
 
           console.log("资料更新成功:", updatedUser);
 

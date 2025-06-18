@@ -276,8 +276,6 @@ export async function refreshTokenApi(
 /**
  * 更新用户头像、昵称和个人简介API
  *
- * 更新用户的基本资料信息
- *
  * @async
  * @param {UpdateAvatarAndUsernameAndProfileRequest} params - 更新参数
  * @returns {Promise<User>} 更新后的用户信息
@@ -289,18 +287,23 @@ export async function updateAvatarAndUsernameAndProfileApi(
   try {
     console.log("更新用户资料参数:", params);
 
-    // 转换为下划线格式
-    const requestData = {
-      user_id: params.userId,
-      username: params.username,
-      avatar_url: params.avatarUrl,
-      profile: params.profile,
-    };
+    // 创建 FormData 对象
+    const formData = new FormData();
+    if (params.username) {
+      formData.append('username', params.username);
+    }
+    if (params.avatar) {
+      formData.append('avatar', params.avatar);
+    }
+    if (params.profile) {
+      formData.append('profile', params.profile);
+    }
 
     const response: ApiResponse<User> = await post(
-      "/user/update-avatar-username-profile",
-      requestData
+      "/forum/user/update-avatar-username-profile",
+      formData
     );
+    
     console.log("更新用户资料响应:", response);
 
     if (response.code === 0) {

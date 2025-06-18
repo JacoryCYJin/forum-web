@@ -681,7 +681,7 @@ const AvatarPanel: React.FC<AvatarPanelProps> = ({
         >
           {avatar ? (
             <img
-              src={avatar.startsWith('blob:') || avatar.startsWith('http') || avatar.startsWith('/') ? avatar : `data:image/jpeg;base64,${avatar}`}
+              src={URL.createObjectURL(avatar)}
               alt="头像预览"
               className="w-full h-full object-cover"
             />
@@ -841,7 +841,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ visible, onClose }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<File | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [bio, setBio] = useState("");
 

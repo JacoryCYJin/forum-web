@@ -66,6 +66,10 @@ export default function SettingsPage() {
     avatar: user?.avatar || '',
     bio: user?.bio || ''
   });
+  
+  // 头像文件状态
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // 普通设置状态
   const [generalSettings, setGeneralSettings] = useState<PrivacySettings>({
@@ -174,6 +178,34 @@ export default function SettingsPage() {
   const handleCancelEditUser = () => {
     setIsEditingUser(false);
     setUserSettings({ ...originalUserSettings });
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
+  /**
+   * 处理头像文件上传
+   */
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        alert('请选择图片文件');
+        return;
+      }
+      
+      // 验证文件大小（5MB）
+      if (file.size > 5 * 1024 * 1024) {
+        alert('图片文件大小不能超过5MB');
+        return;
+      }
+      
+      setAvatarFile(file);
+      
+      // 创建预览URL
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+    }
   };
 
   /**
@@ -185,18 +217,16 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       // 构建更新参数，只包含实际修改的字段
-      const updateParams: any = {
-        userId: user.userId
-      };
+      const updateParams: any = {};
       
       // 只有当昵称实际发生变化时才传递username
       if (userSettings.nickname !== originalUserSettings.nickname) {
         updateParams.username = userSettings.nickname || undefined;
       }
       
-      // 只有当头像实际发生变化时才传递avatarUrl
-      if (userSettings.avatar !== originalUserSettings.avatar) {
-        updateParams.avatarUrl = userSettings.avatar || undefined;
+      // 检查是否有新的头像文件
+      if (avatarFile) {
+        updateParams.avatar = avatarFile;
       }
       
       // 只有当简介实际发生变化时才传递profile
@@ -205,7 +235,7 @@ export default function SettingsPage() {
       }
       
       // 如果没有任何字段需要更新，直接返回
-      if (Object.keys(updateParams).length === 1) { // 只有userId
+      if (Object.keys(updateParams).length === 0) {
         alert('没有检测到任何更改');
         setIsLoading(false);
         return;
@@ -234,6 +264,14 @@ export default function SettingsPage() {
       }
 
       setIsEditingUser(false);
+      
+      // 清理头像相关状态
+      setAvatarFile(null);
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+        setAvatarPreview(null);
+      }
+      
       alert('用户设置已保存成功！');
     } catch (error: any) {
       console.error('保存用户设置失败:', error);
@@ -631,7 +669,7 @@ export default function SettingsPage() {
                       </label>
                       <div className="flex items-center space-x-4">
                         <img
-                          src={userSettings.avatar}
+                          src={avatarPreview || userSettings.avatar}
                           alt="头像"
                           className="w-16 h-16 rounded-lg border border-neutral-200 dark:border-zinc-600 object-cover"
                         />
@@ -642,6 +680,7 @@ export default function SettingsPage() {
                               accept="image/*"
                               className="hidden"
                               id="avatar-upload"
+                              onChange={handleAvatarFileChange}
                             />
                             <label
                               htmlFor="avatar-upload"
@@ -650,10 +689,11 @@ export default function SettingsPage() {
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                               </svg>
-                              <span>更换头像</span>
+                              <span>{avatarFile ? '重新选择' : '更换头像'}</span>
                             </label>
                             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
                               支持 JPG、PNG 格式，文件大小不超过 5MB
+                              {avatarFile && <span className="block text-green-600">已选择: {avatarFile.name}</span>}
                             </p>
                           </div>
                         )}

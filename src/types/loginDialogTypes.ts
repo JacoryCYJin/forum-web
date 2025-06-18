@@ -415,12 +415,12 @@ export interface AvatarPanelProps extends BasePanelProps {
   /**
    * 头像数据
    */
-  avatar: string | null;
+  avatar: File | null;
   
   /**
    * 设置头像的函数
    */
-  setAvatar: (avatar: string | null) => void;
+  setAvatar: (avatar: File | null) => void;
   
   /**
    * 文件输入引用
@@ -515,7 +515,7 @@ export interface DialogHandlersConfig {
     email: string;
     password: string;
     nickname: string;
-    avatar: string | null;
+    avatar: File | null;
     selectedTags: string[];
     verificationCode: string;
     newPassword: string;
@@ -531,7 +531,7 @@ export interface DialogHandlersConfig {
     setEmail: (email: string) => void;
     setPassword: (password: string) => void;
     setNickname: (nickname: string) => void;
-    setAvatar: (avatar: string | null) => void;
+    setAvatar: (avatar: File | null) => void;
     setSelectedTags: (tags: string[]) => void;
     setVerificationCode: (code: string) => void;
     setNewPassword: (password: string) => void;

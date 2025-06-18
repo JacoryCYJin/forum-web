@@ -128,24 +128,8 @@ export interface LoginRequest {
  * 更新用户头像、昵称和个人简介请求参数
  */
 export interface UpdateAvatarAndUsernameAndProfileRequest {
-  /**
-   * 用户ID
-   */
-  userId: string;
-  
-  /**
-   * 新昵称
-   */
   username?: string;
-  
-  /**
-   * 新头像URL
-   */
-  avatarUrl?: string;
-  
-  /**
-   * 新个人简介
-   */
+  avatar?: File;  // 改为 File 类型
   profile?: string;
 }
 
