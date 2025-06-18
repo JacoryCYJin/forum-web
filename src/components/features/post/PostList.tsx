@@ -981,11 +981,39 @@ export default function PostList({
               </div>
               
               {/* 帖子内容预览 */}
-              <div className="text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-3 leading-relaxed text-base">
-                {post.content.length > 150 
-                  ? `${post.content.substring(0, 150)}...` 
-                  : post.content
-                }
+              <div className="mb-4">
+                {/* 检查是否有视频附件 - 检查 fileUrls 字段中是否包含视频文件扩展名 */}
+                {post.fileUrls && /\.(mp4|webm|ogg|avi|mov|wmv|flv|mkv)(\?|$)/i.test(post.fileUrls) ? (
+                  /* 视频帖子特殊展示 */
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2 text-secondary">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm font-medium">视频帖子</span>
+                    </div>
+                    <div className="text-neutral-600 dark:text-neutral-400 line-clamp-2 leading-relaxed text-base">
+                      {/* 去除HTML标签，只显示纯文本内容 */}
+                      {(() => {
+                        const cleanText = post.content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+                        return cleanText.length > 100 
+                          ? `${cleanText.substring(0, 100)}...` 
+                          : cleanText;
+                      })()}
+                    </div>
+                  </div>
+                ) : (
+                  /* 普通文本帖子 */
+                  <div className="text-neutral-600 dark:text-neutral-400 line-clamp-3 leading-relaxed text-base">
+                    {/* 去除HTML标签，只显示纯文本内容 */}
+                    {(() => {
+                      const cleanText = post.content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+                      return cleanText.length > 150 
+                        ? `${cleanText.substring(0, 150)}...` 
+                        : cleanText;
+                    })()}
+                  </div>
+                )}
               </div>
               
               {/* 分类和标签显示区域 - 分类在标签左边 */}
