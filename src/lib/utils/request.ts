@@ -21,6 +21,18 @@ const request: AxiosInstance = axios.create({
 // 请求拦截器 - 处理不同类型的请求数据
 request.interceptors.request.use(
   async (config) => {
+    console.log('🔍 请求拦截器调试信息:');
+    console.log('  - URL:', (config.baseURL || '') + (config.url || ''));
+    console.log('  - Method:', config.method?.toUpperCase());
+    console.log('  - Headers:', config.headers);
+    console.log('  - withCredentials:', config.withCredentials);
+    console.log('  - Data type:', config.data?.constructor?.name);
+    
+    // 检查当前Cookie
+    if (typeof document !== 'undefined') {
+      console.log('  - 当前Cookie:', document.cookie);
+    }
+    
     // 检查并确保令牌有效（每次API调用时刷新令牌状态）
     const isTokenValid = await TokenManager.ensureValidToken();
     
@@ -29,8 +41,13 @@ request.interceptors.request.use(
       console.warn('⚠️ 令牌无效且无法刷新，请求将继续但可能失败');
     }
     
+    // 如果数据是FormData，删除Content-Type让浏览器自动设置multipart/form-data
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+      console.log('  - 检测到FormData，已删除Content-Type让浏览器自动设置');
+    }
     // 如果数据是URLSearchParams，设置正确的Content-Type
-    if (config.data instanceof URLSearchParams) {
+    else if (config.data instanceof URLSearchParams) {
       config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
     

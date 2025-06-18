@@ -5,11 +5,11 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginDialogUtils } from '@/components/common/Navbar/LoginDialog.utils';
 import { createPostApi } from '@/lib/api/postsApi';
-import { uploadImageApi, uploadMultipleAttachmentsApi, type FileUploadResponse } from '@/lib/api/fileApi';
+import { searchTagsApi, type Tag } from '@/lib/api/tagApi';
 import type { Category } from '@/types/categoryTypes';
 
 /**
@@ -35,11 +35,11 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   const [content, setContent] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [customTag, setCustomTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // 图片上传状态（富文本中的图片）
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [contentImages, setContentImages] = useState<File[]>([]);
+  const [imageUrlMap, setImageUrlMap] = useState<Map<string, File>>(new Map());
   
   // 附件上传状态（PDF、TXT等文件）
   const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
@@ -56,11 +56,13 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   
   // 分类和标签数据
   const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
-  const [recommendedTags, setRecommendedTags] = useState<string[]>([]);
+  const [suggestedTags, setSuggestedTags] = useState<Tag[]>([]);
+  const [tagSearchInput, setTagSearchInput] = useState('');
+  const [isSearchingTags, setIsSearchingTags] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   /**
-   * 初始化分类和标签数据
+   * 初始化分类数据
    */
   useEffect(() => {
     const initializeData = async () => {
@@ -71,15 +73,10 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
         const categories = await LoginDialogUtils.getCategoriesApi();
         setAvailableCategories(categories);
         
-        // 获取推荐标签
-        const tags = LoginDialogUtils.getRecommendedTags();
-        setRecommendedTags(tags);
-        
       } catch (error) {
-        console.error('获取分类和标签数据失败:', error);
+        console.error('获取分类数据失败:', error);
         // 使用默认数据
         setAvailableCategories(LoginDialogUtils.getDefaultCategories());
-        setRecommendedTags(LoginDialogUtils.getRecommendedTags());
       } finally {
         setLoadingCategories(false);
       }
@@ -89,25 +86,62 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   }, []);
 
   /**
-   * 处理标签选择
+   * 防抖函数
    */
-  const handleTagToggle = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else if (selectedTags.length < 8) { // 限制最多8个标签
-      setSelectedTags([...selectedTags, tag]);
+  const debounce = useCallback((func: (...args: any[]) => void, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  }, []);
+
+  /**
+   * 搜索标签
+   */
+  const searchTags = useCallback(async (keyword: string) => {
+    if (!keyword.trim()) {
+      setSuggestedTags([]);
+      return;
     }
+
+    setIsSearchingTags(true);
+    try {
+      const tags = await searchTagsApi(keyword.trim(), 10);
+      setSuggestedTags(tags);
+    } catch (error) {
+      console.error('搜索标签失败:', error);
+      setSuggestedTags([]);
+    } finally {
+      setIsSearchingTags(false);
+    }
+  }, []);
+
+  /**
+   * 防抖搜索标签
+   */
+  const debouncedSearchTags = useCallback(
+    debounce(searchTags, 300),
+    [searchTags, debounce]
+  );
+
+  /**
+   * 处理标签搜索输入
+   */
+  const handleTagSearchInputChange = (value: string) => {
+    setTagSearchInput(value);
+    debouncedSearchTags(value);
   };
 
   /**
-   * 添加自定义标签
+   * 处理标签选择
    */
-  const handleAddCustomTag = () => {
-    const trimmedTag = customTag.trim();
-    if (trimmedTag && !selectedTags.includes(trimmedTag) && selectedTags.length < 8) {
-      setSelectedTags([...selectedTags, trimmedTag]);
-      setCustomTag('');
+  const handleTagSelect = (tagName: string) => {
+    if (!selectedTags.includes(tagName) && selectedTags.length < 8) {
+      setSelectedTags([...selectedTags, tagName]);
     }
+    setTagSearchInput('');
+    setSuggestedTags([]);
   };
 
   /**
@@ -115,6 +149,105 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
    */
   const handleRemoveTag = (tagToRemove: string) => {
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
+  };
+
+  /**
+   * 显示图片调整菜单
+   */
+  const showImageResizeMenu = (img: HTMLImageElement) => {
+    const menu = document.createElement('div');
+    menu.className = 'fixed z-50 bg-white dark:bg-zinc-800 border border-neutral-200 dark:border-zinc-700 rounded-lg shadow-lg p-2';
+    menu.style.top = '50%';
+    menu.style.left = '50%';
+    menu.style.transform = 'translate(-50%, -50%)';
+    
+    const sizes = [
+      { label: '小图 (25%)', width: '25%' },
+      { label: '中图 (50%)', width: '50%' },
+      { label: '大图 (75%)', width: '75%' },
+      { label: '原始大小 (100%)', width: '100%' }
+    ];
+    
+    const aligns = [
+      { label: '居左', align: 'left' },
+      { label: '居中', align: 'center' },
+      { label: '居右', align: 'right' }
+    ];
+    
+    menu.innerHTML = `
+      <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">调整图片</div>
+      <div class="space-y-2">
+        <div>
+          <div class="text-xs text-neutral-600 dark:text-neutral-400 mb-1">大小:</div>
+          ${sizes.map(size => `
+            <button type="button" class="block w-full text-left px-2 py-1 text-xs hover:bg-neutral-100 dark:hover:bg-zinc-700 rounded" data-width="${size.width}">
+              ${size.label}
+            </button>
+          `).join('')}
+        </div>
+        <div>
+          <div class="text-xs text-neutral-600 dark:text-neutral-400 mb-1">对齐:</div>
+          ${aligns.map(align => `
+            <button type="button" class="block w-full text-left px-2 py-1 text-xs hover:bg-neutral-100 dark:hover:bg-zinc-700 rounded" data-align="${align.align}">
+              ${align.label}
+            </button>
+          `).join('')}
+        </div>
+        <button type="button" class="w-full px-2 py-1 text-xs bg-red-500 text-white hover:bg-red-600 rounded" data-action="delete">
+          删除图片
+        </button>
+        <button type="button" class="w-full px-2 py-1 text-xs bg-neutral-500 text-white hover:bg-neutral-600 rounded" data-action="close">
+          关闭
+        </button>
+      </div>
+    `;
+    
+    // 添加事件监听
+    menu.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const width = target.getAttribute('data-width');
+      const align = target.getAttribute('data-align');
+      const action = target.getAttribute('data-action');
+      
+      if (width) {
+        img.style.width = width;
+        img.style.maxWidth = width;
+      }
+      
+      if (align) {
+        img.style.display = 'block';
+        if (align === 'center') {
+          img.style.margin = '16px auto';
+        } else if (align === 'left') {
+          img.style.margin = '16px auto 16px 0';
+        } else if (align === 'right') {
+          img.style.margin = '16px 0 16px auto';
+        }
+      }
+      
+      if (action === 'delete') {
+        img.remove();
+      }
+      
+      if (width || align || action) {
+        document.body.removeChild(menu);
+        setContent(contentRef.current?.innerHTML || '');
+      }
+    });
+    
+    document.body.appendChild(menu);
+    
+    // 点击其他地方关闭菜单
+    const closeMenu = (e: MouseEvent) => {
+      if (!menu.contains(e.target as Node)) {
+        document.body.removeChild(menu);
+        document.removeEventListener('click', closeMenu);
+      }
+    };
+    
+    setTimeout(() => {
+      document.addEventListener('click', closeMenu);
+    }, 100);
   };
 
   /**
@@ -184,18 +317,36 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingImage(true);
-    
     try {
-      // 上传图片到OSS获取URL
-      const imageUrl = await uploadImageApi(file);
+      // 生成临时ID
+      const tempId = `temp-image-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // 创建临时URL
+      const blobUrl = URL.createObjectURL(file);
+      
+      // 保存文件映射
+      const newImageUrlMap = new Map(imageUrlMap);
+      newImageUrlMap.set(tempId, file);
+      setImageUrlMap(newImageUrlMap);
+      
+      // 添加到图片列表
+      setContentImages([...contentImages, file]);
       
       // 将图片插入到富文本编辑器中
       if (contentRef.current) {
         const img = document.createElement('img');
-        img.src = imageUrl;
-        img.className = 'max-w-full h-auto rounded-lg my-4 block';
+        img.src = blobUrl;
+        img.className = 'max-w-full h-auto rounded-lg my-4 block cursor-pointer';
         img.alt = file.name;
+        img.setAttribute('data-temp-id', tempId); // 添加临时ID标识
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        
+        // 添加图片点击事件用于调整大小
+        img.addEventListener('click', (e) => {
+          e.preventDefault();
+          showImageResizeMenu(e.target as HTMLImageElement);
+        });
         
         // 在光标位置插入图片
         const selection = window.getSelection();
@@ -225,12 +376,11 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
         contentRef.current.focus();
       }
       
-      console.log('✅ 图片插入成功:', imageUrl);
+      console.log('✅ 图片插入成功:', tempId);
     } catch (error: any) {
       console.error('❌ 图片插入失败:', error);
-      alert(error.message || '图片上传失败，请稍后重试');
+      alert(error.message || '图片插入失败，请稍后重试');
     } finally {
-      setUploadingImage(false);
       // 清空input以便下次选择同一文件
       if (e.target) {
         e.target.value = '';
@@ -273,11 +423,6 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   };
 
   /**
-   * 插入图片到内容中
-   */
-
-
-  /**
    * 处理内容变化
    */
   const handleContentChange = () => {
@@ -309,54 +454,35 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
     setUploadingAttachment(true);
     
     try {
-      const formData = new FormData();
-      
-      // 基本信息
-      formData.append('title', title.trim());
-      formData.append('content', content.trim());
-      formData.append('categoryId', selectedCategory.categoryId);
-      
-      // 标签
-      if (selectedTags.length > 0) {
-        formData.append('tagIds', selectedTags.join(','));
-      }
-      
-      // 地理位置
-      if (location) {
-        formData.append('location', location);
-      }
-      
-      // 上传附件并获取URL
-      let attachmentUrls: FileUploadResponse[] = [];
-      if (attachmentFiles.length > 0) {
-        console.log('📎 开始上传附件文件...');
-        attachmentUrls = await uploadMultipleAttachmentsApi(attachmentFiles);
-        console.log('✅ 附件上传完成:', attachmentUrls);
-        
-        // 将附件URL作为files字段提交
-        attachmentUrls.forEach(attachment => {
-          formData.append('files', attachment.url);
-        });
-      }
-
       console.log('🚀 提交帖子数据:', {
         title: title.trim(),
         content: content.trim(),
-        categoryId: selectedCategory.categoryId,
-        tagIds: selectedTags.join(','),
+        category_id: selectedCategory.categoryId,
+        tag_names: selectedTags,
         location,
-        attachmentCount: attachmentFiles.length
+        attachmentCount: attachmentFiles.length,
+        contentImageCount: contentImages.length
       });
 
-      await createPostApi(formData);
+      // 使用下划线格式的参数调用API
+      await createPostApi({
+        title: title.trim(),
+        content: content.trim(),
+        category_id: selectedCategory.categoryId,
+        tag_names: selectedTags.length > 0 ? selectedTags : undefined,
+        location: location || undefined,
+        files: attachmentFiles.length > 0 ? attachmentFiles : undefined,
+        content_images: contentImages.length > 0 ? contentImages : undefined
+      });
       
       console.log('✅ 发布图文帖子成功:', {
         title,
-        content,
+        content: content,
         category: selectedCategory,
         tags: selectedTags,
         location,
-        attachmentCount: attachmentFiles.length
+        attachmentCount: attachmentFiles.length,
+        contentImageCount: contentImages.length
       });
       
       // 发布成功后跳转
@@ -449,21 +575,132 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
             </label>
             
             {/* 编辑器工具栏 */}
-            <div className="border border-neutral-200 dark:border-zinc-700 rounded-t-lg bg-neutral-50 dark:bg-zinc-800 px-3 py-2 flex items-center space-x-2">
+            <div className="border border-neutral-200 dark:border-zinc-700 rounded-t-lg bg-neutral-50 dark:bg-zinc-800 px-3 py-2 flex items-center space-x-1 flex-wrap gap-2">
+              {/* 标题样式 */}
+              <select
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value) {
+                    document.execCommand('formatBlock', false, value);
+                    setContent(contentRef.current?.innerHTML || '');
+                    e.target.value = '';
+                  }
+                }}
+                className="px-2 py-1 text-xs border border-neutral-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300"
+              >
+                <option value="">样式</option>
+                <option value="h1">大标题 H1</option>
+                <option value="h2">中标题 H2</option>
+                <option value="h3">小标题 H3</option>
+                <option value="p">正文</option>
+              </select>
+
+              {/* 格式化按钮 */}
+              <button
+                type="button"
+                onClick={() => {
+                  document.execCommand('bold');
+                  setContent(contentRef.current?.innerHTML || '');
+                }}
+                className="flex items-center justify-center w-8 h-8 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
+                title="粗体"
+              >
+                <strong>B</strong>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  document.execCommand('italic');
+                  setContent(contentRef.current?.innerHTML || '');
+                }}
+                className="flex items-center justify-center w-8 h-8 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
+                title="斜体"
+              >
+                <em>I</em>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  document.execCommand('underline');
+                  setContent(contentRef.current?.innerHTML || '');
+                }}
+                className="flex items-center justify-center w-8 h-8 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
+                title="下划线"
+              >
+                <span style={{ textDecoration: 'underline' }}>U</span>
+              </button>
+
+              {/* 分隔线 */}
+              <div className="w-px h-6 bg-neutral-300 dark:bg-zinc-600"></div>
+
+              {/* 列表按钮 */}
+              <button
+                type="button"
+                onClick={() => {
+                  document.execCommand('insertUnorderedList');
+                  setContent(contentRef.current?.innerHTML || '');
+                }}
+                className="flex items-center justify-center w-8 h-8 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
+                title="无序列表"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  document.execCommand('insertOrderedList');
+                  setContent(contentRef.current?.innerHTML || '');
+                }}
+                className="flex items-center justify-center w-8 h-8 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
+                title="有序列表"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+              </button>
+
+              {/* 分隔线 */}
+              <div className="w-px h-6 bg-neutral-300 dark:bg-zinc-600"></div>
+
+              {/* 插入图片 */}
               <button
                 type="button"
                 onClick={handleInsertImage}
-                disabled={uploadingImage}
+                disabled={uploadingAttachment}
                 className="flex items-center space-x-1 px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="插入图片"
               >
-                {uploadingImage ? (
+                {uploadingAttachment ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                 ) : (
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 )}
-                <span>{uploadingImage ? '上传中...' : '插入图片'}</span>
+                <span className="hidden sm:inline">{uploadingAttachment ? '上传中...' : '插入图片'}</span>
+              </button>
+
+              {/* 分隔线 */}
+              <div className="w-px h-6 bg-neutral-300 dark:bg-zinc-600"></div>
+
+              {/* 清除格式 */}
+              <button
+                type="button"
+                onClick={() => {
+                  document.execCommand('removeFormat');
+                  setContent(contentRef.current?.innerHTML || '');
+                }}
+                className="flex items-center justify-center w-8 h-8 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary hover:bg-white dark:hover:bg-zinc-700 rounded transition-colors"
+                title="清除格式"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
             
@@ -472,8 +709,14 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
               ref={contentRef}
               contentEditable
               onInput={handleContentChange}
-              className="w-full min-h-[200px] p-4 border border-neutral-200 dark:border-zinc-700 border-t-0 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white"
-              style={{ whiteSpace: 'pre-wrap' }}
+              className="w-full min-h-[200px] p-4 border border-neutral-200 dark:border-zinc-700 border-t-0 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white prose prose-neutral dark:prose-invert max-w-none"
+              style={{ 
+                whiteSpace: 'pre-wrap',
+                '--tw-prose-headings': '#1f2937',
+                '--tw-prose-h1': '#1f2937',
+                '--tw-prose-h2': '#374151',
+                '--tw-prose-h3': '#4b5563'
+              } as React.CSSProperties}
               data-placeholder="请输入帖子内容，支持插入图片..."
             />
             
@@ -593,70 +836,94 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
           </div>
         </div>
 
-        {/* 内容编辑器 */}
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">
-            内容 <span className="text-red-500">*</span>
-          </label>
-          
-          <div
-            ref={contentRef}
-            contentEditable
-            onInput={handleContentChange}
-            className="min-h-[300px] p-4 border border-neutral-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white outline-none"
-            style={{ whiteSpace: 'pre-wrap' }}
-            data-placeholder="请输入帖子内容..."
-          />
-        </div>
-
         {/* 标签选择 */}
         <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">
-            选择标签 (最多8个，可自定义)
+            选择标签 (最多8个)
           </label>
           
-          {/* 推荐标签 */}
+          {/* 统一的标签输入框 */}
           <div className="mb-4">
-            <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">推荐标签:</div>
-            <div className="flex flex-wrap gap-2">
-              {recommendedTags.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => handleTagToggle(tag)}
-                  disabled={!selectedTags.includes(tag) && selectedTags.length >= 8}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                    selectedTags.includes(tag)
-                      ? 'bg-primary text-white'
-                      : 'bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {tag}
-                </button>
-              ))}
+            <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+              输入标签名称:
             </div>
-          </div>
-
-          {/* 自定义标签输入 */}
-          <div className="mb-4">
-            <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">自定义标签:</div>
-            <div className="flex gap-2">
+            <div className="relative">
               <input
                 type="text"
-                value={customTag}
-                onChange={(e) => setCustomTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddCustomTag()}
-                placeholder="输入自定义标签..."
-                className="flex-1 px-3 py-2 border border-neutral-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                value={tagSearchInput}
+                onChange={(e) => handleTagSearchInputChange(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tagName = tagSearchInput.trim();
+                    if (tagName && !selectedTags.includes(tagName) && selectedTags.length < 8) {
+                      setSelectedTags([...selectedTags, tagName]);
+                      setTagSearchInput('');
+                      setSuggestedTags([]);
+                    }
+                  }
+                }}
+                placeholder="输入标签名称（如：技术、前端、React等）..."
+                className="w-full px-3 py-2 border border-neutral-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-transparent"
                 disabled={selectedTags.length >= 8}
               />
-              <button
-                onClick={handleAddCustomTag}
-                disabled={!customTag.trim() || selectedTags.includes(customTag.trim()) || selectedTags.length >= 8}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                添加
-              </button>
+              {isSearchingTags && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                </div>
+              )}
             </div>
+            
+            {/* 搜索结果下拉框 */}
+            {suggestedTags.length > 0 && tagSearchInput.trim() && (
+              <div className="mt-2 border border-neutral-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 max-h-40 overflow-y-auto shadow-lg">
+                {suggestedTags.map(tag => (
+                  <button
+                    key={tag.tagId}
+                    onClick={() => handleTagSelect(tag.tagName)}
+                    disabled={selectedTags.includes(tag.tagName)}
+                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 dark:hover:bg-zinc-700 text-neutral-800 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed border-b border-neutral-100 dark:border-zinc-700 last:border-b-0"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{tag.tagName}</span>
+                      {selectedTags.includes(tag.tagName) && (
+                        <span className="text-xs text-green-600 dark:text-green-400">已选择</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {/* 如果输入的标签不在搜索结果中，显示创建提示 */}
+            {tagSearchInput.trim() && suggestedTags.length === 0 && !isSearchingTags && (
+              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                                         <span className="text-sm text-blue-700 dark:text-blue-300">
+                       创建新标签: &ldquo;{tagSearchInput.trim()}&rdquo;
+                     </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const tagName = tagSearchInput.trim();
+                      if (tagName && !selectedTags.includes(tagName) && selectedTags.length < 8) {
+                        setSelectedTags([...selectedTags, tagName]);
+                        setTagSearchInput('');
+                        setSuggestedTags([]);
+                      }
+                    }}
+                    disabled={!tagSearchInput.trim() || selectedTags.includes(tagSearchInput.trim()) || selectedTags.length >= 8}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    添加
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 已选择的标签 */}

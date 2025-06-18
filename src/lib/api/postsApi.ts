@@ -277,10 +277,11 @@ export async function deletePostApi(postId: string): Promise<void> {
  * @param {Object} params - 创建帖子的参数
  * @param {string} params.title - 帖子标题
  * @param {string} params.content - 帖子内容
- * @param {string} params.categoryId - 分类ID
- * @param {string[]} [params.tagIds] - 标签ID列表
+ * @param {string} params.category_id - 分类ID (使用下划线格式，后端自动转换为categoryId)
+ * @param {string[]} [params.tag_names] - 标签名称列表 (使用下划线格式，后端自动转换为tagNames)
  * @param {string} [params.location] - 发帖位置
- * @param {File[]} [params.files] - 上传的文件列表
+ * @param {File[]} [params.files] - 上传的附件文件列表
+ * @param {File[]} [params.content_images] - 富文本内容中的图片文件列表 (使用下划线格式，后端自动转换为contentImages)
  * @returns {Promise<boolean>} 创建结果
  * @throws {Error} 当API请求失败时抛出错误
  * @example
@@ -288,18 +289,21 @@ export async function deletePostApi(postId: string): Promise<void> {
  * await createPostApi({
  *   title: '我的帖子',
  *   content: '帖子内容',
- *   categoryId: 'category-123',
+ *   category_id: 'category-123',
+ *   tag_names: ['技术', '前端'],
  *   location: '116.4074,39.9042',
- *   files: [file1, file2]
+ *   files: [file1, file2],
+ *   content_images: [image1, image2]
  * });
  */
 export async function createPostApi(params: FormData | {
   title: string;
   content: string;
-  categoryId: string;
-  tagIds?: string[];
+  category_id: string;
+  tag_names?: string[];
   location?: string;
   files?: File[];
+  content_images?: File[];
 }): Promise<boolean> {
   console.log('📤 createPostApi请求参数:', params);
 
@@ -313,27 +317,50 @@ export async function createPostApi(params: FormData | {
       // 如果是普通对象，转换为FormData
       formData = new FormData();
       
-      // 添加基本字段
+      // 添加基本字段 - 使用snake_case格式，后端会自动转换为camelCase
       formData.append('title', params.title);
       formData.append('content', params.content);
-      formData.append('categoryId', params.categoryId);
+      formData.append('category_id', params.category_id); // 使用下划线格式
+      
+      console.log('📋 FormData基本字段:');
+      console.log('  - title:', params.title);
+      console.log('  - content:', params.content ? `${params.content.substring(0, 50)}...` : 'empty');
+      console.log('  - category_id:', params.category_id);
       
       // 添加可选字段
       if (params.location) {
         formData.append('location', params.location);
+        console.log('  - location:', params.location);
       }
       
-      if (params.tagIds && params.tagIds.length > 0) {
-        params.tagIds.forEach(tagId => {
-          formData.append('tagIds', tagId);
+      // 标签名称列表 - 使用下划线格式
+      if (params.tag_names && params.tag_names.length > 0) {
+        params.tag_names.forEach(tagName => {
+          formData.append('tag_names', tagName); // 使用下划线格式
         });
+        console.log('  - tag_names:', params.tag_names);
       }
       
-      // 添加文件
+      // 添加附件文件
       if (params.files && params.files.length > 0) {
         params.files.forEach(file => {
           formData.append('files', file);
         });
+        console.log('  - files count:', params.files.length);
+      }
+      
+      // 添加富文本内容图片 - 使用下划线格式
+      if (params.content_images && params.content_images.length > 0) {
+        params.content_images.forEach(image => {
+          formData.append('content_images', image); // 使用下划线格式
+        });
+        console.log('  - content_images count:', params.content_images.length);
+      }
+      
+      // 打印FormData的所有字段（调试用）
+      console.log('📋 完整FormData内容:');
+      for (const [key, value] of formData.entries()) {
+        console.log(`  - ${key}:`, value instanceof File ? `File(${value.name})` : value);
       }
     }
 
