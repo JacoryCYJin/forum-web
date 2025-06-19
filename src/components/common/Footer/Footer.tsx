@@ -342,7 +342,7 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <div className="group flex items-center space-x-3 text-neutral-600 dark:text-neutral-400 hover:text-primary transition-all duration-300 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-700/50">
                 <Mail theme="outline" size="18" className="text-primary group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-sm group-hover:translate-x-1 transition-transform duration-300">chengyue.jin@outlook.com</span>
+                <span className="text-sm group-hover:translate-x-1 transition-transform duration-300">support@openshare.cn</span>
               </div>
               <div className="group flex items-center space-x-3 text-neutral-600 dark:text-neutral-400 hover:text-primary transition-all duration-300 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-700/50">
                 <Phone theme="outline" size="18" className="text-primary group-hover:scale-110 transition-transform duration-300" />

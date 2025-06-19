@@ -316,22 +316,22 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   const topNavItems: SidebarItem[] = [
     {
       name: "home",
-      icon: <Home theme="outline" size="16" />,
+      icon: <Home theme="outline" size="18" />,
       path: "/",
     },
     {
       name: "hot",
-      icon: <Fire theme="outline" size="16" />,
+      icon: <Fire theme="outline" size="18" />,
       path: "/popular",
     },
     {
       name: "map",
-      icon: <MapDraw theme="outline" size="16" />,
+      icon: <MapDraw theme="outline" size="18" />,
       path: "/introduce",
     },
     {
       name: "follow",
-      icon: <Concern theme="outline" size="16" />,
+      icon: <Concern theme="outline" size="18" />,
       path: "/like",
     },
   ];
@@ -377,25 +377,25 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                         {item.path === "/" && isLinkActive(item.path) ? (
                           <Home
                             theme="filled"
-                            size="16"
+                            size="18"
                           />
                         ) : item.path === "/popular" &&
                           isLinkActive(item.path) ? (
                           <Fire
                             theme="filled"
-                            size="16"
+                            size="18"
                           />
                         ) : item.path === "/introduce" &&
                           isLinkActive(item.path) ? (
                           <MapDraw
                             theme="filled"
-                            size="16"
+                            size="18"
                           />
                         ) : item.path === "/like" &&
                           isLinkActive(item.path) ? (
                           <Concern
                             theme="filled"
-                            size="16"
+                            size="18"
                           />
                         ) : (
                           item.icon

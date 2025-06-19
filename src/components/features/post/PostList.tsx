@@ -998,7 +998,7 @@ export default function PostList({
                         key={tag.tagId}
                         className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-neutral-100 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-zinc-600 transition-all duration-200 cursor-pointer border border-neutral-200 dark:border-zinc-600"
                       >
-                        #{tag.tagName}
+                        #&nbsp;{tag.tagName}
                       </span>
                     ))}
                     {post.tags.length > 4 && (
