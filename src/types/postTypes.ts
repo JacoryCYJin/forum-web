@@ -106,6 +106,11 @@ export interface Post {
    * 发帖位置，格式为 "经度,纬度"
    */
   location?: string;
+
+  /**
+   * 发帖时间
+   */
+  createdTime?: string;
 }
 
 /**
@@ -157,6 +162,11 @@ export interface PostDetail {
    * 评论列表（分页）
    */
   comments: PageResponse<Comment>;
+
+  /**
+   * 发帖时间
+   */
+  createdTime?: string;
 }
 
 /**

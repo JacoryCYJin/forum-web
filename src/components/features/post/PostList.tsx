@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import Link from 'next/link';
+import { formatPostTime } from '@/lib/utils/dateUtils';
 
 import { getPostListApi, getPostsByCategoryIdApi, deletePostApi } from '@/lib/api/postsApi';
 import { getUserFavouritesApi, toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
@@ -811,43 +812,7 @@ export default function PostList({
     return String(commentCountCache.get(postId) ?? 0);
   };
 
-  /**
-   * 格式化发布时间
-   * 
-   * @param postId - 帖子ID，用于生成模拟时间
-   * @returns 格式化后的时间显示
-   */
-  const formatPostTime = (postId: string): string => {
-    // 由于Post接口中没有createdAt字段，这里使用postId生成模拟时间
-    const hash = postId.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    const randomHours = Math.abs(hash) % 72; // 0-72小时前
-    const now = new Date();
-    const mockDate = new Date(now.getTime() - randomHours * 60 * 60 * 1000);
-    
-    const diffInMinutes = Math.floor((now.getTime() - mockDate.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) {
-      return '刚刚';
-    } else if (diffInMinutes < 60) {
-      return `${diffInMinutes}分钟前`;
-    } else if (diffInMinutes < 1440) {
-      const hours = Math.floor(diffInMinutes / 60);
-      return `${hours}小时前`;
-    } else if (diffInMinutes < 10080) {
-      const days = Math.floor(diffInMinutes / 1440);
-      return `${days}天前`;
-    } else {
-      return mockDate.toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    }
-  };
+
 
   // 加载状态
   if (isLoading && posts.length === 0) {
@@ -949,39 +914,39 @@ export default function PostList({
         return (
           <article 
             key={post.postId} 
-            className="bg-white dark:bg-dark-secondary rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-neutral-200/50 dark:border-zinc-700/50 hover:border-neutral-300 dark:hover:border-zinc-600 group overflow-hidden"
+            className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-neutral-200/50 dark:border-zinc-700/50 hover:border-neutral-300 dark:hover:border-zinc-600 group overflow-hidden"
           >
-            <div className="p-6">
+            <div className="p-4">
               {/* 用户头像和信息 - 放在最上方 */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <UserLink
                   userId={post.userId}
                   avatarUrl={getUserAvatar(post.userId)}
                   username={getUserDisplayName(post.userId)}
                   className="flex-1"
                 />
-                <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-zinc-800 px-3 py-1 rounded-full">
-                  <svg className="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-zinc-800 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {formatPostTime(post.postId)}
+                  {formatPostTime(post.createdTime)}
                 </div>
               </div>
               
               {/* 帖子标题 */}
-              <div className="mb-4">
+              <div className="mb-3">
                 <Link 
                   href={`/post/${post.postId}`} 
                   className="block group/title"
                 >
-                  <h2 className="text-xl font-bold text-neutral-800 dark:text-white group-hover/title:text-primary dark:group-hover/title:text-primary transition-colors line-clamp-2 leading-tight">
+                  <h2 className="text-lg font-bold text-neutral-800 dark:text-white group-hover/title:text-primary dark:group-hover/title:text-primary transition-colors line-clamp-2 leading-tight">
                     {post.title}
                   </h2>
                 </Link>
               </div>
               
               {/* 帖子内容预览 */}
-              <div className="mb-4">
+              <div className="mb-3">
                 {/* 检查是否有视频附件 - 检查 fileUrls 字段中是否包含视频文件扩展名 */}
                 {post.fileUrls && /\.(mp4|webm|ogg|avi|mov|wmv|flv|mkv)(\?|$)/i.test(post.fileUrls) ? (
                   /* 视频帖子特殊展示 */
@@ -1017,7 +982,7 @@ export default function PostList({
               </div>
               
               {/* 分类和标签显示区域 - 分类在标签左边 */}
-              <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 {/* 分类标签 - 在最左边 */}
                 {post.category && (
                   <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 text-primary rounded-full text-sm font-medium border border-primary/20">
@@ -1046,7 +1011,7 @@ export default function PostList({
               </div>
               
               {/* 帖子统计和操作区域 */}
-              <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-zinc-700">
+              <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-zinc-700">
                 <div className="flex items-center space-x-6 text-sm text-neutral-500 dark:text-neutral-400">
                   {/* 评论数 */}
                   <div className="flex items-center space-x-2 bg-neutral-50 dark:bg-zinc-800 px-3 py-1.5 rounded-lg">

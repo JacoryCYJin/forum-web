@@ -24,6 +24,7 @@ import {
 } from "@icon-park/react";
 import { getCategoryListWithCacheApi } from "@/lib/api/categoryApi";
 import { Category } from "@/types/categoryTypes";
+import LanguageText from "@/components/common/LanguageText/LanguageText";
 
 /**
  * 侧边栏组件属性接口
@@ -217,31 +218,31 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
     switch (categoryName) {
       case "科技":
-        return <Chip theme={theme} size="22" className="sidebar-icon" />;
+        return <Chip theme={theme} size="16" />;
       case "技术":
-        return <Code theme={theme} size="22" className="sidebar-icon" />;
+        return <Code theme={theme} size="16" />;
       case "电影":
-        return <VideoOne theme={theme} size="22" className="sidebar-icon" />;
+        return <VideoOne theme={theme} size="16" />;
       case "音乐":
-        return <Music theme={theme} size="22" className="sidebar-icon" />;
+        return <Music theme={theme} size="16" />;
       case "美食":
-        return <ForkSpoon theme={theme} size="22" className="sidebar-icon" />;
+        return <ForkSpoon theme={theme} size="16" />;
       case "旅行":
-        return <Journey theme={theme} size="22" className="sidebar-icon" />;
+        return <Journey theme={theme} size="16" />;
       case "摄影":
-        return <Camera theme={theme} size="22" className="sidebar-icon" />;
+        return <Camera theme={theme} size="16" />;
       case "生活":
         return (
-          <CoffeeMachine theme={theme} size="22" className="sidebar-icon" />
+          <CoffeeMachine theme={theme} size="16" />
         );
       case "运动":
-        return <Sport theme={theme} size="22" className="sidebar-icon" />;
+        return <Sport theme={theme} size="16" />;
       case "读书":
-        return <Book theme={theme} size="22" className="sidebar-icon" />;
+        return <Book theme={theme} size="16" />;
       case "游戏":
-        return <Gamepad theme={theme} size="22" className="sidebar-icon" />;
+        return <Gamepad theme={theme} size="16" />;
       default:
-        return <Code theme={theme} size="22" className="sidebar-icon" />;
+        return <Code theme={theme} size="16" />;
     }
   };
 
@@ -254,26 +255,83 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
     }
   };
 
+  /**
+   * 获取导航项的多语言文本
+   *
+   * @param {string} key - 导航项键值
+   * @returns {object} 多语言文本映射
+   */
+  const getNavText = (key: string) => {
+    const textMap: { [key: string]: { 'zh-CN': string; 'zh-TW': string; 'en': string } } = {
+      home: {
+        'zh-CN': '首页',
+        'zh-TW': '首頁',
+        'en': 'Home'
+      },
+      hot: {
+        'zh-CN': '热门',
+        'zh-TW': '熱門',
+        'en': 'Hot'
+      },
+      map: {
+        'zh-CN': '地图',
+        'zh-TW': '地圖',
+        'en': 'Map'
+      },
+      follow: {
+        'zh-CN': '关注',
+        'zh-TW': '關注',
+        'en': 'Follow'
+      },
+      category: {
+        'zh-CN': '分类',
+        'zh-TW': '分類',
+        'en': 'Categories'
+      },
+      loading: {
+        'zh-CN': '加载中...',
+        'zh-TW': '載入中...',
+        'en': 'Loading...'
+      },
+      retry: {
+        'zh-CN': '重试',
+        'zh-TW': '重試',
+        'en': 'Retry'
+      },
+      ignore: {
+        'zh-CN': '忽略',
+        'zh-TW': '忽略',
+        'en': 'Ignore'
+      },
+      noData: {
+        'zh-CN': '暂无分类数据',
+        'zh-TW': '暫無分類數據',
+        'en': 'No categories available'
+      }
+    };
+    return textMap[key] || textMap.home;
+  };
+
   // 顶部固定导航项
   const topNavItems: SidebarItem[] = [
     {
-      name: "首页",
-      icon: <Home theme="outline" size="22" className="sidebar-icon" />,
+      name: "home",
+      icon: <Home theme="outline" size="16" />,
       path: "/",
     },
     {
-      name: "热门",
-      icon: <Fire theme="outline" size="22" className="sidebar-icon" />,
+      name: "hot",
+      icon: <Fire theme="outline" size="16" />,
       path: "/popular",
     },
     {
-      name: "地图",
-      icon: <MapDraw theme="outline" size="22" className="sidebar-icon" />,
+      name: "map",
+      icon: <MapDraw theme="outline" size="16" />,
       path: "/introduce",
     },
     {
-      name: "关注",
-      icon: <Concern theme="outline" size="22" className="sidebar-icon" />,
+      name: "follow",
+      icon: <Concern theme="outline" size="16" />,
       path: "/like",
     },
   ];
@@ -314,34 +372,45 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                   {item.path ? (
                     <Link
                       href={item.path}
-                      className={`flex items-center p-2 rounded-md ${
-                        isLinkActive(item.path)
-                          ? "bg-neutral-200 dark:bg-zinc-700 text-neutral-900 dark:text-white"
-                          : "text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800"
-                      }`}
-                    >
-                      {item.path === "/" && isLinkActive(item.path) ? (
-                        <Home
-                          theme="filled"
-                          size="22"
-                          className="sidebar-icon"
-                        />
-                      ) : item.path === "/popular" &&
-                        isLinkActive(item.path) ? (
-                        <Fire
-                          theme="filled"
-                          size="22"
-                          className="sidebar-icon"
-                        />
-                      ) : (
-                        item.icon
-                      )}
-                      <span className="ml-3">{item.name}</span>
+                      className="group flex items-center space-x-3 text-neutral-600 dark:text-neutral-400 hover:text-primary dark:hover:text-primary transition-all duration-300 p-3 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-700/50"                    >
+                      <span className="group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 text-primary pl-2">
+                        {item.path === "/" && isLinkActive(item.path) ? (
+                          <Home
+                            theme="filled"
+                            size="16"
+                          />
+                        ) : item.path === "/popular" &&
+                          isLinkActive(item.path) ? (
+                          <Fire
+                            theme="filled"
+                            size="16"
+                          />
+                        ) : item.path === "/introduce" &&
+                          isLinkActive(item.path) ? (
+                          <MapDraw
+                            theme="filled"
+                            size="16"
+                          />
+                        ) : item.path === "/like" &&
+                          isLinkActive(item.path) ? (
+                          <Concern
+                            theme="filled"
+                            size="16"
+                          />
+                        ) : (
+                          item.icon
+                        )}
+                      </span>
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">
+                        <LanguageText texts={getNavText(item.name)} />
+                      </span>
                     </Link>
                   ) : (
-                    <div className="flex items-center p-2 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-md">
+                    <div className="flex items-center p-3 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-md">
                       {item.icon}
-                      <span className="ml-3">{item.name}</span>
+                                              <span className="ml-3">
+                          <LanguageText texts={getNavText(item.name)} />
+                        </span>
                     </div>
                   )}
                 </li>
@@ -359,7 +428,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
               onClick={() => toggleCategory("分类")}
             >
               <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-                分类
+                <LanguageText texts={getNavText('category')} />
               </h3>
               <Down
                 theme="outline"
@@ -376,7 +445,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                 {isLoading && (
                   <div className="flex items-center p-2 text-neutral-500 dark:text-neutral-400">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neutral-500 mr-3"></div>
-                    <span className="text-sm">加载中...</span>
+                    <span className="text-sm">
+                      <LanguageText texts={getNavText('loading')} />
+                    </span>
                   </div>
                 )}
 
@@ -392,13 +463,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                           onClick={handleRetry}
                           className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline hover:no-underline"
                         >
-                          重试
+                          <LanguageText texts={getNavText('retry')} />
                         </button>
                         <button
                           onClick={() => setError(null)}
                           className="text-xs text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300"
                         >
-                          忽略
+                          <LanguageText texts={getNavText('ignore')} />
                         </button>
                       </div>
                     </div>
@@ -417,14 +488,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                           <li key={category.categoryId}>
                             <Link
                               href={categoryPath}
-                              className={`flex items-center p-2 rounded-md ${
-                                isActive
-                                  ? "bg-neutral-200 dark:bg-zinc-700 text-neutral-900 dark:text-white"
-                                  : "text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-800"
-                              }`}
+                              className="group flex items-center space-x-3 text-neutral-600 dark:text-neutral-400 hover:text-primary dark:hover:text-primary transition-all duration-300 p-3 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-700/50"
                             >
-                              {getCategoryIcon(category.categoryName, isActive)}
-                              <span className="ml-3">
+                              <span className="group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 text-primary pl-2">
+                                {getCategoryIcon(category.categoryName, isActive)}
+                              </span>
+                              <span className="group-hover:translate-x-1 transition-transform duration-300">
                                 {category.categoryName}
                               </span>
                             </Link>
@@ -434,7 +503,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                     ) : (
                       /* 空状态 */
                       <li className="p-2 text-neutral-500 dark:text-neutral-400 text-sm">
-                        暂无分类数据
+                        <LanguageText texts={getNavText('noData')} />
                       </li>
                     )}
                   </ul>

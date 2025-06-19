@@ -10,6 +10,7 @@ import { getUserInfoApi } from '@/lib/api/userApi';
 import type { PostDetailQueryParams } from '@/types/postTypes';
 import type { User } from '@/types/userTypes';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer/MarkdownRenderer';
+import { formatPostTime } from '@/lib/utils/dateUtils';
 
 
 /**
@@ -192,7 +193,7 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                         <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>发布时间</span>
+                        <span>{formatPostTime(post.createdTime)}</span>
                       </div>
                     </div>
                   </div>

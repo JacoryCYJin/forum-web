@@ -12,6 +12,7 @@ import {
   Mail,
   Phone
 } from "@icon-park/react";
+import LanguageText from "@/components/common/LanguageText/LanguageText";
 
 interface TeamMember {
   id: number;
@@ -27,6 +28,110 @@ interface QuickLink {
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+
+  /**
+   * 获取多语言文本映射
+   */
+  const getFooterText = (key: string) => {
+    const textMap: { [key: string]: { 'zh-CN': string; 'zh-TW': string; 'en': string } } = {
+      subtitle: {
+        'zh-CN': '现代化社区平台',
+        'zh-TW': '現代化社群平台',
+        'en': 'Modern Community Platform'
+      },
+      description: {
+        'zh-CN': '基于 Next.js、Element Plus 和 Tailwind CSS 构建的现代化论坛平台，为用户提供优质的交流体验和创新的社区功能。',
+        'zh-TW': '基於 Next.js、Element Plus 和 Tailwind CSS 構建的現代化論壇平台，為用戶提供優質的交流體驗和創新的社群功能。',
+        'en': 'A modern forum platform built with Next.js, Element Plus, and Tailwind CSS, providing users with high-quality communication experience and innovative community features.'
+      },
+      team: {
+        'zh-CN': '开发团队',
+        'zh-TW': '開發團隊',
+        'en': 'Development Team'
+      },
+      quickNav: {
+        'zh-CN': '快速导航',
+        'zh-TW': '快速導航',
+        'en': 'Quick Navigation'
+      },
+      home: {
+        'zh-CN': '首页',
+        'zh-TW': '首頁',
+        'en': 'Home'
+      },
+      hot: {
+        'zh-CN': '热门',
+        'zh-TW': '熱門',
+        'en': 'Hot'
+      },
+      map: {
+        'zh-CN': '地图',
+        'zh-TW': '地圖',
+        'en': 'Map'
+      },
+      follow: {
+        'zh-CN': '关注',
+        'zh-TW': '關注',
+        'en': 'Follow'
+      },
+      categories: {
+        'zh-CN': '热门分类',
+        'zh-TW': '熱門分類',
+        'en': 'Popular Categories'
+      },
+      tech: {
+        'zh-CN': '技术',
+        'zh-TW': '技術',
+        'en': 'Technology'
+      },
+      science: {
+        'zh-CN': '科技',
+        'zh-TW': '科技',
+        'en': 'Science'
+      },
+      entertainment: {
+        'zh-CN': '娱乐',
+        'zh-TW': '娛樂',
+        'en': 'Entertainment'
+      },
+      music: {
+        'zh-CN': '音乐',
+        'zh-TW': '音樂',
+        'en': 'Music'
+      },
+      contact: {
+        'zh-CN': '联系我们',
+        'zh-TW': '聯繫我們',
+        'en': 'Contact Us'
+      },
+      followUs: {
+        'zh-CN': '关注我们',
+        'zh-TW': '關注我們',
+        'en': 'Follow Us'
+      },
+      copyright: {
+        'zh-CN': '保留所有权利。',
+        'zh-TW': '保留所有權利。',
+        'en': 'All rights reserved.'
+      },
+      privacy: {
+        'zh-CN': '隐私政策',
+        'zh-TW': '隱私政策',
+        'en': 'Privacy Policy'
+      },
+      terms: {
+        'zh-CN': '服务条款',
+        'zh-TW': '服務條款',
+        'en': 'Terms of Service'
+      },
+      help: {
+        'zh-CN': '帮助中心',
+        'zh-TW': '幫助中心',
+        'en': 'Help Center'
+      }
+    };
+    return textMap[key] || textMap.home;
+  };
 
   // 队员数据
   const teamMembers: TeamMember[] = [
@@ -45,22 +150,22 @@ const Footer: React.FC = () => {
   // 快速链接
   const quickLinks: QuickLink[] = [
     {
-      name: "首页",
+      name: "home",
       path: "/",
       icon: <Home theme="outline" size="16" />
     },
     {
-      name: "热门",
+      name: "hot",
       path: "/popular", 
       icon: <Fire theme="outline" size="16" />
     },
     {
-      name: "地图",
+      name: "map",
       path: "/introduce",
       icon: <MapDraw theme="outline" size="16" />
     },
     {
-      name: "关注",
+      name: "follow",
       path: "/like",
       icon: <Concern theme="outline" size="16" />
     }
@@ -69,22 +174,22 @@ const Footer: React.FC = () => {
   // 分类链接
   const categoryLinks: QuickLink[] = [
     {
-      name: "技术",
+      name: "tech",
       path: "/category/tech",
       icon: <Code theme="outline" size="16" />
     },
     {
-      name: "科技",
+      name: "science",
       path: "/category/science",
       icon: <Chip theme="outline" size="16" />
     },
     {
-      name: "娱乐",
+      name: "entertainment",
       path: "/category/entertainment",
       icon: <VideoOne theme="outline" size="16" />
     },
     {
-      name: "音乐",
+      name: "music",
       path: "/category/music",
       icon: <Music theme="outline" size="16" />
     }
@@ -119,14 +224,14 @@ const Footer: React.FC = () => {
                   OpenShare
                 </span>
                 <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                  现代化社区平台
+                  <LanguageText texts={getFooterText('subtitle')} />
                 </div>
               </div>
             </div>
             
             {/* 描述 */}
             <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-              基于 Next.js、Element Plus 和 Tailwind CSS 构建的现代化论坛平台，为用户提供优质的交流体验和创新的社区功能。
+              <LanguageText texts={getFooterText('description')} />
             </p>
             
             {/* 团队成员头像 - 改进版 */}
@@ -135,7 +240,7 @@ const Footer: React.FC = () => {
                 <svg className="w-4 h-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                开发团队
+                <LanguageText texts={getFooterText('team')} />
               </h4>
               <div className="relative h-12">
                 {teamMembers.map((member, index) => (
@@ -178,7 +283,7 @@ const Footer: React.FC = () => {
               <svg className="w-5 h-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              快速导航
+              <LanguageText texts={getFooterText('quickNav')} />
             </h3>
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
@@ -190,7 +295,9 @@ const Footer: React.FC = () => {
                     <span className="group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 text-primary">
                       {link.icon}
                     </span>
-                    <span className="group-hover:translate-x-1 transition-transform duration-300">{link.name}</span>
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">
+                      <LanguageText texts={getFooterText(link.name)} />
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -203,7 +310,7 @@ const Footer: React.FC = () => {
               <svg className="w-5 h-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
-              热门分类
+              <LanguageText texts={getFooterText('categories')} />
             </h3>
             <ul className="space-y-3">
               {categoryLinks.map((link, index) => (
@@ -215,7 +322,9 @@ const Footer: React.FC = () => {
                     <span className="group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 text-primary">
                       {link.icon}
                     </span>
-                    <span className="group-hover:translate-x-1 transition-transform duration-300">{link.name}</span>
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">
+                      <LanguageText texts={getFooterText(link.name)} />
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -228,7 +337,7 @@ const Footer: React.FC = () => {
               <svg className="w-5 h-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              联系我们
+              <LanguageText texts={getFooterText('contact')} />
             </h3>
             <div className="space-y-4">
               <div className="group flex items-center space-x-3 text-neutral-600 dark:text-neutral-400 hover:text-primary transition-all duration-300 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-700/50">
@@ -243,7 +352,9 @@ const Footer: React.FC = () => {
 
             {/* 社交媒体链接 - 增强版 */}
             <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">关注我们</h4>
+              <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
+                <LanguageText texts={getFooterText('followUs')} />
+              </h4>
               <div className="flex space-x-3">
                 {[
                   { 
@@ -283,22 +394,22 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center space-x-2">
               <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                &copy; {currentYear} OpenShare. 保留所有权利。
+                &copy; {currentYear} OpenShare. <LanguageText texts={getFooterText('copyright')} />
               </p>
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
             </div>
             <div className="flex items-center space-x-6 text-sm">
               {[
-                { name: "隐私政策", path: "/privacy" },
-                { name: "服务条款", path: "/terms" },
-                { name: "帮助中心", path: "/help" }
+                { name: "privacy", path: "/privacy" },
+                { name: "terms", path: "/terms" },
+                { name: "help", path: "/help" }
               ].map((link, index) => (
                 <Link 
                   key={index}
                   href={link.path} 
                   className="text-neutral-500 dark:text-neutral-400 hover:text-primary transition-all duration-300 relative group"
                 >
-                  {link.name}
+                  <LanguageText texts={getFooterText(link.name)} />
                   <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
                 </Link>
               ))}

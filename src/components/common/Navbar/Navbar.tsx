@@ -8,11 +8,21 @@ import { Search, User } from '@icon-park/react';
 import LoginDialog from './LoginDialog';
 import UserDropdownMenu from './UserDropdownMenu';
 import { useUserStore } from '@/store/userStore';
+import LanguageText from '@/components/common/LanguageText/LanguageText';
 
 const Navbar: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loginDialogVisible, setLoginDialogVisible] = useState(false);
   const { user } = useUserStore();
+
+  /**
+   * 获取搜索栏的多语言文本
+   */
+  const getSearchText = () => ({
+    'zh-CN': '搜索论坛',
+    'zh-TW': '搜尋論壇',
+    'en': 'Search Forum'
+  });
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-dark-primary border-b border-neutral-200 dark:border-zinc-800 z-50">
@@ -40,10 +50,13 @@ const Navbar: React.FC = () => {
             <input
               type="text"
               className="block w-full bg-neutral-100 dark:bg-zinc-800 border border-neutral-200 dark:border-zinc-700 rounded-full py-2 pl-10 pr-3 text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="搜索论坛"
+              placeholder=""
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-xs text-neutral-400">
+              <LanguageText texts={getSearchText()} />
+            </div>
           </div>
         </div>
 
