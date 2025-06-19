@@ -55,17 +55,21 @@ export default function SettingsPage() {
   const [activeCategory, setActiveCategory] = useState<SettingCategory>('user');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
   
   /**
-   * 检查登录状态并在未登录时弹出登录对话框
+   * 检查登录状态，如果未登录则弹出登录框并返回上一页
    */
   useEffect(() => {
-    if (!user) {
-      showLogin();
-      // 返回上一页
-      router.back();
+    if (!hasCheckedAuth) {
+      setHasCheckedAuth(true);
+      if (!user) {
+        showLogin();
+        router.back();
+        return;
+      }
     }
-  }, [user, showLogin, router]);
+  }, [user, showLogin, router, hasCheckedAuth]);
   
   // 用户设置状态
   const [userSettings, setUserSettings] = useState({
@@ -100,7 +104,7 @@ export default function SettingsPage() {
     // 密码修改
     currentPassword: '',
     newPassword: '',
-    newPasswordConfirm: '',
+    confirmPassword: '',
     
     // 手机号修改
     currentPhone: '',
@@ -110,7 +114,9 @@ export default function SettingsPage() {
     // 邮箱修改
     currentEmail: '',
     newEmail: '',
-    emailVerificationCode: ''
+    emailVerificationCode: '',
+    
+    twoFactorEnabled: false
   });
 
   // 安全设置编辑状态
@@ -265,6 +271,15 @@ export default function SettingsPage() {
       };
       setUser(newUserInfo);
 
+      // 更新本地显示的用户设置
+      const updatedSettings = {
+        nickname: updatedUser.username || userSettings.nickname,
+        avatar: updatedUser.avatarUrl || userSettings.avatar,
+        bio: updatedUser.profile || userSettings.bio
+      };
+      setUserSettings(updatedSettings);
+      setOriginalUserSettings(updatedSettings);
+
       if (typeof window !== 'undefined') {
         const userInfoStr = localStorage.getItem('userInfo');
         if (userInfoStr) {
@@ -320,7 +335,7 @@ export default function SettingsPage() {
    */
   const handleChangePassword = async () => {
     // 基础验证
-    if (!securitySettings.currentPassword || !securitySettings.newPassword || !securitySettings.newPasswordConfirm) {
+    if (!securitySettings.currentPassword || !securitySettings.newPassword || !securitySettings.confirmPassword) {
       alert('请输入当前密码和新密码');
       return;
     }
@@ -332,7 +347,7 @@ export default function SettingsPage() {
     }
     
     // 密码一致性验证
-    if (securitySettings.newPassword !== securitySettings.newPasswordConfirm) {
+    if (securitySettings.newPassword !== securitySettings.confirmPassword) {
       alert('新密码和确认密码不匹配');
       return;
     }
@@ -351,7 +366,7 @@ export default function SettingsPage() {
         userId: user.userId,
         currentPassword: securitySettings.currentPassword,
         newPassword: securitySettings.newPassword,
-        newPasswordConfirm: securitySettings.newPasswordConfirm
+        newPasswordConfirm: securitySettings.confirmPassword
       });
       
       // 密码修改成功后，更新用户的updatedAt时间
@@ -365,7 +380,7 @@ export default function SettingsPage() {
         ...prev,
         currentPassword: '',
         newPassword: '',
-        newPasswordConfirm: ''
+        confirmPassword: ''
       }));
       setIsEditingPassword(false);
       
@@ -592,7 +607,7 @@ export default function SettingsPage() {
   ];
 
   // 如果用户未登录，返回空内容（登录对话框已经弹出）
-  if (!user) {
+  if (!hasCheckedAuth || !user) {
     return null;
   }
 
@@ -969,8 +984,8 @@ export default function SettingsPage() {
                             </label>
                             <input
                               type="password"
-                              value={securitySettings.newPasswordConfirm}
-                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, newPasswordConfirm: e.target.value }))}
+                              value={securitySettings.confirmPassword}
+                              onChange={(e) => setSecuritySettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
                               className="w-full px-4 py-3 border border-neutral-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-neutral-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                               placeholder="请再次输入新密码"
                             />
@@ -983,7 +998,7 @@ export default function SettingsPage() {
                                   ...prev,
                                   currentPassword: '',
                                   newPassword: '',
-                                  newPasswordConfirm: ''
+                                  confirmPassword: ''
                                 }));
                               }}
                               className="px-6 py-3 bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-zinc-600 transition-colors"

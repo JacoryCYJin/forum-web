@@ -35,17 +35,21 @@ export default function LikePage() {
   const [followingList, setFollowingList] = useState<FollowWithUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   /**
-   * 检查登录状态并在未登录时弹出登录对话框
+   * 检查登录状态，如果未登录则弹出登录框并返回上一页
    */
   useEffect(() => {
-    if (!user) {
-      showLogin();
-      // 返回上一页
-      router.back();
+    if (!hasCheckedAuth) {
+      setHasCheckedAuth(true);
+      if (!user) {
+        showLogin();
+        router.back();
+        return;
+      }
     }
-  }, [user, showLogin, router]);
+  }, [user, showLogin, router, hasCheckedAuth]);
 
   /**
    * 获取关注列表
@@ -92,11 +96,13 @@ export default function LikePage() {
   };
 
   /**
-   * 组件初始化时获取数据
+   * 组件初始化时获取数据（仅在已登录时）
    */
   useEffect(() => {
-    fetchFollowingList();
-  }, [user]);
+    if (user && hasCheckedAuth) {
+      fetchFollowingList();
+    }
+  }, [user, hasCheckedAuth]);
 
   /**
    * 跳转到用户页面
@@ -105,8 +111,8 @@ export default function LikePage() {
     router.push(`/user/${userId}`);
   };
 
-  // 如果用户未登录，返回空内容（登录对话框已经弹出）
-  if (!user) {
+  // 如果还未检查认证状态或用户未登录，返回空内容
+  if (!hasCheckedAuth || !user) {
     return null;
   }
 

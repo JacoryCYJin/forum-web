@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
+import { useUserStore } from '@/store/userStore';
 
 /**
  * 收藏按钮组件属性接口
@@ -43,6 +44,9 @@ export default function FavouriteButton({
   variant = 'default',
   className = '' 
 }: FavouriteButtonProps) {
+  const { user, showLogin } = useUserStore();
+  const isLoggedIn = !!user;
+  
   /**
    * 收藏状态
    */
@@ -62,6 +66,12 @@ export default function FavouriteButton({
    * 获取收藏状态
    */
   const fetchFavouriteStatus = async () => {
+    // 未登录用户不获取收藏状态
+    if (!isLoggedIn) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const status = await checkFavouriteApi({ postId });
@@ -77,6 +87,12 @@ export default function FavouriteButton({
    * 切换收藏状态
    */
   const handleToggleFavourite = async () => {
+    // 未登录用户点击时弹出登录对话框
+    if (!isLoggedIn) {
+      showLogin();
+      return;
+    }
+    
     if (isToggling) return;
     
     setIsToggling(true);
@@ -84,8 +100,14 @@ export default function FavouriteButton({
       const newStatus = await toggleFavouriteApi({ postId });
       setIsFavourited(newStatus);
       console.log(`${newStatus ? '已收藏' : '已取消收藏'} 帖子: ${postId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('切换收藏状态失败:', error);
+      
+      // 检查是否需要显示登录对话框
+      if (error.shouldShowLoginDialog) {
+        showLogin();
+        return;
+      }
     } finally {
       setIsToggling(false);
     }
@@ -96,7 +118,7 @@ export default function FavouriteButton({
    */
   useEffect(() => {
     fetchFavouriteStatus();
-  }, [postId]);
+  }, [postId, isLoggedIn]);
 
   // 根据variant确定样式
   const getButtonStyles = () => {

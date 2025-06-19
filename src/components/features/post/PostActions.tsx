@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import FavouriteButton from './FavouriteButton';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import { toggleLikeApi, checkLikeApi } from '@/lib/api/likeApi';
+import { useUserStore } from '@/store/userStore';
 
 /**
  * 帖子操作组件属性接口
@@ -45,6 +46,9 @@ export default function PostActions({
   className = "",
   variant = 'vertical'
 }: PostActionsProps) {
+  const { user, showLogin } = useUserStore();
+  const isLoggedIn = !!user;
+  
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
@@ -52,6 +56,11 @@ export default function PostActions({
    * 组件初始化时获取点赞状态
    */
   useEffect(() => {
+    // 未登录用户不获取点赞状态
+    if (!isLoggedIn) {
+      return;
+    }
+    
     const fetchLikeStatus = async () => {
       try {
         const liked = await checkLikeApi({ post_id: postId });
@@ -62,24 +71,36 @@ export default function PostActions({
     };
 
     fetchLikeStatus();
-  }, [postId]);
+  }, [postId, isLoggedIn]);
 
   /**
    * 处理点赞/取消点赞
    */
   const handleToggleLike = useCallback(async () => {
+    // 未登录用户点击时弹出登录对话框
+    if (!isLoggedIn) {
+      showLogin();
+      return;
+    }
+    
     if (isLiking) return;
     
     setIsLiking(true);
     try {
       const newLikeStatus = await toggleLikeApi({ post_id: postId });
       setIsLiked(newLikeStatus);
-    } catch (error) {
+    } catch (error: any) {
       console.error('点赞操作失败:', error);
+      
+      // 检查是否需要显示登录对话框
+      if (error.shouldShowLoginDialog) {
+        showLogin();
+        return;
+      }
     } finally {
       setIsLiking(false);
     }
-  }, [postId, isLiking]);
+  }, [postId, isLiking, isLoggedIn, showLogin]);
 
   /**
    * 处理分享
@@ -201,7 +222,13 @@ export default function PostActions({
               />
             </span>
           </button>
-
+          
+          {/* 收藏按钮 */}
+          <FavouriteButton 
+            postId={postId} 
+            variant="full-width"
+          />
+          
           {/* 分享按钮 */}
           <button 
             onClick={handleShare}
@@ -220,15 +247,6 @@ export default function PostActions({
               />
             </span>
           </button>
-
-          {/* 收藏按钮 */}
-          <div className="w-full">
-            <FavouriteButton 
-              postId={postId} 
-              variant="full-width"
-              className="w-full"
-            />
-          </div>
         </div>
       )}
     </div>

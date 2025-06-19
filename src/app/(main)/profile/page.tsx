@@ -36,17 +36,21 @@ export default function ProfilePage() {
   });
   const [userPostCount, setUserPostCount] = useState(0);
   const [userFavouriteCount, setUserFavouriteCount] = useState(0);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   /**
-   * 检查登录状态并在未登录时弹出登录对话框
+   * 检查登录状态，如果未登录则弹出登录框并返回上一页
    */
   useEffect(() => {
-    if (!user) {
-      showLogin();
-      // 返回上一页
-      router.back();
+    if (!hasCheckedAuth) {
+      setHasCheckedAuth(true);
+      if (!user) {
+        showLogin();
+        router.back();
+        return;
+      }
     }
-  }, [user, showLogin, router]);
+  }, [user, showLogin, router, hasCheckedAuth]);
 
   /**
    * 获取关注统计数据
@@ -266,8 +270,8 @@ export default function ProfilePage() {
     { key: 'favorites' as TabType, label: '我的收藏', count: userFavouriteCount }
   ];
 
-  // 如果用户未登录，返回空内容（登录对话框已经弹出）
-  if (!user) {
+  // 如果还未检查认证状态或用户未登录，返回空内容
+  if (!hasCheckedAuth || !user) {
     return null;
   }
 
