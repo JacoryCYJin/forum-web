@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import FavouriteButton from './FavouriteButton';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import { toggleLikeApi, checkLikeApi } from '@/lib/api/likeApi';
+import { useUserStore } from '@/store/userStore';
 
 /**
  * 帖子操作组件属性接口
@@ -45,6 +46,10 @@ export default function PostActions({
   className = "",
   variant = 'vertical'
 }: PostActionsProps) {
+  // 获取用户状态
+  const { user } = useUserStore();
+  const isLoggedIn = !!user;
+  
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
@@ -53,6 +58,11 @@ export default function PostActions({
    */
   useEffect(() => {
     const fetchLikeStatus = async () => {
+      // 如果用户未登录，直接返回，不调用API
+      if (!isLoggedIn) {
+        return;
+      }
+      
       try {
         const liked = await checkLikeApi({ post_id: postId });
         setIsLiked(liked);
@@ -62,12 +72,18 @@ export default function PostActions({
     };
 
     fetchLikeStatus();
-  }, [postId]);
+  }, [postId, isLoggedIn]);
 
   /**
    * 处理点赞/取消点赞
    */
   const handleToggleLike = useCallback(async () => {
+    // 如果用户未登录，直接返回
+    if (!isLoggedIn) {
+      console.warn('用户未登录，无法执行点赞操作');
+      return;
+    }
+    
     if (isLiking) return;
     
     setIsLiking(true);
@@ -79,7 +95,7 @@ export default function PostActions({
     } finally {
       setIsLiking(false);
     }
-  }, [postId, isLiking]);
+  }, [postId, isLiking, isLoggedIn]);
 
   /**
    * 处理分享

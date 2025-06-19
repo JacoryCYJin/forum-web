@@ -218,7 +218,7 @@ export async function getUserInfoApi(
   try {
     console.log("获取用户信息参数:", params);
 
-    const response: ApiResponse<User> = await get("/user/info", {
+    const response: ApiResponse<User> = await get("/forum/user/info", {
       user_id: params.userId,
     });
     console.log("获取用户信息响应:", response);

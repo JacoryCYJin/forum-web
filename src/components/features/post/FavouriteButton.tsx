@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { toggleFavouriteApi, checkFavouriteApi } from '@/lib/api/favouriteApi';
+import { useUserStore } from '@/store/userStore';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 
 /**
@@ -43,6 +44,10 @@ export default function FavouriteButton({
   variant = 'default',
   className = '' 
 }: FavouriteButtonProps) {
+  // 获取用户状态
+  const { user } = useUserStore();
+  const isLoggedIn = !!user;
+  
   /**
    * 收藏状态
    */
@@ -51,7 +56,7 @@ export default function FavouriteButton({
   /**
    * 加载状态
    */
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
   /**
    * 切换中状态
@@ -62,6 +67,12 @@ export default function FavouriteButton({
    * 获取收藏状态
    */
   const fetchFavouriteStatus = async () => {
+    // 如果用户未登录，直接返回，不调用API
+    if (!isLoggedIn) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const status = await checkFavouriteApi({ postId });
@@ -77,6 +88,12 @@ export default function FavouriteButton({
    * 切换收藏状态
    */
   const handleToggleFavourite = async () => {
+    // 如果用户未登录，直接返回
+    if (!isLoggedIn) {
+      console.warn('用户未登录，无法执行收藏操作');
+      return;
+    }
+    
     if (isToggling) return;
     
     setIsToggling(true);
@@ -96,7 +113,7 @@ export default function FavouriteButton({
    */
   useEffect(() => {
     fetchFavouriteStatus();
-  }, [postId]);
+  }, [postId, isLoggedIn]);
 
   // 根据variant确定样式
   const getButtonStyles = () => {

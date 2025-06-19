@@ -12,6 +12,7 @@ import { getUserInfoApi } from '@/lib/api/userApi';
 import { getFollowedUsersPostsApi } from '@/lib/api/followApi';
 import { getCommentCountApi } from '@/lib/api/commentApi';
 import { usePaginationStore } from '@/store/paginationStore';
+import { useUserStore } from '@/store/userStore';
 import type { Post, PageResponse } from '@/types/postTypes';
 import type { User } from '@/types/userTypes';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
@@ -95,6 +96,10 @@ export default function PostList({
   showDeleteButton = false
 }: PostListProps) {
   
+  // 获取用户状态
+  const { user } = useUserStore();
+  const isLoggedIn = !!user;
+  
   // 调试props传递
   console.log('🚀 PostList组件渲染，接收到的props:', {
     pageSize,
@@ -104,7 +109,8 @@ export default function PostList({
     showFollowedPosts,
     showUserPosts,
     userId,
-    showDeleteButton
+    showDeleteButton,
+    isLoggedIn
   });
   
   /**
@@ -248,6 +254,11 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const fetchFavouriteStatus = useCallback(async (postId: string) => {
+    // 如果用户未登录，直接返回，不调用API
+    if (!isLoggedIn) {
+      return;
+    }
+    
     // 使用函数式更新来避免依赖状态
     let shouldFetch = true;
     
@@ -273,7 +284,7 @@ export default function PostList({
     } catch (error) {
       console.error(`获取收藏状态失败 (postId: ${postId}):`, error);
     }
-  }, []); // 移除依赖，使用函数式更新
+  }, [isLoggedIn]); // 添加isLoggedIn依赖
 
   /**
    * 获取帖子点赞状态
@@ -281,6 +292,11 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const fetchLikeStatus = useCallback(async (postId: string) => {
+    // 如果用户未登录，直接返回，不调用API
+    if (!isLoggedIn) {
+      return;
+    }
+    
     // 使用函数式更新来避免依赖状态
     let shouldFetch = true;
     
@@ -306,7 +322,7 @@ export default function PostList({
     } catch (error) {
       console.error(`获取点赞状态失败 (postId: ${postId}):`, error);
     }
-  }, []); // 移除依赖，使用函数式更新
+  }, [isLoggedIn]); // 添加isLoggedIn依赖
 
   /**
    * 获取帖子评论数
@@ -368,6 +384,12 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const handleToggleFavourite = useCallback(async (postId: string) => {
+    // 如果用户未登录，直接返回
+    if (!isLoggedIn) {
+      console.warn('用户未登录，无法执行收藏操作');
+      return;
+    }
+    
     // 如果正在切换中，直接返回
     if (togglingFavouriteIds.has(postId)) {
       return;
@@ -415,7 +437,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingFavouriteIds, showFavourites]);
+  }, [togglingFavouriteIds, showFavourites, isLoggedIn]);
 
   /**
    * 切换点赞状态
@@ -423,6 +445,12 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const handleToggleLike = useCallback(async (postId: string) => {
+    // 如果用户未登录，直接返回
+    if (!isLoggedIn) {
+      console.warn('用户未登录，无法执行点赞操作');
+      return;
+    }
+    
     // 如果正在切换中，直接返回
     if (togglingLikeIds.has(postId)) {
       return;
@@ -452,7 +480,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingLikeIds]);
+  }, [togglingLikeIds, isLoggedIn]);
 
   /**
    * 显示删除确认弹窗
@@ -812,8 +840,6 @@ export default function PostList({
     return String(commentCountCache.get(postId) ?? 0);
   };
 
-
-
   // 加载状态
   if (isLoading && posts.length === 0) {
     return (
@@ -1036,19 +1062,20 @@ export default function PostList({
                   {/* 点赞按钮 */}
                   <button 
                     onClick={() => handleToggleLike(post.postId)}
-                    disabled={togglingLikeIds.has(post.postId)}
+                    disabled={togglingLikeIds.has(post.postId) || !isLoggedIn}
                     className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium ${
-                      likeCache.get(post.postId) 
+                      isLoggedIn && likeCache.get(post.postId) 
                         ? 'text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
                         : 'text-neutral-600 dark:text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800'
-                    } ${togglingLikeIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${(togglingLikeIds.has(post.postId) || !isLoggedIn) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={!isLoggedIn ? '请先登录' : ''}
                   >
                     {togglingLikeIds.has(post.postId) ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                     ) : (
                       <svg 
                         className="w-4 h-4" 
-                        fill={likeCache.get(post.postId) ? "currentColor" : "none"} 
+                        fill={isLoggedIn && likeCache.get(post.postId) ? "currentColor" : "none"} 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
                       >
@@ -1058,9 +1085,9 @@ export default function PostList({
                     <span className="text-xs">
                       <LanguageText 
                         texts={{
-                          'zh-CN': likeCache.get(post.postId) ? '已点赞' : '点赞',
-                          'zh-TW': likeCache.get(post.postId) ? '已點讚' : '點讚',
-                          'en': likeCache.get(post.postId) ? 'Liked' : 'Like'
+                          'zh-CN': isLoggedIn && likeCache.get(post.postId) ? '已点赞' : '点赞',
+                          'zh-TW': isLoggedIn && likeCache.get(post.postId) ? '已點讚' : '點讚',
+                          'en': isLoggedIn && likeCache.get(post.postId) ? 'Liked' : 'Like'
                         }}
                       />
                     </span>
@@ -1088,19 +1115,20 @@ export default function PostList({
                   {/* 收藏按钮 */}
                   <button 
                     onClick={() => handleToggleFavourite(post.postId)}
-                    disabled={togglingFavouriteIds.has(post.postId)}
+                    disabled={togglingFavouriteIds.has(post.postId) || (!isLoggedIn && !showFavourites)}
                     className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium ${
-                      favouriteCache.get(post.postId) || showFavourites
+                      (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites
                         ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' 
                         : 'text-neutral-600 dark:text-neutral-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 border border-transparent hover:border-yellow-200 dark:hover:border-yellow-800'
-                    } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${(togglingFavouriteIds.has(post.postId) || (!isLoggedIn && !showFavourites)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={(!isLoggedIn && !showFavourites) ? '请先登录' : ''}
                   >
                     {togglingFavouriteIds.has(post.postId) ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                     ) : (
                       <svg 
                         className="w-4 h-4" 
-                        fill={favouriteCache.get(post.postId) || showFavourites ? "currentColor" : "none"} 
+                        fill={(isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? "currentColor" : "none"} 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
                       >
@@ -1110,9 +1138,9 @@ export default function PostList({
                     <span className="text-xs">
                       <LanguageText 
                         texts={{
-                          'zh-CN': favouriteCache.get(post.postId) || showFavourites ? '已收藏' : '收藏',
-                          'zh-TW': favouriteCache.get(post.postId) || showFavourites ? '已收藏' : '收藏',
-                          'en': favouriteCache.get(post.postId) || showFavourites ? 'Favorited' : 'Save'
+                          'zh-CN': (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? '已收藏' : '收藏',
+                          'zh-TW': (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? '已收藏' : '收藏',
+                          'en': (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? 'Favorited' : 'Save'
                         }}
                       />
                     </span>
