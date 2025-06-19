@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import { getFollowersCountApi } from '@/lib/api/followApi';
 import { getUserPostCountApi } from '@/lib/api/postsApi';
+import { logoutUserApi } from '@/lib/api/userApi';
 
 /**
  * 菜单项接口
@@ -91,8 +92,15 @@ export function UserDropdownMenu() {
   /**
    * 处理退出登录
    */
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      // 调用API清除认证信息和Cookie
+      await logoutUserApi();
+    } catch (error) {
+      console.error('退出登录失败:', error);
+      // 即使API调用失败，也要清除本地状态
+      logout();
+    }
     setIsOpen(false);
     router.push('/');
   };

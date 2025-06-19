@@ -106,9 +106,11 @@ const Footer: React.FC = () => {
             <div className="flex items-center mb-6">
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
+                  <img 
+                    src="/images/logo.png" 
+                    alt="OpenShare Logo" 
+                    className="h-full w-full object-contain brightness-0 invert scale-150" 
+                    />
                 </div>
                 <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-primary-hover/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
               </div>
@@ -143,7 +145,7 @@ const Footer: React.FC = () => {
                     style={{
                       width: "40px",
                       height: "40px",
-                      left: `${index * 24}px`,
+                      left: `${index * 26}px`,
                       zIndex: teamMembers.length - index,
                     }}
                   >

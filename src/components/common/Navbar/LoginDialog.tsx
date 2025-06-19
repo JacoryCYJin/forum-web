@@ -91,7 +91,16 @@ const Logo: React.FC<LogoProps> = () => {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="text-white text-center">
-        <div className="text-3xl font-bold mb-2">云社</div>
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <img 
+              src="/images/logo.png" 
+              alt="OpenShare Logo" 
+              className="h-full w-full object-contain brightness-0 invert scale-[2]" 
+              />
+          </div>
+        </div>
+        <div className="text-2xl font-bold mb-1">云社</div>
         <div className="text-sm opacity-80">OpenShare</div>
       </div>
     </div>
