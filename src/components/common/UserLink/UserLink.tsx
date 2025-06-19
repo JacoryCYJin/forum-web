@@ -7,6 +7,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useUserStore } from '@/store/userStore';
 
 /**
  * 用户链接组件属性接口
@@ -101,11 +102,26 @@ export default function UserLink({
   showBorder = true,
   spacing = "space-x-3"
 }: UserLinkProps) {
+  const { user, showLogin } = useUserStore();
+  const isLoggedIn = !!user;
   const borderClass = showBorder ? "border-2 border-neutral-200 dark:border-zinc-600" : "";
+  
+  /**
+   * 处理用户链接点击
+   */
+  const handleClick = (e: React.MouseEvent) => {
+    // 如果用户未登录，阻止跳转并显示登录对话框
+    if (!isLoggedIn) {
+      e.preventDefault();
+      showLogin();
+      return;
+    }
+  };
   
   return (
     <Link 
       href={`/user/${userId}`} 
+      onClick={handleClick}
       className={`flex items-center ${spacing} hover:opacity-80 transition-opacity ${className}`}
     >
       {showAvatar && (

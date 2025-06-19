@@ -25,7 +25,7 @@ type TabType = 'activities' | 'posts' | 'favorites';
  * @component
  */
 export default function ProfilePage() {
-  const { user, userStats } = useUserStore();
+  const { user, userStats, showLogin } = useUserStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('activities');
   const [activities, setActivities] = useState<UserActivity[]>([]);
@@ -36,6 +36,17 @@ export default function ProfilePage() {
   });
   const [userPostCount, setUserPostCount] = useState(0);
   const [userFavouriteCount, setUserFavouriteCount] = useState(0);
+
+  /**
+   * 检查登录状态并在未登录时弹出登录对话框
+   */
+  useEffect(() => {
+    if (!user) {
+      showLogin();
+      // 返回上一页
+      router.back();
+    }
+  }, [user, showLogin, router]);
 
   /**
    * 获取关注统计数据
@@ -255,20 +266,9 @@ export default function ProfilePage() {
     { key: 'favorites' as TabType, label: '我的收藏', count: userFavouriteCount }
   ];
 
-  // 如果用户未登录，显示提示
+  // 如果用户未登录，返回空内容（登录对话框已经弹出）
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-4">
-            请先登录
-          </h1>
-          <p className="text-neutral-600 dark:text-neutral-400">
-            您需要登录才能查看个人主页
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

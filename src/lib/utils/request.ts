@@ -75,6 +75,7 @@ request.interceptors.response.use(
     (error: any) => {
       // 统一的错误处理
       let message = '请求失败，请稍后重试';
+      let shouldShowLoginDialog = false;
   
       // console.error('=== 详细错误信息 ===');
       // console.error('错误对象:', error);
@@ -88,16 +89,22 @@ request.interceptors.response.use(
       if (error.response) {
         // 服务器返回了错误状态码（如 4xx、5xx）
         const status = error.response.status;
+        const headers = error.response.headers;
+        
         // console.error('服务器响应状态:', status);
         // console.error('服务器响应数据:', error.response.data);
         // console.error('服务器响应头:', error.response.headers);
         
         if (status === 401) {
-          // token过期或无效，清除本地存储的认证信息
-          TokenManager.clearToken();
-          
-          // 可以在这里触发重新登录逻辑
-          message = '登录已过期，请重新登录';
+          // 检查是否需要弹出登录窗口
+          if (headers['x-login-required'] === 'true' && headers['x-login-action'] === 'dialog') {
+            shouldShowLoginDialog = true;
+            message = '此操作需要登录';
+          } else {
+            // token过期或无效，清除本地存储的认证信息
+            TokenManager.clearToken();
+            message = '登录已过期，请重新登录';
+          }
           
           // 如果需要，可以重定向到登录页面
           // window.location.href = '/login';
@@ -121,8 +128,12 @@ request.interceptors.response.use(
   
       // console.error('请求错误：', error); // 仍然打印完整错误，便于调试
   
-      // 返回一个包含 message 的 Promise.reject
-      return Promise.reject({ message });
+      // 返回一个包含 message 和登录引导标志的 Promise.reject
+      return Promise.reject({ 
+        message,
+        shouldShowLoginDialog,
+        status: error.response?.status
+      });
     }
   );
 

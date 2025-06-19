@@ -30,11 +30,22 @@ interface FollowWithUser extends Follow {
  * @component
  */
 export default function LikePage() {
-  const { user } = useUserStore();
+  const { user, showLogin } = useUserStore();
   const router = useRouter();
   const [followingList, setFollowingList] = useState<FollowWithUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * 检查登录状态并在未登录时弹出登录对话框
+   */
+  useEffect(() => {
+    if (!user) {
+      showLogin();
+      // 返回上一页
+      router.back();
+    }
+  }, [user, showLogin, router]);
 
   /**
    * 获取关注列表
@@ -94,31 +105,9 @@ export default function LikePage() {
     router.push(`/user/${userId}`);
   };
 
+  // 如果用户未登录，返回空内容（登录对话框已经弹出）
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-neutral-800 dark:text-white mb-2">
-            <LanguageText 
-              texts={{
-                'zh-CN': '请先登录',
-                'zh-TW': '請先登入',
-                'en': 'Please login first'
-              }}
-            />
-          </h2>
-          <p className="text-neutral-500 dark:text-neutral-400">
-            <LanguageText 
-              texts={{
-                'zh-CN': '登录后查看您的关注动态',
-                'zh-TW': '登入後查看您的關注動態',
-                'en': 'Login to view your followed content'
-              }}
-            />
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

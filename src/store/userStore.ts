@@ -29,6 +29,11 @@ interface UserState {
   /** 是否已初始化 */
   isInitialized: boolean;
   
+  /**
+   * 登录对话框是否可见
+   */
+  showLoginDialog: boolean;
+  
   // 操作
   /** 设置用户信息 */
   setUser: (user: User | null) => void;
@@ -54,6 +59,21 @@ interface UserState {
   restoreLoginState: () => void;
   /** 初始化状态 */
   initialize: () => void;
+  
+  /**
+   * 清除用户信息
+   */
+  clearUser: () => void;
+  
+  /**
+   * 显示登录对话框
+   */
+  showLogin: () => void;
+  
+  /**
+   * 隐藏登录对话框
+   */
+  hideLogin: () => void;
 }
 
 /**
@@ -108,6 +128,8 @@ export const useUserStore = create<UserState>()(
       notifications: [],
       unreadNotificationCount: 0,
       isInitialized: false,
+      
+      showLoginDialog: false,
       
       // 基础设置方法
       setUser: (user) => set({ user }),
@@ -306,7 +328,16 @@ export const useUserStore = create<UserState>()(
           get().restoreLoginState();
           set({ isInitialized: true });
         }
-      }
+      },
+      
+      // 清除用户信息
+      clearUser: () => set({ user: null }),
+      
+      // 显示登录对话框
+      showLogin: () => set({ showLoginDialog: true }),
+      
+      // 隐藏登录对话框
+      hideLogin: () => set({ showLoginDialog: false }),
     }),
     {
       name: 'user-storage',

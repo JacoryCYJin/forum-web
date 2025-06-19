@@ -20,6 +20,7 @@ import {
 import { formatDateToChinese } from '@/lib/utils/dateUtils';
 import { updateUserAndSync } from '@/lib/utils/userUtils';
 import type { PrivacySettings } from '@/types/userTypes';
+import { useRouter } from 'next/navigation';
 
 /**
  * 设置分类类型
@@ -50,9 +51,21 @@ function maskText(text: string, showStart: number = 3, showEnd: number = 4): str
  * @component
  */
 export default function SettingsPage() {
-  const { user, setUser } = useUserStore();
+  const { user, setUser, showLogin } = useUserStore();
   const [activeCategory, setActiveCategory] = useState<SettingCategory>('user');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  
+  /**
+   * 检查登录状态并在未登录时弹出登录对话框
+   */
+  useEffect(() => {
+    if (!user) {
+      showLogin();
+      // 返回上一页
+      router.back();
+    }
+  }, [user, showLogin, router]);
   
   // 用户设置状态
   const [userSettings, setUserSettings] = useState({
@@ -578,20 +591,9 @@ export default function SettingsPage() {
     }
   ];
 
-  // 如果用户未登录，显示提示
+  // 如果用户未登录，返回空内容（登录对话框已经弹出）
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-800 dark:text-white mb-4">
-            请先登录
-          </h1>
-          <p className="text-neutral-600 dark:text-neutral-400">
-            您需要登录才能访问设置页面
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

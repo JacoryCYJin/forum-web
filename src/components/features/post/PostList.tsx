@@ -97,7 +97,7 @@ export default function PostList({
 }: PostListProps) {
   
   // 获取用户状态
-  const { user } = useUserStore();
+  const { user, showLogin } = useUserStore();
   const isLoggedIn = !!user;
   
   // 调试props传递
@@ -254,7 +254,7 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const fetchFavouriteStatus = useCallback(async (postId: string) => {
-    // 如果用户未登录，直接返回，不调用API
+    // 未登录用户不获取收藏状态
     if (!isLoggedIn) {
       return;
     }
@@ -292,7 +292,7 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const fetchLikeStatus = useCallback(async (postId: string) => {
-    // 如果用户未登录，直接返回，不调用API
+    // 未登录用户不获取点赞状态
     if (!isLoggedIn) {
       return;
     }
@@ -384,9 +384,9 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const handleToggleFavourite = useCallback(async (postId: string) => {
-    // 如果用户未登录，直接返回
+    // 未登录用户点击时弹出登录对话框
     if (!isLoggedIn) {
-      console.warn('用户未登录，无法执行收藏操作');
+      showLogin();
       return;
     }
     
@@ -427,8 +427,14 @@ export default function PostList({
       }
       
       console.log(`${newFavouriteStatus ? '已收藏' : '已取消收藏'} 帖子: ${postId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`切换收藏状态失败 (postId: ${postId}):`, error);
+      
+      // 检查是否需要显示登录对话框
+      if (error.shouldShowLoginDialog) {
+        showLogin();
+        return;
+      }
     } finally {
       // 移除切换中标记
       setTogglingFavouriteIds(prev => {
@@ -437,7 +443,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingFavouriteIds, showFavourites, isLoggedIn]);
+  }, [togglingFavouriteIds, showFavourites, isLoggedIn, showLogin]);
 
   /**
    * 切换点赞状态
@@ -445,9 +451,9 @@ export default function PostList({
    * @param postId - 帖子ID
    */
   const handleToggleLike = useCallback(async (postId: string) => {
-    // 如果用户未登录，直接返回
+    // 未登录用户点击时弹出登录对话框
     if (!isLoggedIn) {
-      console.warn('用户未登录，无法执行点赞操作');
+      showLogin();
       return;
     }
     
@@ -470,8 +476,14 @@ export default function PostList({
       });
       
       console.log(`${newLikeStatus ? '已点赞' : '已取消点赞'} 帖子: ${postId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`切换点赞状态失败 (postId: ${postId}):`, error);
+      
+      // 检查是否需要显示登录对话框
+      if (error.shouldShowLoginDialog) {
+        showLogin();
+        return;
+      }
     } finally {
       // 移除切换中标记
       setTogglingLikeIds(prev => {
@@ -480,7 +492,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingLikeIds, isLoggedIn]);
+  }, [togglingLikeIds, isLoggedIn, showLogin]);
 
   /**
    * 显示删除确认弹窗
@@ -764,6 +776,39 @@ export default function PostList({
    * @param page - 新的页码
    */
   const handlePageChange = useCallback((page: number) => {
+    // 未登录用户的分页限制检查
+    if (!isLoggedIn) {
+      // 在首页：最多只能看5页
+      if (!categoryId && !showFavourites && !showFollowedPosts && !showUserPosts) {
+        if (page > 5) {
+          showLogin();
+          // 显示提示消息
+          if (typeof window !== 'undefined') {
+            setTimeout(() => {
+              alert('游客模式只能浏览前5页内容，请登录查看更多');
+            }, 100);
+          }
+          return;
+        }
+      }
+      // 在分类页面：只能看第一页
+      else if (categoryId && page > 1) {
+        showLogin();
+        // 显示提示消息
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            alert('游客模式只能浏览第1页内容，请登录查看更多');
+          }, 100);
+        }
+        return;
+      }
+      // 其他页面（收藏、关注等）：需要登录
+      else if (showFavourites || showFollowedPosts || showUserPosts) {
+        showLogin();
+        return;
+      }
+    }
+    
     // 更新store中的页码
     setPage(pageKey, page);
     
@@ -788,7 +833,7 @@ export default function PostList({
         });
       });
     });
-  }, [fetchPosts, pageKey, setPage]);
+  }, [fetchPosts, pageKey, setPage, isLoggedIn, categoryId, showFavourites, showFollowedPosts, showUserPosts, showLogin]);
 
   /**
    * 获取用户显示名称
@@ -1062,20 +1107,19 @@ export default function PostList({
                   {/* 点赞按钮 */}
                   <button 
                     onClick={() => handleToggleLike(post.postId)}
-                    disabled={togglingLikeIds.has(post.postId) || !isLoggedIn}
+                    disabled={togglingLikeIds.has(post.postId)}
                     className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium ${
-                      isLoggedIn && likeCache.get(post.postId) 
+                      likeCache.get(post.postId) 
                         ? 'text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
                         : 'text-neutral-600 dark:text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800'
-                    } ${(togglingLikeIds.has(post.postId) || !isLoggedIn) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={!isLoggedIn ? '请先登录' : ''}
+                    } ${togglingLikeIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {togglingLikeIds.has(post.postId) ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                     ) : (
                       <svg 
                         className="w-4 h-4" 
-                        fill={isLoggedIn && likeCache.get(post.postId) ? "currentColor" : "none"} 
+                        fill={likeCache.get(post.postId) ? "currentColor" : "none"} 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
                       >
@@ -1085,9 +1129,9 @@ export default function PostList({
                     <span className="text-xs">
                       <LanguageText 
                         texts={{
-                          'zh-CN': isLoggedIn && likeCache.get(post.postId) ? '已点赞' : '点赞',
-                          'zh-TW': isLoggedIn && likeCache.get(post.postId) ? '已點讚' : '點讚',
-                          'en': isLoggedIn && likeCache.get(post.postId) ? 'Liked' : 'Like'
+                          'zh-CN': likeCache.get(post.postId) ? '已点赞' : '点赞',
+                          'zh-TW': likeCache.get(post.postId) ? '已點讚' : '點讚',
+                          'en': likeCache.get(post.postId) ? 'Liked' : 'Like'
                         }}
                       />
                     </span>
@@ -1115,20 +1159,19 @@ export default function PostList({
                   {/* 收藏按钮 */}
                   <button 
                     onClick={() => handleToggleFavourite(post.postId)}
-                    disabled={togglingFavouriteIds.has(post.postId) || (!isLoggedIn && !showFavourites)}
+                    disabled={togglingFavouriteIds.has(post.postId)}
                     className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-all duration-200 font-medium ${
-                      (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites
+                      favouriteCache.get(post.postId) || showFavourites
                         ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' 
                         : 'text-neutral-600 dark:text-neutral-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 border border-transparent hover:border-yellow-200 dark:hover:border-yellow-800'
-                    } ${(togglingFavouriteIds.has(post.postId) || (!isLoggedIn && !showFavourites)) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={(!isLoggedIn && !showFavourites) ? '请先登录' : ''}
+                    } ${togglingFavouriteIds.has(post.postId) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {togglingFavouriteIds.has(post.postId) ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                     ) : (
                       <svg 
                         className="w-4 h-4" 
-                        fill={(isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? "currentColor" : "none"} 
+                        fill={favouriteCache.get(post.postId) || showFavourites ? "currentColor" : "none"} 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
                       >
@@ -1138,9 +1181,9 @@ export default function PostList({
                     <span className="text-xs">
                       <LanguageText 
                         texts={{
-                          'zh-CN': (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? '已收藏' : '收藏',
-                          'zh-TW': (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? '已收藏' : '收藏',
-                          'en': (isLoggedIn && favouriteCache.get(post.postId)) || showFavourites ? 'Favorited' : 'Save'
+                          'zh-CN': favouriteCache.get(post.postId) || showFavourites ? '已收藏' : '收藏',
+                          'zh-TW': favouriteCache.get(post.postId) || showFavourites ? '已收藏' : '收藏',
+                          'en': favouriteCache.get(post.postId) || showFavourites ? 'Favorited' : 'Save'
                         }}
                       />
                     </span>
@@ -1185,7 +1228,7 @@ export default function PostList({
         <div className="mt-12 flex justify-center">
           <Pagination
             currentPage={currentPage}
-            totalPages={pageInfo.page_count}
+            totalPages={pageInfo.page_count} // 显示真实的总页数，不限制
             onPageChange={handlePageChange}
             showWhenSinglePage={true}
           />
