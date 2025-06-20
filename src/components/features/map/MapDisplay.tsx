@@ -20,6 +20,7 @@ export default function MapDisplay() {
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // 生成随机帖子数据
   const generateRandomPosts = (): MapPost[] => {
@@ -108,16 +109,17 @@ export default function MapDisplay() {
     `;
   };
 
-  // 创建自定义标记内容
+  // 创建自定义标记内容（使用固定种子避免hydration不匹配）
   const createCustomMarker = (post: MapPost): string => {
     const opacity = calculateOpacity(post.createdAt);
     // 使用CSS变量，从Tailwind配置中获取primary颜色
     const primaryColor = 'var(--primary)';
     
-    // 为每个标记生成随机动画延迟和方向，使它们看起来各不相同
-    const randomDelay = Math.random() * 2; // 0-2秒的随机延迟
-    const randomDirection = Math.random() > 0.5 ? 1 : -1; // 随机方向
-    const randomDuration = 2 + Math.random() * 2; // 2-4秒的随机动画持续时间
+    // 使用帖子ID作为种子生成固定的"随机"值，避免hydration不匹配
+    const seed = post.id;
+    const randomDelay = (seed % 4) * 0.5; // 0, 0.5, 1, 1.5秒的延迟
+    const randomDirection = (seed % 2) === 0 ? 1 : -1; // 基于ID的偶数奇数决定方向
+    const randomDuration = 2 + (seed % 3); // 2, 3, 4秒的动画持续时间
     
     return `
       <div class="custom-marker-container" style="opacity:${opacity}">
@@ -135,10 +137,15 @@ export default function MapDisplay() {
     `;
   };
 
+  // 客户端检测
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // 初始化高德地图
   useEffect(() => {
-    // 确保代码只在浏览器环境中执行
-    if (typeof window === 'undefined') return;
+    // 确保代码只在浏览器环境中执行，并且是客户端
+    if (typeof window === 'undefined' || !isClient) return;
 
     // 显示加载状态
     setIsMapLoaded(false);
@@ -157,6 +164,7 @@ export default function MapDisplay() {
 
         // 动态导入AMapLoader
         const AMapLoader = (await import('@amap/amap-jsapi-loader')).default;
+        // 只在客户端生成随机数据
         const posts = generateRandomPosts();
 
         console.log('AMapLoader导入成功，开始加载地图API...');
@@ -258,7 +266,21 @@ export default function MapDisplay() {
         mapInstance.current.destroy();
       }
     };
-  }, []);
+  }, [isClient]);
+
+  // 在客户端状态准备好之前显示加载状态
+  if (!isClient) {
+    return (
+      <div className="w-full h-full relative">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+            <p className="mt-2 text-gray-700">正在初始化...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full relative">

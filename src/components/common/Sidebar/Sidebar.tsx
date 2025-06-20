@@ -385,6 +385,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
         'zh-CN': '游戏',
         'zh-TW': '遊戲',
         'en': 'Gaming'
+      },
+      '体育': {
+        'zh-CN': '体育',
+        'zh-TW': '體育',
+        'en': 'Sports'
       }
     };
     return textMap[categoryName] || {

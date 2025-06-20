@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 
 /**
  * 媒体类型枚举
@@ -49,20 +50,122 @@ export interface MediaDisplayProps {
   showIndicators?: boolean;
   /** 是否显示导航箭头 */
   showNavigation?: boolean;
-  /** 长宽比（如 "16:10" 或 "1.6:1"），不设置则使用图片原始比例 */
-  aspectRatio?: string;
-  /** 是否保持图片原始长宽比 */
-  maintainAspectRatio?: boolean;
 }
+
+/**
+ * 仅客户端的导航控件组件
+ */
+function NavigationControls({
+  currentIndex,
+  media,
+  showNavigation,
+  showIndicators,
+  autoPlay,
+  isPlaying,
+  onPrevious,
+  onNext,
+  onGoToSlide,
+  onTogglePlayback
+}: {
+  currentIndex: number;
+  media: MediaItem[];
+  showNavigation: boolean;
+  showIndicators: boolean;
+  autoPlay: boolean;
+  isPlaying: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+  onGoToSlide: (index: number) => void;
+  onTogglePlayback: () => void;
+}) {
+  return (
+    <>
+      {/* 导航箭头 */}
+      {showNavigation && media.length > 1 && (
+        <>
+          <button
+            onClick={onPrevious}
+            className="media-nav-button media-nav-button-left"
+            aria-label="上一张图片"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={onNext}
+            className="media-nav-button media-nav-button-right"
+            aria-label="下一张图片"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* 播放控制按钮 */}
+      {autoPlay && media.length > 1 && (
+        <button
+          onClick={onTogglePlayback}
+          className="media-control-button"
+          aria-label={isPlaying ? '暂停自动播放' : '开始自动播放'}
+        >
+          {isPlaying ? (
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+            </svg>
+          ) : (
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1" />
+            </svg>
+          )}
+        </button>
+      )}
+
+      {/* 指示器 */}
+      {showIndicators && media.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {media.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => onGoToSlide(index)}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                index === currentIndex
+                  ? 'bg-white'
+                  : 'bg-white/50 hover:bg-white/70'
+              }`}
+              aria-label={`跳转到第 ${index + 1} 张图片`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 计数器 */}
+      {media.length > 1 && (
+        <div className="media-counter">
+          {currentIndex + 1} / {media.length}
+        </div>
+      )}
+    </>
+  );
+}
+
+// 动态导入控件，禁用 SSR
+const ClientOnlyNavigationControls = dynamic(
+  () => Promise.resolve(NavigationControls),
+  { ssr: false }
+);
 
 /**
  * 媒体展示组件
  * 
- * 支持图片轮播和视频播放的通用组件
+ * 支持图片轮播和视频播放的通用组件，严格使用 16:9 长宽比
  *
  * @component
  * @example
- * // 图片轮播
+ * // 图片轮播 (16:9 比例)
  * <MediaDisplay 
  *   type={MediaType.IMAGES}
  *   media={[
@@ -72,7 +175,7 @@ export interface MediaDisplayProps {
  *   autoPlay={true}
  * />
  * 
- * // 视频展示
+ * // 视频展示 (16:9 比例)
  * <MediaDisplay 
  *   type={MediaType.VIDEO}
  *   media={[{ url: '/videos/demo.mp4', title: '演示视频' }]}
@@ -85,30 +188,30 @@ export function MediaDisplay({
   autoPlay = false,
   interval = 5000,
   showIndicators = true,
-  showNavigation = true,
-  aspectRatio,
-  maintainAspectRatio = true
+  showNavigation = true
 }: MediaDisplayProps) {
   // 当前展示的媒体索引
   const [currentIndex, setCurrentIndex] = useState(0);
   // 是否正在播放自动轮播
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   /**
-   * 计算容器样式，包括长宽比
+   * 组件挂载后设置自动播放状态
+   */
+  useEffect(() => {
+    if (autoPlay) {
+      setIsPlaying(true);
+    }
+  }, [autoPlay]);
+
+  /**
+   * 计算容器样式，严格限定为16:9长宽比
    */
   const getContainerStyle = (): React.CSSProperties => {
     const style: React.CSSProperties = {};
     
-    if (aspectRatio) {
-      // 解析长宽比字符串（如 "16:10" 或 "1.6:1"）
-      const [width, height] = aspectRatio.split(':').map(Number);
-      const ratio = width / height;
-      style.aspectRatio = `${ratio}`;
-    } else if (maintainAspectRatio && type === MediaType.IMAGES) {
-      // 针对您的图片（3600x2252）使用精确比例
-      style.aspectRatio = '1.599';
-    }
+    // 严格限定为 16:9 比例
+    style.aspectRatio = '16/9'; // 16:9 = 1.777777...
     
     return style;
   };
@@ -181,7 +284,6 @@ export function MediaDisplay({
       >
         <video
           className="w-full h-full object-cover"
-          autoPlay
           controls
           loop
           muted
@@ -232,74 +334,19 @@ export function MediaDisplay({
         )}
       </div>
 
-      {/* 导航箭头 */}
-      {showNavigation && media.length > 1 && (
-        <>
-          <button
-            onClick={goToPrevious}
-            className="media-nav-button media-nav-button-left"
-            aria-label="上一张图片"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
-          <button
-            onClick={goToNext}
-            className="media-nav-button media-nav-button-right"
-            aria-label="下一张图片"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </>
-      )}
-
-      {/* 播放控制按钮 */}
-      {autoPlay && media.length > 1 && (
-        <button
-          onClick={togglePlayback}
-          className="media-control-button"
-          aria-label={isPlaying ? '暂停自动播放' : '开始自动播放'}
-        >
-          {isPlaying ? (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
-            </svg>
-          ) : (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1" />
-            </svg>
-          )}
-        </button>
-      )}
-
-      {/* 指示器 */}
-      {showIndicators && media.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {media.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex
-                  ? 'bg-white'
-                  : 'bg-white/50 hover:bg-white/70'
-              }`}
-              aria-label={`跳转到第 ${index + 1} 张图片`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* 计数器 */}
-      {media.length > 1 && (
-        <div className="media-counter">
-          {currentIndex + 1} / {media.length}
-        </div>
-      )}
+      {/* 客户端专用的导航控件 - 使用动态导入禁用 SSR */}
+      <ClientOnlyNavigationControls
+        currentIndex={currentIndex}
+        media={media}
+        showNavigation={showNavigation}
+        showIndicators={showIndicators}
+        autoPlay={autoPlay}
+        isPlaying={isPlaying}
+        onPrevious={goToPrevious}
+        onNext={goToNext}
+        onGoToSlide={goToSlide}
+        onTogglePlayback={togglePlayback}
+      />
     </div>
   );
 }

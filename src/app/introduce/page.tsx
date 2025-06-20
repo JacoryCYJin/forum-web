@@ -21,19 +21,39 @@ import {
 const demoMediaData = {
   forumScreenshots: [
     {
-      url: "/images/screenshots/forum/1.png",
+      url: "/images/screenshots/forum/home.jpg",
       title: "论坛首页",
-      description: "现代化的论坛首页设计，支持分类浏览和热门内容展示",
+      description: "现代化的论坛首页设计，支持分类浏览和热门内容展示，支持黑夜模式",
     },
     {
-      url: "/images/screenshots/forum/2.png",
-      title: "富文本编辑器",
-      description: "强大的Markdown编辑器，支持图片上传和实时预览",
+      url: "/images/screenshots/forum/login-page.jpg",
+      title: "登录组件",
+      description: "简洁的登录组件，支持手机号邮箱注册登录，重制密码",
     },
     {
-      url: "/images/screenshots/forum/3.png",
+      url: "/images/screenshots/forum/post-send.jpg",
+      title: "帖子发送",
+      description: "强大的Markdown编辑器，支持图文帖子和视频帖子的发送",
+    },
+    {
+      url: "/images/screenshots/forum/post-detail.jpg",
       title: "帖子详情页",
-      description: "清晰的帖子展示，支持点赞、收藏和评论互动",
+      description: "清晰的帖子展示，支持点赞、收藏和评论互动，支持视频播放",
+    },
+    {
+      url: "/images/screenshots/forum/report.jpg",
+      title: "举报帖子/评论/用户",
+      description: "支持举报帖子、评论、用户，支持举报原因选择",
+    },
+    {
+      url: "/images/screenshots/forum/language.jpg",
+      title: "多语言支持",
+      description: "支持多语言切换，支持中文简体、中文繁体、英文切换",
+    },
+    {
+      url: "/images/screenshots/forum/me.jpg",
+      title: "我的页面",
+      description: "支持查看我的收藏、我的帖子、我关注的人和我的关注人的发帖子",
     },
   ],
 
@@ -93,19 +113,24 @@ const demoMediaData = {
   // 管理后台截图
   adminScreenshots: [
     {
-      url: "/images/screenshots/admin/dashboard.jpg",
-      title: "管理后台首页",
+      url: "/images/screenshots/admin/admin-login.jpg",
+      title: "管理后台登录",
       description: "Vue3 + Element Plus构建的现代化管理界面",
     },
     {
-      url: "/images/screenshots/admin/user-management.jpg",
-      title: "用户管理",
+      url: "/images/screenshots/admin/admin-home.jpg",
+      title: "管理后台首页",
       description: "完整的用户生命周期管理和权限控制",
     },
     {
-      url: "/images/screenshots/admin/content-review.jpg",
-      title: "内容审核",
+      url: "/images/screenshots/admin/admin-report.jpg",
+      title: "举报处理",
       description: "智能化的内容审核和举报处理系统",
+    },
+    {
+      url: "/images/screenshots/admin/admin-tag.jpg",
+      title: "标签管理",
+      description: "支持标签创建、编辑、删除等操作",
     },
   ],
 };
@@ -559,50 +584,72 @@ export default function IntroducePage(): React.JSX.Element {
                     </h3>
                     <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                       基于Next.js +
-                      React的现代化论坛系统，支持富文本编辑、分类标签、热门排行、用户互动等完整社区功能
+                      React的现代化论坛系统，支持深色模式、多语言切换、富文本编辑、用户管理等完整社区功能
                     </p>
                     <ul className="space-y-4">
+                      <li className="flex items-start">
+                        <span className="intro-feature-bullet">🌓</span>
+                        <div>
+                          <strong className="text-gray-900 dark:text-white">
+                            现代化界面设计
+                          </strong>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            支持深色/浅色主题切换，分类浏览和热门内容展示
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="intro-feature-bullet">🔐</span>
+                        <div>
+                          <strong className="text-gray-900 dark:text-white">
+                            完整用户认证系统
+                          </strong>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            支持手机号/邮箱注册登录，密码重置功能
+                          </p>
+                        </div>
+                      </li>
                       <li className="flex items-start">
                         <span className="intro-feature-bullet">📝</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            富文本编辑器支持
+                            强大的内容创作
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            支持Markdown编辑、图片上传、标签分类
+                            Markdown编辑器，支持图文帖子和视频帖子发送
                           </p>
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">🏷️</span>
+                        <span className="intro-feature-bullet">💬</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            分类标签系统
+                            丰富的互动功能
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            灵活的内容分类与标签管理机制
+                            点赞收藏评论分享，支持举报机制，保障社区环境
                           </p>
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">❤️</span>
+                        <span className="intro-feature-bullet">🌐</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            点赞收藏功能
+                            多语言国际化
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            用户互动与内容价值评估
+                            支持中文简体、中文繁体、英文多语言切换
                           </p>
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">🔥</span>
+                        <span className="intro-feature-bullet">👤</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            热门排行算法
+                            个人中心管理
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            智能的内容推荐与热点发现
+                            我的收藏、我的帖子、关注管理等完整用户体验
                           </p>
                         </div>
                       </li>
@@ -615,7 +662,6 @@ export default function IntroducePage(): React.JSX.Element {
                       className="w-full max-w-4xl mx-auto"
                       autoPlay={true}
                       interval={4000}
-                      maintainAspectRatio={true}
                     />
                   </div>
                 </div>
@@ -630,7 +676,7 @@ export default function IntroducePage(): React.JSX.Element {
                     </h3>
                     <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                       基于WebSocket +
-                      Kafka的高并发实时聊天，支持私聊、群聊、消息推送、在线状态等完整即时通讯功能
+                      Kafka的高并发实时聊天，支持私聊、文件发送、消息推送、在线状态等完整即时通讯功能
                     </p>
                     <ul className="space-y-4">
                       <li className="flex items-start">
@@ -656,13 +702,13 @@ export default function IntroducePage(): React.JSX.Element {
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">👥</span>
+                        <span className="intro-feature-bullet">📎</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            私聊群聊支持
+                            文件发送支持
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            灵活的多人会话与群组管理
+                            支持图片、文档等多种文件类型的实时发送
                           </p>
                         </div>
                       </li>
@@ -670,10 +716,10 @@ export default function IntroducePage(): React.JSX.Element {
                         <span className="intro-feature-bullet">🟢</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            在线状态显示
+                            在线状态与消息提醒
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            实时的用户在线状态与活跃度
+                            实时显示用户在线状态，未读消息智能提醒
                           </p>
                         </div>
                       </li>
@@ -684,21 +730,20 @@ export default function IntroducePage(): React.JSX.Element {
                       type={MediaType.VIDEO}
                       media={demoMediaData.chatDemos}
                       className="w-full max-w-4xl mx-auto"
-                      aspectRatio="16:9"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* 智能文件管理 */}
+              {/* 云盘文件管理 */}
               <div className="intro-feature-showcase">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div>
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                      <span className="intro-gradient-text">智能文件管理</span>
+                      <span className="intro-gradient-text">云盘文件管理</span>
                     </h3>
                     <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                      基于MinIO的分布式存储系统，提供文件上传下载、智能分类、批量操作、版本管理等企业级文件服务
+                      基于MinIO的企业级云盘存储解决方案，提供文件上传下载、文件夹管理、权限控制、分享链接等完整的云端文件服务
                     </p>
                     <ul className="space-y-4">
                       <li className="flex items-start">
@@ -708,18 +753,18 @@ export default function IntroducePage(): React.JSX.Element {
                             分布式文件存储
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            高可用、高性能的对象存储服务
+                            高可用、高性能的MinIO对象存储服务
                           </p>
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">🧠</span>
+                        <span className="intro-feature-bullet">📁</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            智能文件分类
+                            文件夹层级管理
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            自动识别文件类型与智能归档
+                            灵活的目录结构与层级组织，智能文件分类
                           </p>
                         </div>
                       </li>
@@ -730,18 +775,29 @@ export default function IntroducePage(): React.JSX.Element {
                             批量上传下载
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            高效的批量文件处理能力
+                            高效的批量文件处理与进度显示
                           </p>
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">🔄</span>
+                        <span className="intro-feature-bullet">🔐</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            文件版本管理
+                            权限与分享控制
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            完整的版本控制与历史追踪
+                            细粒度权限控制，安全分享链接生成
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="intro-feature-bullet">📊</span>
+                        <div>
+                          <strong className="text-gray-900 dark:text-white">
+                            访问统计分析
+                          </strong>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            详细的访问记录与使用情况分析
                           </p>
                         </div>
                       </li>
@@ -750,11 +806,10 @@ export default function IntroducePage(): React.JSX.Element {
                   <div>
                     <MediaDisplay
                       type={MediaType.IMAGES}
-                      media={demoMediaData.filesScreenshots}
+                      media={[...demoMediaData.filesScreenshots, ...demoMediaData.cloudScreenshots]}
                       className="w-full max-w-4xl mx-auto"
                       autoPlay={true}
                       interval={4000}
-                      maintainAspectRatio={true}
                     />
                   </div>
                 </div>
@@ -820,86 +875,16 @@ export default function IntroducePage(): React.JSX.Element {
                       </li>
                     </ul>
                   </div>
-                  <div className="lg:order-1">
+                  <div>
                     <MediaDisplay
                       type={MediaType.VIDEO}
                       media={demoMediaData.analyticsDemo}
                       className="w-full max-w-4xl mx-auto"
-                      aspectRatio="16:9"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* 云盘共享系统 */}
-              <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                      <span className="intro-gradient-text">云盘共享系统</span>
-                    </h3>
-                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                      企业级云盘存储解决方案，支持文件夹管理、权限控制、分享链接、访问统计等完整的文件共享服务
-                    </p>
-                    <ul className="space-y-4">
-                      <li className="flex items-start">
-                        <span className="intro-feature-bullet">📁</span>
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">
-                            文件夹层级管理
-                          </strong>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            灵活的目录结构与层级组织
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="intro-feature-bullet">🔐</span>
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">
-                            权限精细控制
-                          </strong>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            细粒度的访问权限与安全管控
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="intro-feature-bullet">🔗</span>
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">
-                            分享链接生成
-                          </strong>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            快速创建安全的文件分享链接
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="intro-feature-bullet">📊</span>
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">
-                            访问统计分析
-                          </strong>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            详细的访问记录与使用情况分析
-                          </p>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <MediaDisplay
-                      type={MediaType.IMAGES}
-                      media={demoMediaData.cloudScreenshots}
-                      className="w-full max-w-4xl mx-auto"
-                      autoPlay={true}
-                      interval={4000}
-                      maintainAspectRatio={true}
-                    />
-                  </div>
-                </div>
-              </div>
 
               {/* 智能管理后台 */}
               <div className="intro-feature-showcase">
@@ -914,13 +899,24 @@ export default function IntroducePage(): React.JSX.Element {
                     </p>
                     <ul className="space-y-4">
                       <li className="flex items-start">
+                        <span className="intro-feature-bullet">💻</span>
+                        <div>
+                          <strong className="text-gray-900 dark:text-white">
+                            现代化管理界面
+                          </strong>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            Vue3 + Element Plus构建的现代化登录与管理界面
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start">
                         <span className="intro-feature-bullet">👥</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            用户权限管理
+                            用户生命周期管理
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            完整的用户生命周期与权限体系
+                            完整的用户生命周期管理和权限控制体系
                           </p>
                         </div>
                       </li>
@@ -928,37 +924,27 @@ export default function IntroducePage(): React.JSX.Element {
                         <span className="intro-feature-bullet">🛡️</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            内容审核系统
+                            举报处理系统
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            智能化内容审核与违规处理
+                            智能化的内容审核和举报处理系统
                           </p>
                         </div>
                       </li>
                       <li className="flex items-start">
-                        <span className="intro-feature-bullet">📈</span>
+                        <span className="intro-feature-bullet">🏷️</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            数据统计看板
+                            标签管理系统
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            全方位的运营数据与趋势分析
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="intro-feature-bullet">🔔</span>
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">
-                            系统监控告警
-                          </strong>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            实时监控与智能告警机制
+                            支持标签创建、编辑、删除等完整操作
                           </p>
                         </div>
                       </li>
                     </ul>
                   </div>
+                  
                   <div className="lg:order-1">
                     <MediaDisplay
                       type={MediaType.IMAGES}
@@ -966,7 +952,6 @@ export default function IntroducePage(): React.JSX.Element {
                       className="w-full max-w-4xl mx-auto"
                       autoPlay={true}
                       interval={4000}
-                      maintainAspectRatio={true}
                     />
                   </div>
                 </div>
