@@ -885,29 +885,14 @@ export default function PostList({
     return String(commentCountCache.get(postId) ?? 0);
   };
 
-  // 加载状态
+  // 加载状态 - 简约设计
   if (isLoading && posts.length === 0) {
     return (
-      <div className="space-y-4">
-        {/* 简化的加载状态 */}
-        {[...Array(5)].map((_, index) => (
-          <div key={index} className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
-            <div className="animate-pulse">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-neutral-200 dark:bg-zinc-700 rounded-full"></div>
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-20"></div>
-                    <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-16"></div>
-                  </div>
-                  <div className="h-6 bg-neutral-200 dark:bg-zinc-700 rounded w-3/4"></div>
-                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-full"></div>
-                  <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded w-2/3"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm">加载中...</p>
+        </div>
       </div>
     );
   }
