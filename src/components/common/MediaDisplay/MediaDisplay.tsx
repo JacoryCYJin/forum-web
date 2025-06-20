@@ -181,8 +181,10 @@ export function MediaDisplay({
       >
         <video
           className="w-full h-full object-cover"
+          autoPlay
           controls
           loop
+          muted
           poster={videoItem.thumbnail}
           aria-label={videoItem.title || '视频内容'}
         >

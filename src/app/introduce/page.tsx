@@ -40,20 +40,10 @@ const demoMediaData = {
   // 聊天系统演示视频
   chatDemos: [
     {
-      url: "/images/screenshots/chat/1.png",
-      title: "实时聊天演示",
-      description: "WebSocket实时通信，支持私聊、群聊和在线状态",
-      // thumbnail: '/images/screenshots/chat/chat-preview.jpg'
-    },
-    {
-      url: "/images/screenshots/chat/2.png",
-      title: "文件列表视图",
-      description: "清晰的文件管理界面，支持多种视图模式",
-    },
-    {
-      url: "/images/screenshots/chat/3.png",
-      title: "文件上传进度",
-      description: "实时显示上传进度，支持批量上传和断点续传",
+      url: "/videos/chat.mp4",
+      title: "大数据分析演示",
+      description: "MaxCompute驱动的实时数据分析和可视化",
+      thumbnail: "/images/screenshots/analytics/dashboard-preview.jpg",
     },
   ],
 
@@ -79,10 +69,10 @@ const demoMediaData = {
   // 数据分析演示视频
   analyticsDemo: [
     {
-      url: "/videos/analytics-demo.mp4",
+      url: "/videos/chat.mp4",
       title: "大数据分析演示",
       description: "MaxCompute驱动的实时数据分析和可视化",
-      thumbnail: "/images/screenshots/analytics/dashboard-preview.jpg",
+      thumbnail: "/images/screenshots/chat/1.png",
     },
   ],
 
@@ -691,12 +681,10 @@ export default function IntroducePage(): React.JSX.Element {
                   </div>
                   <div className="lg:order-1">
                     <MediaDisplay
-                      type={MediaType.IMAGES}
+                      type={MediaType.VIDEO}
                       media={demoMediaData.chatDemos}
                       className="w-full max-w-4xl mx-auto"
-                      autoPlay={true}
-                      interval={4000}
-                      maintainAspectRatio={true}
+                      aspectRatio="16:9"
                     />
                   </div>
                 </div>
