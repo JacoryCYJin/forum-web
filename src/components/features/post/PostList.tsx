@@ -1228,10 +1228,25 @@ export default function PostList({
         <div className="mt-12 flex justify-center">
           <Pagination
             currentPage={currentPage}
-            totalPages={pageInfo.page_count} // 显示真实的总页数，不限制
-            onPageChange={handlePageChange}
+            totalPages={isLoggedIn ? pageInfo.page_count : 1} // 未登录用户只能看第一页
+            onPageChange={isLoggedIn ? handlePageChange : () => {}} // 未登录用户禁用页面切换
             showWhenSinglePage={true}
           />
+          {/* 未登录用户提示 */}
+          {!isLoggedIn && pageInfo.page_count > 1 && (
+            <div className="ml-4 flex items-center text-neutral-500 dark:text-neutral-400">
+              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <LanguageText 
+                texts={{
+                  'zh-CN': '登录后查看更多内容',
+                  'zh-TW': '登錄後查看更多內容',
+                  'en': 'Login to view more content'
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 

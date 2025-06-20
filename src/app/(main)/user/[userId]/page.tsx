@@ -366,37 +366,58 @@ export default function UserProfilePage() {
               </div>
             </div>
             
-            {/* 关注按钮 - 简洁设计 */}
+            {/* 操作按钮组 - 简洁设计 */}
             {currentUser && currentUser.userId !== userId && (
-              <button
-                onClick={handleFollowToggle}
-                disabled={followLoading}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                  isFollowing
-                    ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-                    : 'bg-primary text-white hover:bg-primary-hover'
-                } ${followLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {followLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                    <span>
-                      <LanguageText 
-                        texts={{
-                          'zh-CN': '处理中...',
-                          'zh-TW': '處理中...',
-                          'en': 'Processing...'
-                        }}
-                      />
-                    </span>
-                  </div>
-                ) : isFollowing ? (
-                  <LanguageText 
-                    texts={{
-                      'zh-CN': '已关注',
-                      'zh-TW': '已關注',
-                      'en': 'Following'
-                    }}
+              <div className="flex space-x-3">
+                {/* 私聊按钮 */}
+                <button
+                  onClick={() => window.open(`/message?userId=${userId}`, '_blank')}
+                  className="px-4 py-2 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg font-medium transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-600 flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>
+                    <LanguageText 
+                      texts={{
+                        'zh-CN': '私聊',
+                        'zh-TW': '私聊',
+                        'en': 'Message'
+                      }}
+                    />
+                  </span>
+                </button>
+
+                {/* 关注按钮 */}
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={followLoading}
+                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                    isFollowing
+                      ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                      : 'bg-primary text-white hover:bg-primary-hover'
+                  } ${followLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {followLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      <span>
+                        <LanguageText 
+                          texts={{
+                            'zh-CN': '处理中...',
+                            'zh-TW': '處理中...',
+                            'en': 'Processing...'
+                          }}
+                        />
+                      </span>
+                    </div>
+                  ) : isFollowing ? (
+                    <LanguageText 
+                      texts={{
+                        'zh-CN': '已关注',
+                        'zh-TW': '已關注',
+                        'en': 'Following'
+                      }}
                   />
                 ) : (
                   <LanguageText 
@@ -408,6 +429,7 @@ export default function UserProfilePage() {
                   />
                 )}
               </button>
+              </div>
             )}
           </div>
         </div>

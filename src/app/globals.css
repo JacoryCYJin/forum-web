@@ -515,3 +515,321 @@ a {
 .dark .rich-content img {
   opacity: 0.9;
 }
+
+/* 聊天页面自定义样式 */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* 消息渐入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* 发送按钮点击效果 */
+.send-button-active {
+  transform: scale(0.95);
+}
+
+/* 消息气泡动画效果 */
+.message-bubble {
+  transition: all 0.2s ease;
+}
+
+.message-bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 联系人悬停效果 */
+.contact-item {
+  transition: all 0.2s ease;
+}
+
+.contact-item:hover {
+  transform: translateX(2px);
+}
+
+/* 在线状态指示器动画 */
+.online-indicator {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 暗色模式下的聊天背景 */
+.dark .chat-background {
+  background: linear-gradient(135deg, rgb(24, 24, 27) 0%, rgb(39, 39, 42) 100%);
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 消息发送状态指示器 */
+.message-status {
+  transition: all 0.2s ease;
+}
+
+/* 输入框聚焦效果 */
+.message-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 头像悬停效果 */
+.avatar-hover {
+  transition: all 0.2s ease;
+}
+
+.avatar-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 联系人列表项激活状态 */
+.contact-active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+/* 消息时间戳动画 */
+.message-time {
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+.message-bubble:hover .message-time {
+  opacity: 1;
+}
+
+/* 发送按钮脉冲效果 */
+.send-pulse {
+  animation: sendPulse 1s ease-in-out;
+}
+
+@keyframes sendPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* 加载动画优化 */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% {
+    content: '';
+  }
+  40% {
+    content: '.';
+  }
+  60% {
+    content: '..';
+  }
+  80%, 100% {
+    content: '...';
+  }
+}
+
+/* 聊天页面样式 */
+
+/* 聊天消息容器 */
+.chat-message-container {
+  @apply flex items-end mb-4 max-w-none;
+}
+
+/* 我的消息 - 右对齐 */
+.chat-message-container.from-me {
+  @apply flex-row-reverse justify-start;
+}
+
+/* 对方的消息 - 左对齐 */
+.chat-message-container.from-other {
+  @apply flex-row justify-start;
+}
+
+/* 聊天头像 */
+.chat-avatar {
+  @apply w-8 h-8 rounded-full flex-shrink-0 border-2 border-white dark:border-dark-secondary shadow-sm;
+}
+
+/* 我的消息头像 - 左边距 */
+.chat-message-container.from-me .chat-avatar {
+  @apply ml-2;
+}
+
+/* 对方消息头像 - 右边距 */
+.chat-message-container.from-other .chat-avatar {
+  @apply mr-2;
+}
+
+/* 聊天气泡容器 */
+.chat-bubble {
+  @apply relative px-4 py-2 rounded-2xl shadow-sm max-w-xs break-words;
+}
+
+/* 图片消息气泡的特殊样式 */
+.chat-bubble.image-message {
+  @apply px-2 py-2 max-w-sm;
+}
+
+/* 图片消息内容样式 */
+.chat-bubble-content img {
+  @apply w-full h-auto rounded-lg;
+}
+
+/* 我的消息气泡 - 蓝色主题 */
+.chat-bubble.from-me {
+  @apply bg-primary text-white rounded-br-sm;
+}
+
+/* 对方的消息气泡 - 灰色主题 */
+.chat-bubble.from-other {
+  @apply bg-neutral-100 dark:bg-dark-secondary text-neutral-800 dark:text-white rounded-bl-sm border border-neutral-200 dark:border-zinc-700;
+}
+
+/* 消息内容 */
+.chat-bubble-content {
+  @apply text-sm leading-relaxed;
+}
+
+/* 消息时间和状态 */
+.chat-bubble-time {
+  @apply flex items-center justify-end space-x-1 text-xs opacity-70 mt-1;
+}
+
+/* 对方消息的时间 */
+.chat-bubble.from-other .chat-bubble-time {
+  @apply justify-start text-neutral-500 dark:text-neutral-400;
+}
+
+/* 我的消息的时间 */
+.chat-bubble.from-me .chat-bubble-time {
+  @apply justify-end text-white;
+}
+
+/* 联系人项目样式 */
+.chat-contact-item {
+  @apply transition-colors duration-200 cursor-pointer;
+}
+
+.chat-contact-item:hover {
+  @apply bg-neutral-100/80 dark:bg-neutral-700/50;
+}
+
+/* 发送按钮动画 */
+.chat-send-button {
+  @apply transition-colors duration-200;
+}
+
+.chat-send-button:hover {
+  @apply bg-primary-hover;
+}
+
+.chat-send-button:active {
+  @apply bg-primary;
+}
+
+/* 消息状态指示器 */
+.message-status-sending {
+  @apply opacity-60;
+}
+
+.message-status-sent {
+  @apply opacity-80;
+}
+
+.message-status-delivered {
+  @apply opacity-90;
+}
+
+.message-status-read {
+  @apply opacity-100;
+}
+
+/* 响应式适配 */
+@media (max-width: 640px) {
+  .chat-bubble {
+    @apply max-w-[280px];
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-bubble {
+    @apply max-w-[240px];
+  }
+}
+
+/* 聊天消息容器 - 确保滚动不影响页面布局 */
+.chat-messages-container {
+  scroll-behavior: smooth;
+  overflow-anchor: auto;
+  position: relative; /* 确保定位上下文 */
+  contain: layout style; /* 限制布局影响范围 */
+}
+
+/* 确保聊天页面不会影响全局滚动 */
+.chat-page-container {
+  position: relative;
+  contain: layout style;
+  will-change: auto; /* 避免不必要的硬件加速 */
+}
+
+/* 防止选择文本时的问题 */
+.chat-message-container {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}

@@ -25,6 +25,7 @@ import {
 import { getCategoryListWithCacheApi } from "@/lib/api/categoryApi";
 import { Category } from "@/types/categoryTypes";
 import LanguageText from "@/components/common/LanguageText/LanguageText";
+import { useUserStore } from "@/store/userStore";
 
 /**
  * 侧边栏组件属性接口
@@ -69,6 +70,11 @@ interface SidebarItem {
  * <Sidebar onToggle={(collapsed) => console.log('Sidebar collapsed:', collapsed)} />
  */
 const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
+  /**
+   * 用户登录状态
+   */
+  const { user } = useUserStore();
+
   /**
    * 组件挂载状态引用，防止在组件卸载后更新状态
    */
@@ -273,6 +279,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
         'zh-TW': '熱門',
         'en': 'Hot'
       },
+      message: {
+        'zh-CN': '聊天',
+        'zh-TW': '聊天',
+        'en': 'Messages'
+      },
       map: {
         'zh-CN': '地图',
         'zh-TW': '地圖',
@@ -313,7 +324,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   };
 
   // 顶部固定导航项
-  const topNavItems: SidebarItem[] = [
+  const allNavItems: SidebarItem[] = [
     {
       name: "home",
       icon: <Home theme="outline" size="18" />,
@@ -323,6 +334,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
       name: "hot",
       icon: <Fire theme="outline" size="18" />,
       path: "/popular",
+    },
+    {
+      name: "message",
+      icon: (
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+      path: "/message",
     },
     {
       name: "map",
@@ -335,6 +355,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
       path: "/like",
     },
   ];
+
+  // 根据用户登录状态过滤导航项
+  const topNavItems = allNavItems.filter(item => {
+    // 未登录时隐藏聊天和关注选项
+    if (!user && (item.name === "message" || item.name === "follow")) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <aside className="fixed top-14 left-0 z-40 h-[calc(100vh-3.5rem)] flex flex-col">
@@ -385,6 +414,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                             theme="filled"
                             size="18"
                           />
+                        ) : item.path === "/message" &&
+                          isLinkActive(item.path) ? (
+                          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
                         ) : item.path === "/introduce" &&
                           isLinkActive(item.path) ? (
                           <MapDraw
