@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useToast } from './useToast';
-import Toast from './Toast';
+import ClientOnlyToast from './ClientOnlyToast';
 import type { ToastType } from './Toast';
 
 /**
@@ -65,7 +65,8 @@ export function ToastProvider({ children }: ToastProviderProps) {
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <Toast messages={messages} onRemove={removeToast} />
+      {/* Toast 组件只在客户端渲染 */}
+      <ClientOnlyToast messages={messages} onRemove={removeToast} />
     </ToastContext.Provider>
   );
 }
