@@ -108,7 +108,7 @@ export default function ChatPage() {
   /**
    * 滚动到消息列表底部
    */
-  const scrollToBottom = useCallback(() => {
+  const scrollToBottom = useCallback((smooth: boolean = true) => {
     // 使用更安全的滚动方式，确保只在消息容器内滚动
     if (messagesEndRef.current) {
       try {
@@ -119,12 +119,12 @@ export default function ChatPage() {
           // 使用平滑的容器内滚动，不影响页面布局
           messagesContainer.scrollTo({
             top: messagesContainer.scrollHeight,
-            behavior: "smooth",
+            behavior: smooth ? "smooth" : "auto",
           });
         } else {
           // 备用方案：直接滚动到元素位置，但限制在容器内
           messagesEndRef.current.scrollIntoView({
-            behavior: "smooth",
+            behavior: smooth ? "smooth" : "auto",
             block: "end",
             inline: "nearest",
           });
@@ -191,6 +191,16 @@ export default function ChatPage() {
       }
 
       setContacts(contactsList);
+
+      // 如果没有指定targetUserId且有联系人，默认选择第一个联系人
+      if (!targetUserId && contactsList.length > 0 && !selectedContact) {
+        const firstContact = contactsList[0];
+        setSelectedContact(firstContact);
+        // 延迟获取聊天记录，确保DOM稳定
+        setTimeout(() => {
+          fetchChatHistory(firstContact.userId);
+        }, 300);
+      }
     } catch (error) {
       console.error("获取联系人列表失败:", error);
     } finally {
@@ -228,7 +238,7 @@ export default function ChatPage() {
       // 延迟滚动，确保DOM更新完成
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          scrollToBottom();
+          scrollToBottom(true); // 切换联系人时使用平滑滚动
         });
       });
     } catch (error) {
@@ -269,9 +279,9 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, tempMessage]);
       setMessageInput(""); // 立即清空输入框
 
-      // 安全的滚动到底部
+      // 发送消息后立即滚动到底部（不使用动画）
       requestAnimationFrame(() => {
-        scrollToBottom();
+        scrollToBottom(false);
       });
 
       // 发送到服务器
@@ -383,9 +393,9 @@ export default function ChatPage() {
 
       setMessages((prev) => [...prev, tempMessage]);
 
-      // 滚动到底部
+      // 发送文件时立即滚动到底部（不使用动画）
       requestAnimationFrame(() => {
-        scrollToBottom();
+        scrollToBottom(false);
       });
 
       // 直接发送文件到后端，由后端处理上传和URL存储
@@ -398,8 +408,66 @@ export default function ChatPage() {
 
       console.log("🎯 文件上传成功，服务器返回:", result);
 
-      // 重新获取聊天记录以获取完整的消息内容（包含文件URL）
-      await fetchChatHistory(currentContact.userId);
+      // 先标记临时消息为发送成功
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.messageId === tempMessageId
+            ? {
+                ...msg,
+                messageId: result.messageId,
+                status: "sent",
+              }
+            : msg
+        )
+      );
+
+      // 更新联系人列表中的最后消息
+      setContacts((prev) =>
+        prev.map((contact) =>
+          contact.userId === currentContact.userId
+            ? {
+                ...contact,
+                lastMessage: `[${msgType === "image" ? "图片" : msgType === "video" ? "视频" : msgType === "voice" ? "语音" : "文件"}]`,
+                lastMessageTime: new Date().toISOString(),
+              }
+            : contact
+        )
+      );
+
+      // 短暂延迟后重新获取聊天记录，但使用优化的滚动策略
+      setTimeout(async () => {
+        try {
+          // 保存当前滚动位置，用于判断是否需要滚动
+          const messagesContainer = messagesEndRef.current?.closest(".chat-messages-container") as HTMLElement;
+          const wasAtBottom = messagesContainer 
+            ? Math.abs(messagesContainer.scrollTop + messagesContainer.clientHeight - messagesContainer.scrollHeight) <= 20
+            : true;
+
+          // 重新获取聊天记录以获取包含文件URL的完整消息
+          const response = await getChatHistoryApi({
+            with_user_id: currentContact.userId,
+            page: 1,
+            size: 50,
+          });
+
+          const sortedMessages = (response.list || []).reverse();
+          
+          // 更新消息列表，但保持当前用户的滚动体验
+          setMessages(sortedMessages);
+
+          // 只有在用户之前就在底部时才自动滚动，避免干扰用户浏览历史消息
+          if (wasAtBottom) {
+            // 延迟滚动，确保DOM更新完成，使用无动画滚动避免视觉干扰
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                scrollToBottom(false);
+              });
+            });
+          }
+        } catch (error) {
+          console.error("重新获取聊天记录失败:", error);
+        }
+      }, 600); // 稍微缩短延迟时间
     } catch (error: any) {
       console.error("发送文件失败:", error);
 

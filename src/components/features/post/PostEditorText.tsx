@@ -492,7 +492,7 @@ export function PostEditorText({ onCancel }: PostEditorTextProps) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900 py-6">
+    <div className="min-h-screen bg-neutral-200 dark:bg-zinc-900 py-6">
       <div className="max-w-4xl mx-auto px-4">
         {/* 现代化头部卡片 */}
         <div className="bg-white dark:bg-dark-secondary rounded-xl shadow-sm border border-neutral-200/50 dark:border-zinc-700/50 p-8 mb-6 hover:shadow-lg transition-all duration-300">

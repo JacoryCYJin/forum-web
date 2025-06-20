@@ -28,7 +28,7 @@ export default function CreatePostPage() {
   // 如果还没有选择类型，显示选择界面
   if (!selectedType) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900 py-12">
+      <div className="min-h-screen bg-neutral-200 dark:bg-zinc-900 py-12">
         <div className="max-w-5xl mx-auto px-4">
           {/* 现代化页面标题区域 */}
           <div className="text-center mb-12">

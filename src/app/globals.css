@@ -186,6 +186,118 @@ select:focus {
   }
 }
 
+/* MediaDisplay 组件导航箭头样式 */
+.media-nav-button {
+  @apply absolute top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-all duration-300 ease-in-out;
+  background: rgba(var(--primary-rgb), 0.8);
+  color: white;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
+}
+
+.media-nav-button-left {
+  left: 8px;
+}
+
+.media-nav-button-right {
+  right: 8px;
+}
+
+/* 容器hover时显示导航按钮 */
+.media-display-container:hover .media-nav-button {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* 导航按钮hover效果 */
+.media-nav-button:hover {
+  background: rgba(var(--primary-rgb), 1);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+/* 深色模式下的导航按钮优化 */
+@media (prefers-color-scheme: dark) {
+  .media-nav-button {
+    background: rgba(var(--primary-rgb), 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .media-nav-button:hover {
+    background: rgba(var(--primary-rgb), 1);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.5);
+  }
+}
+
+/* 媒体播放控制按钮样式 */
+.media-control-button {
+  @apply absolute top-2 right-2 p-1.5 rounded-full transition-all duration-300 ease-in-out;
+  background: rgba(var(--primary-rgb), 0.8);
+  color: white;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
+}
+
+/* 容器hover时显示播放控制按钮 */
+.media-display-container:hover .media-control-button {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* 播放控制按钮hover效果 */
+.media-control-button:hover {
+  background: rgba(var(--primary-rgb), 1);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+/* 媒体计数器样式 */
+.media-counter {
+  @apply absolute top-2 left-2 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out;
+  background: rgba(var(--primary-rgb), 0.8);
+  color: white;
+  opacity: 0;
+  visibility: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
+}
+
+/* 容器hover时显示计数器 */
+.media-display-container:hover .media-counter {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 深色模式下的控制元素优化 */
+@media (prefers-color-scheme: dark) {
+  .media-control-button,
+  .media-counter {
+    background: rgba(var(--primary-rgb), 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .media-control-button:hover {
+    background: rgba(var(--primary-rgb), 1);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.5);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -305,6 +417,223 @@ a {
   background: linear-gradient(135deg, var(--intro-feature-secondary-light) 0%, #FFCCBC 100%);
 }
 
+/* 系统卡片样式 */
+.intro-page .intro-system-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .intro-page .intro-system-card {
+  background: var(--intro-bg-card);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.intro-page .intro-system-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+.intro-page .intro-system-header {
+  margin-bottom: 24px;
+}
+
+.intro-page .intro-feature-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.intro-page .intro-feature-bullet {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.intro-page .intro-feature-desc {
+  display: block;
+  font-size: 14px;
+  color: var(--intro-text-secondary);
+  margin-top: 4px;
+}
+
+/* 技术卡片样式 */
+.intro-page .intro-tech-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .intro-page .intro-tech-card {
+  background: var(--intro-bg-card);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.intro-page .intro-tech-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.intro-page .intro-tech-header {
+  margin-bottom: 16px;
+}
+
+.intro-page .intro-tech-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.intro-page .intro-tech-name {
+  color: var(--intro-text-primary);
+  font-weight: 500;
+}
+
+.intro-page .intro-tech-tag {
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* 截图预留区域样式 */
+.intro-page .intro-screenshot-placeholder {
+  width: 100%;
+}
+
+.intro-page .intro-screenshot-frame {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 2px dashed #E5E7EB;
+  transition: all 0.3s ease;
+}
+
+.dark .intro-page .intro-screenshot-frame {
+  background: var(--intro-bg-card);
+  border-color: #374151;
+}
+
+.intro-page .intro-screenshot-frame:hover {
+  border-color: var(--intro-primary);
+  background: rgba(255, 69, 0, 0.02);
+}
+
+.dark .intro-page .intro-screenshot-frame:hover {
+  background: rgba(255, 69, 0, 0.05);
+}
+
+.intro-page .intro-screenshot-content {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+/* 特性展示区域样式 */
+.intro-page .intro-feature-showcase {
+  margin-bottom: 64px;
+  position: relative;
+}
+
+.intro-page .intro-feature-showcase:last-child {
+  margin-bottom: 0;
+}
+
+
+
+/* 时间轴样式 */
+.intro-page .intro-timeline {
+  position: relative;
+  max-width: 4xl;
+  margin: 0 auto;
+}
+
+.intro-page .intro-timeline::before {
+  content: '';
+  position: absolute;
+  left: 32px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  opacity: 0.3;
+}
+
+.intro-page .intro-timeline-item {
+  position: relative;
+  padding-left: 80px;
+  padding-bottom: 32px;
+}
+
+.intro-page .intro-timeline-marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+  z-index: 10;
+}
+
+.intro-page .intro-timeline-content {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-left: 16px;
+}
+
+.dark .intro-page .intro-timeline-content {
+  background: var(--intro-bg-card);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.intro-page .intro-timeline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.intro-page .intro-timeline-tag {
+  background: rgba(255, 69, 0, 0.1);
+  color: var(--intro-primary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.dark .intro-page .intro-timeline-tag {
+  background: rgba(255, 69, 0, 0.2);
+  color: #FFB366;
+  border-color: rgba(255, 69, 0, 0.3);
+}
+
 /* 毛玻璃效果 */
 .intro-page .intro-glass {
   backdrop-filter: blur(10px);
@@ -332,19 +661,17 @@ a {
   animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* 统计数据区块 - 移除动画效果 */
+/* 统计数据区块 */
 .intro-page .intro-stats-section {
   background: linear-gradient(90deg, var(--intro-primary) 0%, var(--intro-secondary) 100%);
   color: white;
 }
 
 .intro-page .intro-stats-item {
-  /* 移除所有动画效果 */
   transition: none;
 }
 
 .intro-page .intro-stats-item:hover {
-  /* 移除悬停动画 */
   transform: none;
 }
 
@@ -446,6 +773,29 @@ a {
   .intro-page .intro-section-title {
     font-size: 1.875rem;
     line-height: 1.3;
+  }
+  
+  .intro-page .intro-timeline::before {
+    left: 16px;
+  }
+  
+  .intro-page .intro-timeline-item {
+    padding-left: 60px;
+  }
+  
+  .intro-page .intro-timeline-marker {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  .intro-page .intro-timeline-content {
+    margin-left: 12px;
+  }
+  
+  .intro-page .intro-system-card,
+  .intro-page .intro-tech-card {
+    padding: 20px;
   }
 }
 
@@ -832,4 +1182,15 @@ a {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+}
+
+/* 文件消息更新时的平滑过渡 */
+.file-message-updating {
+  opacity: 0.8;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.file-message-updated {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
 }
