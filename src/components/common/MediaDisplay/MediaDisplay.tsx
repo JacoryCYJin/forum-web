@@ -42,7 +42,7 @@ export interface MediaDisplayProps {
   media: MediaItem[];
   /** 展示容器的CSS类名 */
   className?: string;
-  /** 是否自动播放轮播图 */
+  /** 是否自动播放轮播图（对视频无效，视频总是自动播放） */
   autoPlay?: boolean;
   /** 轮播间隔时间（毫秒） */
   interval?: number;
@@ -131,7 +131,7 @@ function NavigationControls({
             <button
               key={index}
               onClick={() => onGoToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={`w-2 h-2 rounded-full transition-colors drop-shadow-md ${
                 index === currentIndex
                   ? 'bg-white'
                   : 'bg-white/50 hover:bg-white/70'
@@ -194,6 +194,8 @@ export function MediaDisplay({
   const [currentIndex, setCurrentIndex] = useState(0);
   // 是否正在播放自动轮播
   const [isPlaying, setIsPlaying] = useState(false);
+  // 是否hover状态（用于控制视频控件）
+  const [isHovered, setIsHovered] = useState(false);
 
   /**
    * 组件挂载后设置自动播放状态
@@ -261,6 +263,7 @@ export function MediaDisplay({
 
   // 如果没有媒体数据，显示占位符
   if (!media || media.length === 0) {
+    // 对于占位符，我们希望文字始终可见，不需要hover效果
     return (
       <div className={`flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg ${className}`}>
         <div className="text-center py-16">
@@ -274,32 +277,35 @@ export function MediaDisplay({
   // 视频展示
   if (type === MediaType.VIDEO) {
     const videoItem = media[0]; // 只取第一个视频
-    return (
-      <div 
-        className={`relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
-        style={{ 
-          ...getContainerStyle(),
-          minHeight: '300px'  // 设置最小高度，确保组件不会太小
-        }}
-      >
-        <video
-          className="w-full h-full object-cover"
-          autoPlay={autoPlay}
-          controls
-          loop
-          muted
-          poster={videoItem.thumbnail}
-          aria-label={videoItem.title || '视频内容'}
+    
+          return (
+        <div 
+          className={`group relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
+          style={{ 
+            ...getContainerStyle(),
+            minHeight: '300px'  // 设置最小高度，确保组件不会太小
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
-          <source src={videoItem.url} type="video/mp4" />
-          您的浏览器不支持视频播放。
-        </video>
+          <video
+            className="w-full h-full object-cover"
+            autoPlay={true}
+            controls={isHovered}
+            loop
+            muted
+            poster={videoItem.thumbnail}
+            aria-label={videoItem.title || '视频内容'}
+          >
+            <source src={videoItem.url} type="video/mp4" />
+            您的浏览器不支持视频播放。
+          </video>
         
         {videoItem.title && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-            <h4 className="text-white font-medium">{videoItem.title}</h4>
+          <div className="absolute bottom-12 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <h4 className="text-black font-medium drop-shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">{videoItem.title}</h4>
             {videoItem.description && (
-              <p className="text-white/80 text-sm mt-1">{videoItem.description}</p>
+              <p className="text-black/90 text-sm mt-1 drop-shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">{videoItem.description}</p>
             )}
           </div>
         )}
@@ -308,9 +314,10 @@ export function MediaDisplay({
   }
 
   // 图片轮播
+  
   return (
     <div 
-      className={`media-display-container relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
+      className={`media-display-container group relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
       style={{ 
         ...getContainerStyle(),
         minHeight: '300px'  // 设置最小高度，确保组件不会太小
@@ -324,12 +331,15 @@ export function MediaDisplay({
           className="w-full h-full object-cover transition-opacity duration-500"
         />
         
+        {/* 底部渐变背景层 */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
         {/* 图片信息覆盖层 */}
         {media[currentIndex].title && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-            <h4 className="text-white font-medium">{media[currentIndex].title}</h4>
+          <div className="absolute bottom-10 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <h4 className="text-black font-medium drop-shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">{media[currentIndex].title}</h4>
             {media[currentIndex].description && (
-              <p className="text-white/80 text-sm mt-1">{media[currentIndex].description}</p>
+              <p className="text-black/90 text-sm mt-1 drop-shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">{media[currentIndex].description}</p>
             )}
           </div>
         )}
