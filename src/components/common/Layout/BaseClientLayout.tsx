@@ -8,6 +8,7 @@
 import { ThemeProvider } from 'next-themes';
 import LanguageProvider from './LanguageProvider';
 import UserStateInitializer from '@/components/common/UserStateInitializer';
+import { ToastProvider } from '@/components/common/Toast/ToastProvider';
 
 /**
  * 主题包装组件Props
@@ -28,9 +29,11 @@ interface ThemeWrapperProps {
 export default function BaseClientLayout({ children }: ThemeWrapperProps) {
   return (
     <ThemeProvider attribute="class" enableSystem defaultTheme="system" disableTransitionOnChange>
-      <LanguageProvider />
-      <UserStateInitializer />
-      {children}
+      <ToastProvider>
+        <LanguageProvider />
+        <UserStateInitializer />
+        {children}
+      </ToastProvider>
     </ThemeProvider>
   );
 } 

@@ -19,6 +19,7 @@ import LanguageText from '@/components/common/LanguageText/LanguageText';
 import Pagination from '@/components/common/Pagination/Pagination';
 import ConfirmDialog from '@/components/common/ConfirmDialog/ConfirmDialog';
 import UserLink from '@/components/common/UserLink/UserLink';
+import { useToastContext } from '@/components/common/Toast/ToastProvider';
 
 /**
  * 帖子列表组件属性接口
@@ -99,6 +100,9 @@ export default function PostList({
   // 获取用户状态
   const { user, showLogin } = useUserStore();
   const isLoggedIn = !!user;
+  
+  // 获取Toast上下文
+  const { showWarning, showSuccess, showError } = useToastContext();
   
   // 调试props传递
   console.log('🚀 PostList组件渲染，接收到的props:', {
@@ -546,11 +550,11 @@ export default function PostList({
       
       console.log(`已删除帖子: ${postId}`);
       
-      // 可以添加成功提示，这里暂时用alert
-      alert('帖子删除成功');
+      // 显示成功提示
+      showSuccess('帖子删除成功');
     } catch (error: any) {
       console.error(`删除帖子失败 (postId: ${postId}):`, error);
-      alert(error.message || '删除帖子失败，请稍后重试');
+      showError(error.message || '删除帖子失败，请稍后重试');
     } finally {
       // 移除删除中标记
       setDeletingPostIds(prev => {
@@ -783,11 +787,9 @@ export default function PostList({
         if (page > 5) {
           showLogin();
           // 显示提示消息
-          if (typeof window !== 'undefined') {
-            setTimeout(() => {
-              alert('游客模式只能浏览前5页内容，请登录查看更多');
-            }, 100);
-          }
+          setTimeout(() => {
+            showWarning('游客模式只能浏览前5页内容，请登录查看更多');
+          }, 100);
           return;
         }
       }
@@ -795,11 +797,9 @@ export default function PostList({
       else if (categoryId && page > 1) {
         showLogin();
         // 显示提示消息
-        if (typeof window !== 'undefined') {
-          setTimeout(() => {
-            alert('游客模式只能浏览第1页内容，请登录查看更多');
-          }, 100);
-        }
+        setTimeout(() => {
+          showWarning('游客模式只能浏览第1页内容，请登录查看更多');
+        }, 100);
         return;
       }
       // 其他页面（收藏、关注等）：需要登录
@@ -1213,25 +1213,10 @@ export default function PostList({
         <div className="mt-12 flex justify-center">
           <Pagination
             currentPage={currentPage}
-            totalPages={isLoggedIn ? pageInfo.page_count : 1} // 未登录用户只能看第一页
-            onPageChange={isLoggedIn ? handlePageChange : () => {}} // 未登录用户禁用页面切换
+            totalPages={pageInfo.page_count} // 始终显示真实的页数
+            onPageChange={handlePageChange} // 始终允许点击，在内部进行限制检查
             showWhenSinglePage={true}
           />
-          {/* 未登录用户提示 */}
-          {!isLoggedIn && pageInfo.page_count > 1 && (
-            <div className="ml-4 flex items-center text-neutral-500 dark:text-neutral-400">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <LanguageText 
-                texts={{
-                  'zh-CN': '登录后查看更多内容',
-                  'zh-TW': '登錄後查看更多內容',
-                  'en': 'Login to view more content'
-                }}
-              />
-            </div>
-          )}
         </div>
       )}
 
