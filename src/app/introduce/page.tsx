@@ -987,16 +987,19 @@ export default function IntroducePage(): React.JSX.Element {
               </p>
             </div>
 
-            <div className="intro-timeline">
-              <div className="space-y-12">
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">1</div>
-                  <div className="intro-timeline-content">
+            {/* 两列时间线布局 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* 左侧时间线 */}
+              <div className="space-y-8">
+                {/* 阶段 1 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">1</div>
+                  <div className="intro-timeline-card-content">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                       项目架构与技术准备
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      搭建技术基础、数据模型与初始化环境
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      搭建完整的微服务架构体系，确立技术栈选型，设计数据库模型，配置开发环境与CI/CD流水线
                     </p>
                     <div className="intro-timeline-tags">
                       <span className="intro-timeline-tag">Spring Boot</span>
@@ -1008,31 +1011,15 @@ export default function IntroducePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">2</div>
-                  <div className="intro-timeline-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      用户模块开发
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      实现用户注册认证、基础资料与偏好配置
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">JWT认证</span>
-                      <span className="intro-timeline-tag">用户管理</span>
-                      <span className="intro-timeline-tag">权限控制</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">3</div>
-                  <div className="intro-timeline-content">
+                {/* 阶段 3 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">3</div>
+                  <div className="intro-timeline-card-content">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                       论坛核心功能开发
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      支持发帖、展示、互动与分类结构搭建
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      构建完整的内容创作与交互体系，支持富文本编辑、文件上传、标签分类、点赞收藏、评论互动等功能
                     </p>
                     <div className="intro-timeline-tags">
                       <span className="intro-timeline-tag">富文本编辑</span>
@@ -1043,32 +1030,15 @@ export default function IntroducePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">4</div>
-                  <div className="intro-timeline-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      云端存储体系构建
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      基于MinIO构建分布式文件系统，实现智能云盘功能
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">MinIO存储</span>
-                      <span className="intro-timeline-tag">文件管理</span>
-                      <span className="intro-timeline-tag">权限控制</span>
-                      <span className="intro-timeline-tag">分享机制</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">5</div>
-                  <div className="intro-timeline-content">
+                {/* 阶段 5 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">5</div>
+                  <div className="intro-timeline-card-content">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                       实时聊天系统
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      集成WebSocket、Kafka、Zookeeper构建聊天功能
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      基于WebSocket + Kafka的高并发实时通信系统，支持私聊群聊、文件发送、消息推送、在线状态管理
                     </p>
                     <div className="intro-timeline-tags">
                       <span className="intro-timeline-tag">WebSocket</span>
@@ -1079,38 +1049,81 @@ export default function IntroducePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">6</div>
-                  <div className="intro-timeline-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      大数据分析系统
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      集成MaxCompute、DataWorks实现数据驱动决策
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">MaxCompute</span>
-                      <span className="intro-timeline-tag">DataWorks</span>
-                      <span className="intro-timeline-tag">ODPS SDK</span>
-                      <span className="intro-timeline-tag">数据分析</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="intro-timeline-item">
-                  <div className="intro-timeline-marker">7</div>
-                  <div className="intro-timeline-content">
+                {/* 阶段 7 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">7</div>
+                  <div className="intro-timeline-card-content">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                       系统优化与上线
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      性能优化、安全加固、监控部署
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      全面性能调优，安全防护加固，完善监控告警体系，Docker容器化部署，确保系统稳定可靠运行
                     </p>
                     <div className="intro-timeline-tags">
                       <span className="intro-timeline-tag">性能优化</span>
                       <span className="intro-timeline-tag">安全加固</span>
                       <span className="intro-timeline-tag">Docker部署</span>
                       <span className="intro-timeline-tag">监控告警</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 右侧时间线 */}
+              <div className="space-y-8 lg:mt-16">
+                {/* 阶段 2 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">2</div>
+                  <div className="intro-timeline-card-content">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                      用户认证体系
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      实现完整的用户生命周期管理，包括注册登录、身份验证、权限控制、个人资料管理、安全设置等功能
+                    </p>
+                    <div className="intro-timeline-tags">
+                      <span className="intro-timeline-tag">JWT认证</span>
+                      <span className="intro-timeline-tag">用户管理</span>
+                      <span className="intro-timeline-tag">权限控制</span>
+                      <span className="intro-timeline-tag">安全验证</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 阶段 4 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">4</div>
+                  <div className="intro-timeline-card-content">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                      云端存储体系
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      基于MinIO构建的企业级分布式存储方案，提供文件上传下载、权限控制、分享管理、版本管理等功能
+                    </p>
+                    <div className="intro-timeline-tags">
+                      <span className="intro-timeline-tag">MinIO存储</span>
+                      <span className="intro-timeline-tag">文件管理</span>
+                      <span className="intro-timeline-tag">权限控制</span>
+                      <span className="intro-timeline-tag">分享机制</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 阶段 6 */}
+                <div className="intro-timeline-card">
+                  <div className="intro-timeline-badge">6</div>
+                  <div className="intro-timeline-card-content">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                      大数据分析系统
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      集成阿里云MaxCompute + DataWorks，实现用户行为分析、内容推荐、热点预测、数据可视化等智能化功能
+                    </p>
+                    <div className="intro-timeline-tags">
+                      <span className="intro-timeline-tag">MaxCompute</span>
+                      <span className="intro-timeline-tag">DataWorks</span>
+                      <span className="intro-timeline-tag">ODPS SDK</span>
+                      <span className="intro-timeline-tag">数据分析</span>
                     </div>
                   </div>
                 </div>

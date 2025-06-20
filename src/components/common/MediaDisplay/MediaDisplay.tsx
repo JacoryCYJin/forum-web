@@ -6,7 +6,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 
 /**
  * 媒体类型枚举
@@ -52,111 +51,7 @@ export interface MediaDisplayProps {
   showNavigation?: boolean;
 }
 
-/**
- * 仅客户端的导航控件组件
- */
-function NavigationControls({
-  currentIndex,
-  media,
-  showNavigation,
-  showIndicators,
-  autoPlay,
-  isPlaying,
-  onPrevious,
-  onNext,
-  onGoToSlide,
-  onTogglePlayback
-}: {
-  currentIndex: number;
-  media: MediaItem[];
-  showNavigation: boolean;
-  showIndicators: boolean;
-  autoPlay: boolean;
-  isPlaying: boolean;
-  onPrevious: () => void;
-  onNext: () => void;
-  onGoToSlide: (index: number) => void;
-  onTogglePlayback: () => void;
-}) {
-  return (
-    <>
-      {/* 导航箭头 */}
-      {showNavigation && media.length > 1 && (
-        <>
-          <button
-            onClick={onPrevious}
-            className="media-nav-button media-nav-button-left"
-            aria-label="上一张图片"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
-          <button
-            onClick={onNext}
-            className="media-nav-button media-nav-button-right"
-            aria-label="下一张图片"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </>
-      )}
 
-      {/* 播放控制按钮 */}
-      {autoPlay && media.length > 1 && (
-        <button
-          onClick={onTogglePlayback}
-          className="media-control-button"
-          aria-label={isPlaying ? '暂停自动播放' : '开始自动播放'}
-        >
-          {isPlaying ? (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
-            </svg>
-          ) : (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1" />
-            </svg>
-          )}
-        </button>
-      )}
-
-      {/* 指示器 */}
-      {showIndicators && media.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {media.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => onGoToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-colors drop-shadow-md ${
-                index === currentIndex
-                  ? 'bg-white'
-                  : 'bg-white/50 hover:bg-white/70'
-              }`}
-              aria-label={`跳转到第 ${index + 1} 张图片`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* 计数器 */}
-      {media.length > 1 && (
-        <div className="media-counter">
-          {currentIndex + 1} / {media.length}
-        </div>
-      )}
-    </>
-  );
-}
-
-// 动态导入控件，禁用 SSR
-const ClientOnlyNavigationControls = dynamic(
-  () => Promise.resolve(NavigationControls),
-  { ssr: false }
-);
 
 /**
  * 媒体展示组件
@@ -345,19 +240,75 @@ export function MediaDisplay({
         )}
       </div>
 
-      {/* 客户端专用的导航控件 - 使用动态导入禁用 SSR */}
-      <ClientOnlyNavigationControls
-        currentIndex={currentIndex}
-        media={media}
-        showNavigation={showNavigation}
-        showIndicators={showIndicators}
-        autoPlay={autoPlay}
-        isPlaying={isPlaying}
-        onPrevious={goToPrevious}
-        onNext={goToNext}
-        onGoToSlide={goToSlide}
-        onTogglePlayback={togglePlayback}
-      />
+      {/* 导航控件 */}
+      {/* 导航箭头 */}
+      {showNavigation && media.length > 1 && (
+        <>
+          <button
+            onClick={goToPrevious}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+            aria-label="上一张图片"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={goToNext}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+            aria-label="下一张图片"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* 播放控制按钮 */}
+      {autoPlay && media.length > 1 && (
+        <button
+          onClick={togglePlayback}
+          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+          aria-label={isPlaying ? '暂停自动播放' : '开始自动播放'}
+        >
+          {isPlaying ? (
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+            </svg>
+          ) : (
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1" />
+            </svg>
+          )}
+        </button>
+      )}
+
+      {/* 指示器 */}
+      {showIndicators && media.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {media.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-2 h-2 rounded-full transition-colors drop-shadow-md ${
+                index === currentIndex
+                  ? 'bg-white'
+                  : 'bg-white/50 hover:bg-white/70'
+              }`}
+              aria-label={`跳转到第 ${index + 1} 张图片`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 计数器 */}
+      {media.length > 1 && (
+        <div className="absolute top-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+          {currentIndex + 1} / {media.length}
+        </div>
+      )}
     </div>
   );
 }
