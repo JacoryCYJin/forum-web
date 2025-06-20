@@ -730,6 +730,8 @@ export default function IntroducePage(): React.JSX.Element {
                       type={MediaType.VIDEO}
                       media={demoMediaData.chatDemos}
                       className="w-full max-w-4xl mx-auto"
+                      autoPlay={true}
+                      interval={4000}
                     />
                   </div>
                 </div>
@@ -841,6 +843,17 @@ export default function IntroducePage(): React.JSX.Element {
                         </div>
                       </li>
                       <li className="flex items-start">
+                        <span className="intro-feature-bullet">📍</span>
+                        <div>
+                          <strong className="text-gray-900 dark:text-white">
+                            智能埋点服务
+                          </strong>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            全链路数据埋点收集，精准追踪用户行为轨迹
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start">
                         <span className="intro-feature-bullet">📈</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
@@ -880,6 +893,8 @@ export default function IntroducePage(): React.JSX.Element {
                       type={MediaType.VIDEO}
                       media={demoMediaData.analyticsDemo}
                       className="w-full max-w-4xl mx-auto"
+                      autoPlay={true}
+                      interval={4000}
                     />
                   </div>
                 </div>
@@ -889,7 +904,7 @@ export default function IntroducePage(): React.JSX.Element {
               {/* 智能管理后台 */}
               <div className="intro-feature-showcase">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <div className="lg:order-2">
+                  <div>
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">智能管理后台</span>
                     </h3>
@@ -945,7 +960,7 @@ export default function IntroducePage(): React.JSX.Element {
                     </ul>
                   </div>
                   
-                  <div className="lg:order-1">
+                  <div>
                     <MediaDisplay
                       type={MediaType.IMAGES}
                       media={demoMediaData.adminScreenshots}

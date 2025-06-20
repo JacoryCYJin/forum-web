@@ -284,6 +284,7 @@ export function MediaDisplay({
       >
         <video
           className="w-full h-full object-cover"
+          autoPlay={autoPlay}
           controls
           loop
           muted
