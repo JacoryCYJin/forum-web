@@ -46,16 +46,17 @@ export default function FullLayout({ children }: FullLayoutProps) {
             sidebarCollapsed ? "w-10" : "w-60"
           }`}
         ></div>
-        <main className="flex-1 dark:bg-neutral-dark-100">
-          <div className="container mx-auto px-4 py-6">{children}</div>
+        <main className="flex-1 dark:bg-neutral-dark-100 min-h-screen">
+          <div className="container mx-auto px-4 py-6 pb-20">{children}</div>
+          {/* Footer放在main内部，确保需要滚动才能看到 */}
+          <div
+            className={`transition-all duration-300 ${
+              sidebarCollapsed ? "ml-0" : "ml-0"
+            }`}
+          >
+            <Footer />
+          </div>
         </main>
-      </div>
-      <div
-        className={`transition-all duration-300 ${
-          sidebarCollapsed ? "ml-10" : "ml-60"
-        }`}
-      >
-        <Footer />
       </div>
     </div>
   );

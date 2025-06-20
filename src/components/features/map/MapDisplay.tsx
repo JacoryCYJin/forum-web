@@ -149,7 +149,8 @@ export default function MapDisplay() {
         console.log('开始加载高德地图...');
         
         // 配置安全密钥（如果你的key是2021年12月2日后申请的，需要配置安全密钥）
-        const securityJsCode = process.env.NEXT_PUBLIC_AMAP_SECURITY_JS_CODE || '9bdea8960678552c012b993488a73203';
+        const securityJsCode = process.env.NEXT_PUBLIC_AMAP_SECURITY_JS_CODE || 'c5a4dbfcb1ebdfcf5b8dcc79d6c4b2e8';
+        console.log('使用的安全密钥:', securityJsCode);
         window._AMapSecurityConfig = {
           securityJsCode: securityJsCode,
         };
@@ -161,7 +162,8 @@ export default function MapDisplay() {
         console.log('AMapLoader导入成功，开始加载地图API...');
 
         // 加载高德地图API
-        const apiKey = process.env.NEXT_PUBLIC_AMAP_API_KEY || '37fc8d676413b9a955a49104a6dc6bb9';
+        const apiKey = process.env.NEXT_PUBLIC_AMAP_API_KEY || '9bdea8960678552c012b993488a73203';
+        console.log('使用的API Key:', apiKey);
         const AMap = await AMapLoader.load({
           key: apiKey,
           version: '2.0',

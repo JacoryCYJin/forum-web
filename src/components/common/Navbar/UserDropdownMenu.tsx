@@ -72,8 +72,8 @@ export function UserDropdownMenu() {
     setStatsLoading(true);
     try {
       const [followersCount, postsCount] = await Promise.all([
-        getFollowersCountApi(), // 获取当前用户的粉丝数
-        getUserPostCountApi({}) // 获取当前用户的帖子数
+        getFollowersCountApi(user.userId), // 获取当前用户的粉丝数
+        getUserPostCountApi({ userId: user.userId }) // 获取当前用户的帖子数
       ]);
       
       setUserStats({
@@ -259,16 +259,13 @@ export function UserDropdownMenu() {
                 <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
                   {user.nickname}
                 </p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
-                  @{user.username || user.userId}
-                </p>
                 
                 {/* 统计信息 */}
-                <div className="flex space-x-4 mt-2">
+                <div className="flex space-x-6 mt-2">
                   <div className="text-center">
-                    <div className="text-xs font-semibold text-neutral-800 dark:text-white">
+                    <div className="text-sm font-semibold text-neutral-800 dark:text-white">
                       {statsLoading ? (
-                        <div className="w-4 h-3 bg-neutral-200 dark:bg-zinc-600 rounded animate-pulse"></div>
+                        <div className="w-6 h-4 bg-neutral-200 dark:bg-zinc-600 rounded animate-pulse"></div>
                       ) : (
                         userStats.followersCount
                       )}
@@ -276,9 +273,9 @@ export function UserDropdownMenu() {
                     <div className="text-xs text-neutral-500 dark:text-neutral-400">粉丝</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-xs font-semibold text-neutral-800 dark:text-white">
+                    <div className="text-sm font-semibold text-neutral-800 dark:text-white">
                       {statsLoading ? (
-                        <div className="w-4 h-3 bg-neutral-200 dark:bg-zinc-600 rounded animate-pulse"></div>
+                        <div className="w-6 h-4 bg-neutral-200 dark:bg-zinc-600 rounded animate-pulse"></div>
                       ) : (
                         userStats.postsCount
                       )}

@@ -277,9 +277,9 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* 用户信息卡片 */}
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg border border-neutral-100 dark:border-zinc-700 p-6 mb-6">
           <div className="flex items-start space-x-6">
             {/* 头像 */}
             <img
@@ -350,7 +350,7 @@ export default function ProfilePage() {
         </div>
 
         {/* 标签页导航 */}
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow mb-6">
+        <div className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg border border-neutral-100 dark:border-zinc-700 mb-6">
           <div className="border-b border-neutral-200 dark:border-zinc-700">
             <nav className="flex space-x-8 px-6">
               {tabs.map(tab => (

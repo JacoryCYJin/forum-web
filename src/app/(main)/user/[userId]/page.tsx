@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import { getUserInfoApi } from '@/lib/api/userApi';
@@ -14,6 +14,7 @@ import { getFollowingCountApi, getFollowersCountApi, followUserApi, unfollowUser
 import PostList from '@/components/features/post/PostList';
 import LanguageText from '@/components/common/LanguageText/LanguageText';
 import ConfirmDialog from '@/components/common/ConfirmDialog/ConfirmDialog';
+import ReportDialog from '@/components/common/ReportDialog/ReportDialog';
 import { ElMessage } from 'element-plus';
 import type { User } from '@/types/userTypes';
 
@@ -49,6 +50,9 @@ export default function UserProfilePage() {
   const [followLoading, setFollowLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   /**
    * 获取用户信息
@@ -174,6 +178,22 @@ export default function UserProfilePage() {
   };
 
   /**
+   * 点击外部关闭下拉菜单
+   */
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  /**
    * 初始化数据
    */
   useEffect(() => {
@@ -291,9 +311,9 @@ export default function UserProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* 用户信息卡片 - 简洁设计 */}
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg border border-neutral-100 dark:border-zinc-700 p-6 mb-6">
           <div className="flex items-start justify-between">
             <div className="flex items-start space-x-6">
               {/* 用户头像 */}
@@ -368,7 +388,7 @@ export default function UserProfilePage() {
             
             {/* 操作按钮组 - 简洁设计 */}
             {currentUser && currentUser.userId !== userId && (
-              <div className="flex space-x-3">
+              <div className="flex items-center space-x-3">
                 {/* 私聊按钮 */}
                 <button
                   onClick={() => window.open(`/message?userId=${userId}`, '_blank')}
@@ -429,13 +449,44 @@ export default function UserProfilePage() {
                   />
                 )}
               </button>
+
+              {/* 更多操作按钮（举报等） */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center justify-center w-10 h-10 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-700"
+                  title="更多操作"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </button>
+                
+                {/* 下拉菜单 */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-32 bg-white dark:bg-zinc-800 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-lg z-20 overflow-hidden">
+                    <button
+                      onClick={() => {
+                        setShowReportDialog(true);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm text-neutral-700 dark:text-neutral-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center space-x-3 font-medium group"
+                    >
+                      <svg className="w-4 h-4 text-red-500 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <span className="group-hover:text-red-600">举报用户</span>
+                    </button>
+                  </div>
+                )}
+              </div>
               </div>
             )}
           </div>
         </div>
 
         {/* 用户帖子列表 - 简洁容器 */}
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg border border-neutral-100 dark:border-zinc-700 p-6">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-2">
               <LanguageText 
@@ -473,6 +524,19 @@ export default function UserProfilePage() {
           loading={followLoading}
           onConfirm={handleConfirmUnfollow}
           onCancel={() => setShowUnfollowDialog(false)}
+        />
+
+        {/* 举报弹窗 */}
+        <ReportDialog
+          visible={showReportDialog}
+          onClose={() => setShowReportDialog(false)}
+          componentType="USER"
+          componentId={userId}
+          title={`用户: ${userInfo?.username || '该用户'}`}
+          onSuccess={() => {
+            console.log('用户举报提交成功');
+            ElMessage.success('举报提交成功');
+          }}
         />
       </div>
     </div>
