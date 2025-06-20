@@ -427,7 +427,15 @@ export default function ChatPage() {
           contact.userId === currentContact.userId
             ? {
                 ...contact,
-                lastMessage: `[${msgType === "image" ? "图片" : msgType === "video" ? "视频" : msgType === "voice" ? "语音" : "文件"}]`,
+                lastMessage: `[${
+                  msgType === "image"
+                    ? "图片"
+                    : msgType === "video"
+                    ? "视频"
+                    : msgType === "voice"
+                    ? "语音"
+                    : "文件"
+                }]`,
                 lastMessageTime: new Date().toISOString(),
               }
             : contact
@@ -438,9 +446,15 @@ export default function ChatPage() {
       setTimeout(async () => {
         try {
           // 保存当前滚动位置，用于判断是否需要滚动
-          const messagesContainer = messagesEndRef.current?.closest(".chat-messages-container") as HTMLElement;
-          const wasAtBottom = messagesContainer 
-            ? Math.abs(messagesContainer.scrollTop + messagesContainer.clientHeight - messagesContainer.scrollHeight) <= 20
+          const messagesContainer = messagesEndRef.current?.closest(
+            ".chat-messages-container"
+          ) as HTMLElement;
+          const wasAtBottom = messagesContainer
+            ? Math.abs(
+                messagesContainer.scrollTop +
+                  messagesContainer.clientHeight -
+                  messagesContainer.scrollHeight
+              ) <= 20
             : true;
 
           // 重新获取聊天记录以获取包含文件URL的完整消息
@@ -451,7 +465,7 @@ export default function ChatPage() {
           });
 
           const sortedMessages = (response.list || []).reverse();
-          
+
           // 更新消息列表，但保持当前用户的滚动体验
           setMessages(sortedMessages);
 
@@ -1500,9 +1514,9 @@ export default function ChatPage() {
 
             {/* 消息输入框 */}
             <div className="bg-white/90 dark:bg-dark-secondary/90 backdrop-blur-sm border-t border-neutral-200 dark:border-zinc-700 p-4">
-              <div className="flex items-end space-x-3">
+              <div className="flex items-center space-x-3 chat-input-container">
                 {/* 文件发送按钮组 */}
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 flex-shrink-0">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -1512,7 +1526,7 @@ export default function ChatPage() {
                       }
                     }}
                     disabled={sendingFile}
-                    className={`p-2 rounded-lg transition-all duration-200 ${
+                    className={`chat-input-button ${
                       sendingFile
                         ? "text-neutral-400 cursor-not-allowed"
                         : "text-neutral-500 hover:text-primary dark:text-neutral-400 dark:hover:text-primary hover:bg-neutral-100 dark:hover:bg-neutral-700"
@@ -1522,7 +1536,6 @@ export default function ChatPage() {
                       <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                     ) : (
                       <svg
-                        className="w-5 h-5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1546,18 +1559,13 @@ export default function ChatPage() {
                       }
                     }}
                     disabled={sendingFile}
-                    className={`p-2 rounded-lg transition-all duration-200 ${
+                    className={`chat-input-button ${
                       sendingFile
                         ? "text-neutral-400 cursor-not-allowed"
                         : "text-neutral-500 hover:text-primary dark:text-neutral-400 dark:hover:text-primary hover:bg-neutral-100 dark:hover:bg-neutral-700"
                     }`}
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -1586,41 +1594,35 @@ export default function ChatPage() {
                     onKeyPress={handleKeyPress}
                     placeholder="输入消息..."
                     disabled={sendingMessage || sendingFile}
-                    className="w-full resize-none rounded-xl border border-neutral-200 dark:border-zinc-700 bg-neutral-50 dark:bg-neutral-800 px-4 py-3 text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 custom-scrollbar disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full resize-none rounded-xl border border-neutral-200 dark:border-zinc-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 custom-scrollbar disabled:opacity-50 disabled:cursor-not-allowed chat-input-textarea"
                     rows={1}
-                    style={{ minHeight: "44px", maxHeight: "120px" }}
                   />
                 </div>
 
                 {/* 发送按钮 */}
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSendMessage();
-                  }}
+                  onClick={handleSendMessage}
                   disabled={
-                    !messageInput.trim() || sendingMessage || sendingFile
+                    (!messageInput.trim() && !sendingFile) || sendingMessage
                   }
-                  className={`p-3 rounded-xl transition-all duration-200 flex items-center justify-center min-w-[44px] chat-send-button ${
-                    !messageInput.trim() || sendingMessage || sendingFile
-                      ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-400 cursor-not-allowed"
-                      : "bg-primary text-white hover:bg-primary-hover shadow-lg hover:shadow-xl"
+                  className={`chat-send-button transition-all duration-200 ${
+                    (!messageInput.trim() && !sendingFile) || sendingMessage
+                      ? "bg-neutral-300 dark:bg-neutral-600 text-neutral-500 cursor-not-allowed"
+                      : "bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl"
                   }`}
                 >
                   {sendingMessage ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     <svg
-                      className="w-5 h-5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
+                      strokeWidth={2}
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                       />
                     </svg>

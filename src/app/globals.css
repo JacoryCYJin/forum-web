@@ -553,8 +553,6 @@ a {
   margin-bottom: 0;
 }
 
-
-
 /* 时间轴样式 */
 .intro-page .intro-timeline {
   position: relative;
@@ -1193,4 +1191,55 @@ a {
 .file-message-updated {
   opacity: 1;
   transition: opacity 0.2s ease-in-out;
+}
+
+/* 聊天输入区域对齐优化 */
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-input-button {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+.chat-input-button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.chat-input-textarea {
+  min-height: 40px !important;
+  max-height: 120px !important;
+  line-height: 1.5 !important;
+  padding: 10px 16px !important;
+  display: flex;
+  align-items: center;
+}
+
+.chat-send-button {
+  width: 40px !important;
+  height: 40px !important;
+  flex-shrink: 0;
+  border-radius: 0.75rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative;
+}
+
+.chat-send-button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
