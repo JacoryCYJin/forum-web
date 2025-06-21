@@ -51,6 +51,11 @@ interface CommentSectionProps {
   onCommentAdded?: () => void;
 
   /**
+   * 评论提交回调
+   */
+  onCommentSubmitted?: (commentId: string, content: string) => void;
+
+  /**
    * 是否显示加载状态
    */
   loading?: boolean;
@@ -210,6 +215,7 @@ export default function CommentSection({
   comments,
   // onPageChange,
   onCommentAdded,
+  onCommentSubmitted,
   loading = false,
 }: CommentSectionProps) {
   /**
@@ -267,7 +273,9 @@ export default function CommentSection({
       };
 
 
-      await addCommentApi(commentData);
+      // 发送API请求并获取返回的评论ID
+      const newCommentResponse = await addCommentApi(commentData);
+      const newCommentId = newCommentResponse?.data?.commentId || `temp-${Date.now()}`;
 
       // 发布成功后重置状态
       setCommentContent("");
@@ -276,6 +284,11 @@ export default function CommentSection({
       // 调用回调函数刷新评论列表
       if (onCommentAdded) {
         onCommentAdded();
+      }
+
+      // 触发评论提交回调，用于事件跟踪
+      if (onCommentSubmitted) {
+        onCommentSubmitted(newCommentId, commentContent.trim());
       }
 
       console.log("评论发布成功");

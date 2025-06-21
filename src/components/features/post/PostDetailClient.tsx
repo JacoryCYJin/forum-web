@@ -25,6 +25,11 @@ interface PostDetailClientProps {
    * 初始评论分页数据
    */
   initialComments: PageResponse<Comment>;
+  
+  /**
+   * 评论提交回调
+   */
+  onCommentSubmitted?: (commentId: string, content: string) => void;
 }
 
 /**
@@ -36,7 +41,7 @@ interface PostDetailClientProps {
  * @example
  * <PostDetailClient postId="post-123" initialComments={commentsData} />
  */
-export default function PostDetailClient({ postId, initialComments }: PostDetailClientProps) {
+export default function PostDetailClient({ postId, initialComments, onCommentSubmitted }: PostDetailClientProps) {
   // 使用本地状态管理评论数据和当前页码
   const [comments, setComments] = useState<PageResponse<Comment>>(initialComments);
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,12 +117,19 @@ export default function PostDetailClient({ postId, initialComments }: PostDetail
     page_num: currentPage
   };
 
+  // 创建评论提交回调，同时处理本地状态更新和外部回调
+  const handleCommentSubmitted = (commentId: string, content: string) => {
+    handleCommentAdded(); // 刷新本地评论列表
+    onCommentSubmitted?.(commentId, content); // 调用外部回调
+  };
+
   return (
     <CommentSection 
       postId={postId}
       comments={commentsWithCorrectPage}
       onPageChange={handleCommentPageChange}
       onCommentAdded={handleCommentAdded}
+      onCommentSubmitted={handleCommentSubmitted}
       loading={loading}
     />
   );

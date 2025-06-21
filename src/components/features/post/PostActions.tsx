@@ -29,6 +29,16 @@ interface PostActionsProps {
    * 组件布局变体
    */
   variant?: 'vertical' | 'horizontal';
+  
+  /**
+   * 点赞状态变更回调
+   */
+  onLikeStatusChanged?: (isLiked: boolean) => void;
+  
+  /**
+   * 收藏状态变更回调
+   */
+  onFavouriteStatusChanged?: (isFavourited: boolean) => void;
 }
 
 /**
@@ -44,7 +54,9 @@ export default function PostActions({
   postId, 
   postTitle, 
   className = "",
-  variant = 'vertical'
+  variant = 'vertical',
+  onLikeStatusChanged,
+  onFavouriteStatusChanged
 }: PostActionsProps) {
   const { user, showLogin } = useUserStore();
   const isLoggedIn = !!user;
@@ -89,6 +101,7 @@ export default function PostActions({
     try {
       const newLikeStatus = await toggleLikeApi({ post_id: postId });
       setIsLiked(newLikeStatus);
+      onLikeStatusChanged?.(newLikeStatus);
     } catch (error: any) {
       console.error('点赞操作失败:', error);
       
@@ -100,7 +113,7 @@ export default function PostActions({
     } finally {
       setIsLiking(false);
     }
-  }, [postId, isLiking, isLoggedIn, showLogin]);
+  }, [postId, isLiking, isLoggedIn, showLogin, onLikeStatusChanged]);
 
   /**
    * 处理分享
@@ -185,6 +198,7 @@ export default function PostActions({
             postId={postId} 
             variant="default"
             className={`${buttonBaseClass} w-[100px]`}
+            onFavouriteStatusChanged={onFavouriteStatusChanged}
           />
         </div>
       ) : (
@@ -227,6 +241,7 @@ export default function PostActions({
           <FavouriteButton 
             postId={postId} 
             variant="full-width"
+            onFavouriteStatusChanged={onFavouriteStatusChanged}
           />
           
           {/* 分享按钮 */}

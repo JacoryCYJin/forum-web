@@ -35,6 +35,21 @@ interface PostSidebarProps {
    * 初始评论数据
    */
   initialComments: PageResponse<Comment>;
+  
+  /**
+   * 评论提交回调
+   */
+  onCommentSubmitted?: (commentId: string, content: string) => void;
+  
+  /**
+   * 点赞状态变更回调
+   */
+  onLikeStatusChanged?: (isLiked: boolean) => void;
+  
+  /**
+   * 收藏状态变更回调
+   */
+  onFavouriteStatusChanged?: (isFavourited: boolean) => void;
 }
 
 /**
@@ -55,7 +70,10 @@ export default function PostSidebar({
   postId, 
   postTitle,
   commentCount,
-  initialComments 
+  initialComments,
+  onCommentSubmitted,
+  onLikeStatusChanged,
+  onFavouriteStatusChanged
 }: PostSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -102,6 +120,8 @@ export default function PostSidebar({
             postTitle={postTitle}
             variant="horizontal"
             className="justify-center"
+            onLikeStatusChanged={onLikeStatusChanged}
+            onFavouriteStatusChanged={onFavouriteStatusChanged}
           />
         </div>
         
@@ -121,17 +141,13 @@ export default function PostSidebar({
                   'en': `Comments (${commentCount})`
                 }}
               />
-              {/* {commentCount > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                  {commentCount}
-                </span>
-              )} */}
             </h4>
           </div>
           <div className="max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
             <PostDetailClient 
               postId={postId}
               initialComments={initialComments}
+              onCommentSubmitted={onCommentSubmitted}
             />
           </div>
         </div>

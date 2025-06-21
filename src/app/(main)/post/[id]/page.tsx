@@ -11,6 +11,7 @@ import type { PostDetailQueryParams } from '@/types/postTypes';
 import type { User } from '@/types/userTypes';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer/MarkdownRenderer';
 import { formatPostTime } from '@/lib/utils/dateUtils';
+import PostViewTracker from '@/components/features/post/PostViewTracker';
 
 /**
  * 帖子详情页面参数类型
@@ -118,6 +119,9 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
 
     return (
       <div className="relative">
+        {/* 跟踪帖子查看事件 */}
+        <PostViewTracker postId={id} postTitle={post.title} />
+        
         {/* 返回按钮 */}
         <div className="max-w-7xl mx-auto mb-6">
           <BackButton />

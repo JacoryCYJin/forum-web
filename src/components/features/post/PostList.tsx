@@ -11,6 +11,7 @@ import { toggleLikeApi, checkLikeApi } from '@/lib/api/likeApi';
 import { getUserInfoApi } from '@/lib/api/userApi';
 import { getFollowedUsersPostsApi } from '@/lib/api/followApi';
 import { getCommentCountApi } from '@/lib/api/commentApi';
+import { trackLikePost, trackFavouritePost, trackSharePost } from '@/lib/api/trackingApi';
 import { usePaginationStore } from '@/store/paginationStore';
 import { useUserStore } from '@/store/userStore';
 import type { Post, PageResponse } from '@/types/postTypes';
@@ -412,6 +413,9 @@ export default function PostList({
         return newCache;
       });
       
+      // 发送埋点事件
+      trackFavouritePost(postId);
+      
       // 如果在收藏页面且取消了收藏，从列表中移除该帖子
       if (showFavourites && !newFavouriteStatus) {
         setPosts(prev => prev.filter(post => post.postId !== postId));
@@ -447,7 +451,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingFavouriteIds, showFavourites, isLoggedIn, showLogin]);
+  }, [togglingFavouriteIds, showFavourites, isLoggedIn, showLogin, posts]);
 
   /**
    * 切换点赞状态
@@ -479,6 +483,9 @@ export default function PostList({
         return newCache;
       });
       
+      // 发送埋点事件
+      trackLikePost(postId);
+      
       console.log(`${newLikeStatus ? '已点赞' : '已取消点赞'} 帖子: ${postId}`);
     } catch (error: any) {
       console.error(`切换点赞状态失败 (postId: ${postId}):`, error);
@@ -496,7 +503,7 @@ export default function PostList({
         return newSet;
       });
     }
-  }, [togglingLikeIds, isLoggedIn, showLogin]);
+  }, [togglingLikeIds, isLoggedIn, showLogin, posts]);
 
   /**
    * 显示删除确认弹窗
@@ -595,6 +602,9 @@ export default function PostList({
       const url = `${window.location.origin}/post/${postId}`;
       await navigator.clipboard.writeText(url);
       
+      // 发送分享事件埋点
+      trackSharePost(postId);
+      
       // 这里可以添加一个toast提示，暂时用console.log
       console.log(`已复制链接到剪贴板: ${title}`);
       
@@ -622,7 +632,7 @@ export default function PostList({
       document.execCommand('copy');
       document.body.removeChild(textArea);
     }
-  }, []);
+  }, [posts]);
 
   /**
    * 获取帖子列表数据
@@ -918,7 +928,7 @@ export default function PostList({
     );
   }
 
-  // 空状态
+  // 空状态w
   if (posts.length === 0) {
     if (showFavourites) {
       return (

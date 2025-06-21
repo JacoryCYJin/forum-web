@@ -24,6 +24,11 @@ interface FavouriteButtonProps {
    * 自定义CSS类名
    */
   className?: string;
+  
+  /**
+   * 收藏状态变更回调
+   */
+  onFavouriteStatusChanged?: (isFavourited: boolean) => void;
 }
 
 /**
@@ -42,7 +47,8 @@ interface FavouriteButtonProps {
 export default function FavouriteButton({ 
   postId, 
   variant = 'default',
-  className = '' 
+  className = '',
+  onFavouriteStatusChanged
 }: FavouriteButtonProps) {
   const { user, showLogin } = useUserStore();
   const isLoggedIn = !!user;
@@ -100,6 +106,9 @@ export default function FavouriteButton({
       const newStatus = await toggleFavouriteApi({ postId });
       setIsFavourited(newStatus);
       console.log(`${newStatus ? '已收藏' : '已取消收藏'} 帖子: ${postId}`);
+      if (onFavouriteStatusChanged) {
+        onFavouriteStatusChanged(newStatus);
+      }
     } catch (error: any) {
       console.error('切换收藏状态失败:', error);
       
