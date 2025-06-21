@@ -12,7 +12,6 @@ import type { User } from '@/types/userTypes';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer/MarkdownRenderer';
 import { formatPostTime } from '@/lib/utils/dateUtils';
 
-
 /**
  * 帖子详情页面参数类型
  */
@@ -82,8 +81,6 @@ export async function generateMetadata({ params }: PostPageParams): Promise<Meta
     };
   }
 }
-
-
 
 /**
  * 帖子详情页面组件
@@ -233,8 +230,6 @@ export default async function PostPage({ params, searchParams }: PostPageParams)
                       </div>
                     </div>
                   </div>
-
-
 
                   {/* 视频内容 - 如果是视频帖子，优先展示视频 */}
                   {post.fileUrls && /\.(mp4|webm|ogg|avi|mov|wmv|flv|mkv)(\?|$)/i.test(post.fileUrls) && (

@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['element-plus'],
   },
 
+  // 开发服务器配置 - 解决WebSocket连接错误
+  ...(process.env.NODE_ENV === 'development' && {
+    devIndicators: {
+      buildActivity: false, // 禁用构建指示器
+    },
+    // 可选：完全禁用热重载（如果需要的话）
+    // swcMinify: false,
+  }),
+
   // 图片优化配置
   images: {
     // 支持的图片格式
@@ -91,30 +100,6 @@ const nextConfig: NextConfig = {
 
   // 静态资源优化
   assetPrefix: process.env.NODE_ENV === 'production' ? undefined : undefined,
-
-  // PWA 和缓存配置
-  headers: async () => {
-    return [
-      {
-        source: '/(.*)\\.(ico|png|jpg|jpeg|gif|svg|webp)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/(.*)\\.(js|css)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
 };
 
 export default nextConfig;

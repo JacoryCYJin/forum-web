@@ -7,11 +7,6 @@ import { get } from "@/lib/utils/request";
 import { Category, CategoryListResponse } from "@/types/categoryTypes";
 import { ApiResponse } from "@/types/userTypes";
 
-// 在文件顶部添加缓存
-let categoriesCache: Category[] | null = null;
-let cacheTimestamp: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
-
 /**
  * 获取分类列表
  * 
@@ -49,57 +44,6 @@ export async function getCategoryListApi(): Promise<Category[]> {
 }
 
 /**
- * 获取分类列表（带缓存）
- * 
- * 为了避免重复请求，添加了5分钟的缓存机制
- *
- * @async
- * @returns {Promise<Category[]>} 分类列表数据
- * @throws {Error} 当API请求失败时抛出错误
- */
-export async function getCategoryListWithCacheApi(): Promise<Category[]> {
-  const now = Date.now();
-  
-  // 检查缓存是否有效
-  if (categoriesCache && (now - cacheTimestamp) < CACHE_DURATION) {
-    console.log('使用缓存的分类数据');
-    return categoriesCache;
-  }
-  
-  try {
-    console.log('重新获取分类数据');
-    const categories = await getCategoryListApi();
-    
-    // 更新缓存
-    categoriesCache = categories;
-    cacheTimestamp = now;
-    
-    return categories;
-  } catch (error) {
-    console.error("❌ 获取分类列表失败:", error);
-    
-    // 如果请求失败但有缓存数据，返回缓存数据
-    if (categoriesCache) {
-      console.log('请求失败，使用缓存数据');
-      return categoriesCache;
-    }
-    
-    throw error;
-  }
-}
-
-/**
- * 清除分类缓存
- * 
- * 当分类数据可能发生变化时调用此方法
- */
-export function clearCategoryCache(): void {
-  categoriesCache = null;
-  cacheTimestamp = 0;
-  console.log('已清除分类缓存');
-}
-
-/**
  * 根据分类ID查找分类信息
  * 
  * 通过获取完整分类列表，然后在前端过滤出指定ID的分类
@@ -114,8 +58,8 @@ export async function getCategoryByIdApi(categoryId: string): Promise<Category |
   try {
     console.log('查找分类信息，ID:', categoryId);
     
-    // 使用缓存版本的API
-    const categories = await getCategoryListWithCacheApi();
+    // 直接调用API，不使用缓存
+    const categories = await getCategoryListApi();
     
     const category = categories.find(cat => cat.categoryId === categoryId);
     
@@ -130,6 +74,20 @@ export async function getCategoryByIdApi(categoryId: string): Promise<Category |
     console.error("❌ 获取分类信息失败:", error);
     throw error;
   }
+}
+
+/**
+ * 获取分类列表（不带缓存）
+ * 
+ * 直接调用API获取最新数据
+ *
+ * @async
+ * @returns {Promise<Category[]>} 分类列表数据
+ * @throws {Error} 当API请求失败时抛出错误
+ */
+export async function getCategoryListWithCacheApi(): Promise<Category[]> {
+  console.log('直接获取分类数据（已移除缓存）');
+  return getCategoryListApi();
 }
 
 /**
@@ -167,7 +125,7 @@ export async function getCategoryByNameApi(categoryName: string): Promise<Catego
       
       return category;
     } else {
-      console.warn('⚠️ API响应数据格式异常:', response);
+      console.warn('API响应数据格式异常:', response);
       return null;
     }
   } catch (error) {
