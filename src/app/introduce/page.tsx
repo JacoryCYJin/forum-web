@@ -405,12 +405,12 @@ export default function IntroducePage(): React.JSX.Element {
                   </p> */}
                 </div>
                 <div className="flex justify-center">
-                  <div className="w-full max-w-6xl">
+                  <div className="w-full max-w-7xl">
                     <img
                       src="/images/system-architecture.svg"
                       alt="云社 · OpenShare 系统架构图"
-                      className="w-full h-auto rounded-lg shadow-lg"
-                      style={{ maxHeight: "800px", objectFit: "contain" }}
+                      className="w-full h-auto rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+                      style={{ maxHeight: "1000px", objectFit: "contain" }}
                     />
                   </div>
                 </div>
@@ -422,143 +422,7 @@ export default function IntroducePage(): React.JSX.Element {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {/* 前端技术 */}
-              <div className="intro-tech-card">
-                <div className="intro-tech-header">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-2xl text-white">💻</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    前端技术栈
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Next.js 14</span>
-                    <span className="intro-tech-tag">React框架</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">TypeScript</span>
-                    <span className="intro-tech-tag">类型安全</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Tailwind CSS</span>
-                    <span className="intro-tech-tag">样式框架</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Element Plus</span>
-                    <span className="intro-tech-tag">UI组件库</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Zustand</span>
-                    <span className="intro-tech-tag">状态管理</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* 后端技术 */}
-              <div className="intro-tech-card">
-                <div className="intro-tech-header">
-                  <div className="w-16 h-16 bg-gradient-to-br from-secondary to-orange-700 rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-2xl text-white">🗄️</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    后端技术栈
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Spring Boot</span>
-                    <span className="intro-tech-tag">Java框架</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">MySQL</span>
-                    <span className="intro-tech-tag">关系数据库</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Redis</span>
-                    <span className="intro-tech-tag">缓存系统</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">MinIO</span>
-                    <span className="intro-tech-tag">对象存储</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">JWT</span>
-                    <span className="intro-tech-tag">身份认证</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 大数据技术 */}
-              <div className="intro-tech-card">
-                <div className="intro-tech-header">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-yellow-600 rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-2xl text-white">📊</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    大数据技术
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">MaxCompute</span>
-                    <span className="intro-tech-tag">大数据计算</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">DataWorks</span>
-                    <span className="intro-tech-tag">数据开发</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">ODPS SDK</span>
-                    <span className="intro-tech-tag">数据接口</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Zookeeper</span>
-                    <span className="intro-tech-tag">服务协调</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Kafka</span>
-                    <span className="intro-tech-tag">消息队列</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 基础设施 */}
-              <div className="intro-tech-card">
-                <div className="intro-tech-header">
-                  <div className="w-16 h-16 bg-gradient-to-br from-secondary to-orange-800 rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-2xl text-white">🚀</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    基础设施
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Docker</span>
-                    <span className="intro-tech-tag">容器化</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">Nginx</span>
-                    <span className="intro-tech-tag">反向代理</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">WebSocket</span>
-                    <span className="intro-tech-tag">实时通信</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">SSL/TLS</span>
-                    <span className="intro-tech-tag">安全传输</span>
-                  </div>
-                  <div className="intro-tech-item">
-                    <span className="intro-tech-name">监控告警</span>
-                    <span className="intro-tech-tag">运维保障</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -987,145 +851,171 @@ export default function IntroducePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* 两列时间线布局 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {/* 左侧时间线 */}
-              <div className="space-y-8">
+            {/* 时间线式布局 - 优雅的介绍页面风格 */}
+            <div className="relative">
+              {/* 时间线主轴 */}
+              <div className="absolute left-1/2 transform -translate-x-0.5 w-1 h-full bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 rounded-full"></div>
+              
+              <div className="space-y-16">
                 {/* 阶段 1 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">1</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      项目架构与技术准备
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      搭建完整的微服务架构体系，确立技术栈选型，设计数据库模型，配置开发环境与CI/CD流水线
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">Spring Boot</span>
-                      <span className="intro-timeline-tag">Next.js</span>
-                      <span className="intro-timeline-tag">Vue 3</span>
-                      <span className="intro-timeline-tag">MySQL</span>
-                      <span className="intro-timeline-tag">Redis</span>
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8 text-right">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        项目架构与技术准备
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        搭建技术基础、数据模型与初始化环境，确立系统架构设计和技术选型，为整个项目奠定坚实的技术基础
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">Spring Boot</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">Next.js</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">Vue 3</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">1</span>
+                  </div>
+                  <div className="w-1/2 pl-8"></div>
+                </div>
+
+                {/* 阶段 2 */}
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8"></div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">2</span>
+                  </div>
+                  <div className="w-1/2 pl-8">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        用户模块开发
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        实现用户注册认证、基础资料与偏好配置，构建完整的用户管理体系，确保系统安全性和用户体验
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">JWT认证</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">用户管理</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">权限控制</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* 阶段 3 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">3</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      论坛核心功能开发
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      构建完整的内容创作与交互体系，支持富文本编辑、文件上传、标签分类、点赞收藏、评论互动等功能
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">富文本编辑</span>
-                      <span className="intro-timeline-tag">文件上传</span>
-                      <span className="intro-timeline-tag">标签系统</span>
-                      <span className="intro-timeline-tag">热门排行</span>
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8 text-right">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        论坛核心功能开发
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        支持发帖、展示、互动与分类结构搭建，打造完整的社区交流平台，提供丰富的用户互动体验
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">富文本编辑</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">文件上传</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">标签系统</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">3</span>
+                  </div>
+                  <div className="w-1/2 pl-8"></div>
+                </div>
+
+                {/* 阶段 4 */}
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8"></div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">4</span>
+                  </div>
+                  <div className="w-1/2 pl-8">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        云端存储体系构建
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        基于MinIO构建分布式文件系统，实现智能云盘功能和企业级存储服务，保障数据安全与高效访问
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">MinIO存储</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">文件管理</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">权限控制</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* 阶段 5 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">5</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      实时聊天系统
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      基于WebSocket + Kafka的高并发实时通信系统，支持私聊群聊、文件发送、消息推送、在线状态管理
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">WebSocket</span>
-                      <span className="intro-timeline-tag">Kafka</span>
-                      <span className="intro-timeline-tag">Zookeeper</span>
-                      <span className="intro-timeline-tag">实时通信</span>
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8 text-right">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        实时聊天系统
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        集成WebSocket、Kafka、Zookeeper构建聊天功能，实现高并发实时通信，提供流畅的即时交流体验
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">WebSocket</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">Kafka</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">实时通信</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">5</span>
+                  </div>
+                  <div className="w-1/2 pl-8"></div>
+                </div>
+
+                {/* 阶段 6 */}
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8"></div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">6</span>
+                  </div>
+                  <div className="w-1/2 pl-8">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        大数据分析系统
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        集成MaxCompute、DataWorks实现数据驱动决策，构建智能化分析平台，提供个性化推荐和深度洞察
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">MaxCompute</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">DataWorks</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">数据分析</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* 阶段 7 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">7</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      系统优化与上线
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      全面性能调优，安全防护加固，完善监控告警体系，Docker容器化部署，确保系统稳定可靠运行
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">性能优化</span>
-                      <span className="intro-timeline-tag">安全加固</span>
-                      <span className="intro-timeline-tag">Docker部署</span>
-                      <span className="intro-timeline-tag">监控告警</span>
+                <div className="relative flex items-center">
+                  <div className="w-1/2 pr-8 text-right">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-orange-100 dark:border-orange-900/20 hover:shadow-xl transition-all duration-500 hover:scale-105">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        系统优化与上线
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        性能优化、安全加固、监控部署，确保系统稳定运行和用户体验，实现生产环境的高可用性
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">性能优化</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">安全加固</span>
+                        <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm rounded-full border border-orange-200 dark:border-orange-800">Docker部署</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* 右侧时间线 */}
-              <div className="space-y-8 lg:mt-16">
-                {/* 阶段 2 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">2</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      用户认证体系
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      实现完整的用户生命周期管理，包括注册登录、身份验证、权限控制、个人资料管理、安全设置等功能
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">JWT认证</span>
-                      <span className="intro-timeline-tag">用户管理</span>
-                      <span className="intro-timeline-tag">权限控制</span>
-                      <span className="intro-timeline-tag">安全验证</span>
-                    </div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white dark:bg-gray-800 border-4 border-orange-400 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <span className="text-orange-600 font-bold text-lg">7</span>
                   </div>
-                </div>
-
-                {/* 阶段 4 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">4</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      云端存储体系
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      基于MinIO构建的企业级分布式存储方案，提供文件上传下载、权限控制、分享管理、版本管理等功能
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">MinIO存储</span>
-                      <span className="intro-timeline-tag">文件管理</span>
-                      <span className="intro-timeline-tag">权限控制</span>
-                      <span className="intro-timeline-tag">分享机制</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 阶段 6 */}
-                <div className="intro-timeline-card">
-                  <div className="intro-timeline-badge">6</div>
-                  <div className="intro-timeline-card-content">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      大数据分析系统
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                      集成阿里云MaxCompute + DataWorks，实现用户行为分析、内容推荐、热点预测、数据可视化等智能化功能
-                    </p>
-                    <div className="intro-timeline-tags">
-                      <span className="intro-timeline-tag">MaxCompute</span>
-                      <span className="intro-timeline-tag">DataWorks</span>
-                      <span className="intro-timeline-tag">ODPS SDK</span>
-                      <span className="intro-timeline-tag">数据分析</span>
-                    </div>
-                  </div>
+                  <div className="w-1/2 pl-8"></div>
                 </div>
               </div>
             </div>

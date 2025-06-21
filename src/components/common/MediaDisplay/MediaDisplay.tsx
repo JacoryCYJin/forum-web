@@ -178,7 +178,7 @@ export function MediaDisplay({
           className={`group relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
           style={{ 
             ...getContainerStyle(),
-            minHeight: '300px'  // 设置最小高度，确保组件不会太小
+            minHeight: '350px'  // 设置最小高度，确保组件不会太小
           }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -215,7 +215,7 @@ export function MediaDisplay({
       className={`media-display-container group relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
       style={{ 
         ...getContainerStyle(),
-        minHeight: '300px'  // 设置最小高度，确保组件不会太小
+        minHeight: '350px'  // 设置最小高度，确保组件不会太小
       }}
     >
       {/* 主图片展示区域 */}
