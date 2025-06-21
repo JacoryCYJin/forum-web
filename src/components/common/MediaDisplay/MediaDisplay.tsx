@@ -109,6 +109,8 @@ export function MediaDisplay({
     
     // 严格限定为 16:9 比例
     style.aspectRatio = '16/9'; // 16:9 = 1.777777...
+    // 确保最小宽度，这样可以确保最小高度（因为比例是固定的）
+    style.minWidth = '620px'; // 对应350px高度的16:9比例宽度
     
     return style;
   };
@@ -177,8 +179,7 @@ export function MediaDisplay({
         <div 
           className={`group relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
           style={{ 
-            ...getContainerStyle(),
-            minHeight: '350px'  // 设置最小高度，确保组件不会太小
+            ...getContainerStyle()
           }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -214,8 +215,7 @@ export function MediaDisplay({
     <div 
       className={`media-display-container group relative overflow-hidden rounded-lg shadow-lg min-w-0 ${className}`}
       style={{ 
-        ...getContainerStyle(),
-        minHeight: '350px'  // 设置最小高度，确保组件不会太小
+        ...getContainerStyle()
       }}
     >
       {/* 主图片展示区域 */}

@@ -172,8 +172,8 @@ export default function IntroducePage(): React.JSX.Element {
                 className="text-lg md:text-xl text-gray-600 dark:text-white/80 max-w-3xl mx-auto leading-relaxed px-4"
                 style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.3)" }}
               >
-                融合内容交流与文件分享功能，支持实时聊天、大数据分析的综合性社区平台。
-                让交流更智能、更有温度，数据驱动社区发展。
+                融合内容交流与文件分享功能，支持实时聊天、智能管理后台的综合性社区平台。
+                让交流更智能、更有温度，数据驱动运营决策。
               </p>
             </div>
 
@@ -207,10 +207,10 @@ export default function IntroducePage(): React.JSX.Element {
               <h3 className="text-xl font-bold text-gray-800 mb-4">平台亮点</h3>
               <div className="space-y-3">
                 {[
-                  { icon: "📊", text: "大数据智能分析" },
+                  { icon: "📊", text: "数据看板与统计" },
                   { icon: "💬", text: "实时聊天系统" },
                   { icon: "☁️", text: "云端文件管理" },
-                  { icon: "📊", text: "大数据智能分析" },
+                  { icon: "🛡️", text: "智能管理后台" },
                 ].map((item, index) => (
                   <div key={index} className="flex items-center text-gray-700">
                     <span className="text-2xl mr-3">{item.icon}</span>
@@ -414,11 +414,11 @@ export default function IntroducePage(): React.JSX.Element {
                     />
                   </div>
                 </div>
-                <div className="mt-6 text-center">
+                {/* <div className="mt-6 text-center">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     点击图片可查看完整架构详情
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -533,7 +533,7 @@ export default function IntroducePage(): React.JSX.Element {
 
               {/* 实时聊天系统 */}
               <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                   <div className="lg:order-2">
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">实时聊天系统</span>
@@ -789,13 +789,24 @@ export default function IntroducePage(): React.JSX.Element {
                         </div>
                       </li>
                       <li className="flex items-start">
+                        <span className="intro-feature-bullet">📊</span>
+                        <div>
+                          <strong className="text-gray-900 dark:text-white">
+                            数据看板与统计
+                          </strong>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            实时用户数据统计、活跃度分析、内容质量监控等可视化看板
+                          </p>
+                        </div>
+                      </li>
+                      <li className="flex items-start">
                         <span className="intro-feature-bullet">👥</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            用户生命周期管理
+                            用户权限管理
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            完整的用户生命周期管理和权限控制体系
+                            用户角色分配、权限控制、账户状态管理、封禁解封等操作
                           </p>
                         </div>
                       </li>
@@ -806,7 +817,7 @@ export default function IntroducePage(): React.JSX.Element {
                             举报处理系统
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            智能化的内容审核和举报处理系统
+                            智能化内容审核与人工复审结合，智能无法判断的举报内容交由人工最终审核
                           </p>
                         </div>
                       </li>
@@ -814,10 +825,10 @@ export default function IntroducePage(): React.JSX.Element {
                         <span className="intro-feature-bullet">🏷️</span>
                         <div>
                           <strong className="text-gray-900 dark:text-white">
-                            标签管理系统
+                            标签与内容管理
                           </strong>
                           <p className="text-gray-600 dark:text-gray-300">
-                            支持标签创建、编辑、删除等完整操作
+                            标签分类管理、用户内容管理、帖子审核与删除等全面内容治理
                           </p>
                         </div>
                       </li>
@@ -1045,21 +1056,21 @@ export default function IntroducePage(): React.JSX.Element {
                 <div className="text-4xl text-white mb-6 mx-auto">🌍</div>
                 <h3 className="text-xl font-bold mb-4">连接世界</h3>
                 <p className="text-white/80 leading-relaxed">
-                  打破地理界限，让全球用户能够无障碍地交流和分享，构建真正的全球化社区。
+                  打破地理界限，通过智能管理后台与数据看板，让全球用户无障碍交流分享，构建智能化社区。
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
                 <div className="text-4xl text-white mb-6 mx-auto">⚡</div>
                 <h3 className="text-xl font-bold mb-4">激发创造</h3>
                 <p className="text-white/80 leading-relaxed">
-                  提供强大的创作工具和平台，激发每个用户的创造潜能，让优质内容得到更好的传播。
+                  提供强大的创作工具和平台，结合用户权限管理，激发创造潜能，让优质内容安全传播。
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
-                <div className="text-4xl text-white mb-6 mx-auto">❤️</div>
-                <h3 className="text-xl font-bold mb-4">共享未来</h3>
+                <div className="text-4xl text-white mb-6 mx-auto">📊</div>
+                <h3 className="text-xl font-bold mb-4">数据驱动</h3>
                 <p className="text-white/80 leading-relaxed">
-                  通过开放共享的理念，让知识和经验得到更好的传承，共同构建美好的数字未来。
+                  通过数据看板和统计分析，让知识和经验得到更好的传承，数据驱动运营决策。
                 </p>
               </div>
             </div>
