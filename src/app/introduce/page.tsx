@@ -6,7 +6,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import MapWrapper from "./MapWrapper";
 import SimpleLayout from "@/components/common/Layout/SimpleLayout";
@@ -84,20 +84,6 @@ const demoMediaData = {
       title: "分享设置",
       description: "灵活的权限控制，支持链接分享和访问期限设置",
     },
-  ],
-
-  // 数据分析演示视频
-  analyticsDemo: [
-    {
-      url: "/videos/chat.mp4",
-      title: "大数据分析演示",
-      description: "MaxCompute驱动的实时数据分析和可视化",
-      thumbnail: "/images/screenshots/chat/1.png",
-    },
-  ],
-
-  // 云盘系统截图
-  cloudScreenshots: [
     {
       url: "/images/screenshots/files/cloud-storage.jpg",
       title: "云盘主界面",
@@ -107,6 +93,20 @@ const demoMediaData = {
       url: "/images/screenshots/files/folder-management.jpg",
       title: "文件夹管理",
       description: "支持文件夹创建、重命名、移动等完整操作",
+    },
+  ],
+
+  // 数据分析演示视频
+  analyticsScreenshots: [
+    {
+      url: "/images/screenshots/analytics/1.jpg",
+      title: "论坛埋点数据拆分",
+      description: "论坛埋点数据拆分，支持多种视图模式",
+    },
+    {
+      url: "/images/screenshots/analytics/2.jpg",
+      title: "论坛埋点数据加工",
+      description: "论坛埋点数据加工，支持多种视图模式，支持数据分析",
     },
   ],
 
@@ -144,6 +144,16 @@ const demoMediaData = {
  * @returns {React.JSX.Element} 介绍页面组件
  */
 export default function IntroducePage(): React.JSX.Element {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <SimpleLayout>
       <div className="intro-page flex flex-col">
@@ -258,120 +268,244 @@ export default function IntroducePage(): React.JSX.Element {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-              {/* 论坛系统 */}
-              <div className="intro-system-card">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-16">
+              {/* 统一网关服务 */}
+              <div className="intro-system-card min-h-[420px] w-full max-w-md mx-auto">
                 <div className="intro-system-header">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-2xl text-white">📱</span>
+                    <span className="text-2xl text-white">🌐</span>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    论坛社区系统
+                    统一网关服务
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                    基于 Next.js
-                    构建的现代化社区论坛，支持内容创作、互动交流和文件分享
+                    基于Spring Cloud Gateway的统一接入层，提供路由转发、认证鉴权、限流熔断等核心功能
                   </p>
                 </div>
 
                 <div className="intro-feature-list">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    核心功能
-                  </h4>
                   <ul className="space-y-3 text-gray-600 dark:text-gray-300">
                     <li className="flex items-start">
-                      <span className="intro-feature-bullet">📝</span>
+                      <span className="intro-feature-bullet">🔐</span>
                       <div>
-                        <strong>富文本内容创作</strong>
-                        <span className="intro-feature-desc">
-                          支持 Markdown 编辑、图片上传、标签分类
-                        </span>
+                        <strong>统一认证鉴权</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于JWT的统一认证，支持多种登录方式和权限控制</p>
                       </div>
                     </li>
                     <li className="flex items-start">
-                      <span className="intro-feature-bullet">💬</span>
+                      <span className="intro-feature-bullet">⚡</span>
                       <div>
-                        <strong>实时聊天系统</strong>
-                        <span className="intro-feature-desc">
-                          WebSocket + Kafka 消息队列，支持私聊和群聊
-                        </span>
+                        <strong>动态路由转发</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">支持动态配置路由规则，灵活处理服务请求转发</p>
                       </div>
                     </li>
                     <li className="flex items-start">
-                      <span className="intro-feature-bullet">☁️</span>
+                      <span className="intro-feature-bullet">🛡️</span>
                       <div>
-                        <strong>云盘文件管理</strong>
-                        <span className="intro-feature-desc">
-                          基于 MinIO 的分布式存储，支持文件分享和权限控制
-                        </span>
+                        <strong>限流熔断保护</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于Sentinel的流量控制，保障系统稳定性</p>
                       </div>
                     </li>
                     <li className="flex items-start">
-                      <span className="intro-feature-bullet">📊</span>
+                      <span className="intro-feature-bullet">📡</span>
                       <div>
-                        <strong>大数据分析系统</strong>
-                        <span className="intro-feature-desc">
-                          MaxCompute驱动的智能分析与个性化推荐
-                        </span>
+                        <strong>服务注册发现</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于Nacos的服务自动注册与发现机制</p>
                       </div>
                     </li>
                   </ul>
                 </div>
               </div>
 
-              {/* 管理系统 */}
-              <div className="intro-system-card">
+              {/* 论坛聊天服务 */}
+              <div className="intro-system-card min-h-[420px] w-full max-w-md mx-auto">
                 <div className="intro-system-header">
-                  <div className="w-16 h-16 bg-gradient-to-br from-secondary to-orange-700 rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-2xl text-white">⚙️</span>
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-6">
+                    <span className="text-2xl text-white">💬</span>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    管理后台系统
+                    论坛聊天服务
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                    基于 Vue 3 构建的管理后台，提供全面的运营管理和数据分析能力
+                    提供帖子管理、评论互动、实时聊天等社区核心功能的微服务
                   </p>
                 </div>
 
                 <div className="intro-feature-list">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    管理功能
-                  </h4>
+                  <ul className="space-y-3 text-gray-600 dark:text-gray-300">
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">📝</span>
+                      <div>
+                        <strong>内容发布管理</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">支持Markdown编辑器，图文视频等多媒体内容发布</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">💭</span>
+                      <div>
+                        <strong>评论互动系统</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">支持点赞、收藏、评论等丰富的社交互动功能</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">📨</span>
+                      <div>
+                        <strong>即时通讯功能</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于WebSocket的实时聊天，支持私聊和群聊</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">🔔</span>
+                      <div>
+                        <strong>消息通知系统</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">支持站内信、邮件等多渠道消息通知</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 分布式文件服务 */}
+              <div className="intro-system-card min-h-[420px] w-full max-w-md mx-auto">
+                <div className="intro-system-header">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-6">
+                    <span className="text-2xl text-white">📁</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    分布式文件服务
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                    基于MinIO的分布式文件存储系统，提供高可用的文件存储和管理服务
+                  </p>
+                </div>
+
+                <div className="intro-feature-list">
+                  <ul className="space-y-3 text-gray-600 dark:text-gray-300">
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">☁️</span>
+                      <div>
+                        <strong>云端存储管理</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">高可用、高性能的MinIO对象存储服务</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">🔄</span>
+                      <div>
+                        <strong>断点续传支持</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">支持大文件分片上传和断点续传功能</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">🔗</span>
+                      <div>
+                        <strong>文件访问控制</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">细粒度的文件权限控制和安全访问策略</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">🔍</span>
+                      <div>
+                        <strong>文件索引检索</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于ElasticSearch的全文检索功能</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* 最后两个模块居中显示在一行 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-[880px] mx-auto">
+              {/* 大数据分析服务 */}
+              <div className="intro-system-card min-h-[420px] w-full max-w-md mx-auto">
+                <div className="intro-system-header">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-6">
+                    <span className="text-2xl text-white">📊</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    大数据分析服务
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                    基于MaxCompute的数据分析平台，提供用户行为分析和智能推荐功能
+                  </p>
+                </div>
+
+                <div className="intro-feature-list">
+                  <ul className="space-y-3 text-gray-600 dark:text-gray-300">
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">📈</span>
+                      <div>
+                        <strong>行为数据分析</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">深度洞察用户行为模式与偏好特征</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">🎯</span>
+                      <div>
+                        <strong>智能内容推荐</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于机器学习的个性化内容推荐系统</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">📱</span>
+                      <div>
+                        <strong>实时数据监控</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">动态图表展示和实时数据监控看板</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="intro-feature-bullet">🔮</span>
+                      <div>
+                        <strong>趋势预测分析</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于机器学习的热点话题预测</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 智能管理后台 */}
+              <div className="intro-system-card min-h-[420px] w-full max-w-md mx-auto">
+                <div className="intro-system-header">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-6">
+                    <span className="text-2xl text-white">⚙️</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    智能管理后台
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                    基于Vue3的管理平台，提供内容审核、用户管理、数据统计等运营功能
+                  </p>
+                </div>
+
+                <div className="intro-feature-list">
                   <ul className="space-y-3 text-gray-600 dark:text-gray-300">
                     <li className="flex items-start">
                       <span className="intro-feature-bullet">👥</span>
                       <div>
-                        <strong>用户管理</strong>
-                        <span className="intro-feature-desc">
-                          用户信息管理、权限控制、封禁处理
-                        </span>
+                        <strong>用户权限管理</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">完整的用户生命周期管理和权限控制</p>
                       </div>
                     </li>
                     <li className="flex items-start">
-                      <span className="intro-feature-bullet">🛡️</span>
+                      <span className="intro-feature-bullet">🔍</span>
                       <div>
-                        <strong>举报处理</strong>
-                        <span className="intro-feature-desc">
-                          内容审核、举报处理、违规内容管理
-                        </span>
+                        <strong>内容审核处理</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">智能化内容审核和人工复审结合机制</p>
                       </div>
                     </li>
                     <li className="flex items-start">
                       <span className="intro-feature-bullet">📊</span>
                       <div>
-                        <strong>数据看板</strong>
-                        <span className="intro-feature-desc">
-                          实时数据统计、用户行为分析、运营指标监控
-                        </span>
+                        <strong>运营数据统计</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">实时用户数据统计和活跃度分析</p>
                       </div>
                     </li>
                     <li className="flex items-start">
-                      <span className="intro-feature-bullet">🔧</span>
+                      <span className="intro-feature-bullet">🤖</span>
                       <div>
-                        <strong>系统配置</strong>
-                        <span className="intro-feature-desc">
-                          系统参数设置、功能开关、维护管理
-                        </span>
+                        <strong>智能审核系统</strong>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">基于AI的自动化内容审核功能</p>
                       </div>
                     </li>
                   </ul>
@@ -441,7 +575,7 @@ export default function IntroducePage(): React.JSX.Element {
             <div className="space-y-16">
               {/* 论坛社区系统 */}
               <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
                   <div>
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">论坛社区系统</span>
@@ -533,7 +667,7 @@ export default function IntroducePage(): React.JSX.Element {
 
               {/* 实时聊天系统 */}
               <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
                   <div className="lg:order-2">
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">实时聊天系统</span>
@@ -603,7 +737,7 @@ export default function IntroducePage(): React.JSX.Element {
 
               {/* 云盘文件管理 */}
               <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
                   <div>
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">云盘文件管理</span>
@@ -672,7 +806,7 @@ export default function IntroducePage(): React.JSX.Element {
                   <div>
                     <MediaDisplay
                       type={MediaType.IMAGES}
-                      media={[...demoMediaData.filesScreenshots, ...demoMediaData.cloudScreenshots]}
+                      media={demoMediaData.filesScreenshots}
                       className="w-full max-w-4xl mx-auto"
                       autoPlay={true}
                       interval={4000}
@@ -683,7 +817,7 @@ export default function IntroducePage(): React.JSX.Element {
 
               {/* 大数据分析系统 */}
               <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
                   <div className="lg:order-2">
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">
@@ -754,8 +888,8 @@ export default function IntroducePage(): React.JSX.Element {
                   </div>
                   <div>
                     <MediaDisplay
-                      type={MediaType.VIDEO}
-                      media={demoMediaData.analyticsDemo}
+                      type={MediaType.IMAGES}
+                      media={demoMediaData.analyticsScreenshots}
                       className="w-full max-w-4xl mx-auto"
                       autoPlay={true}
                       interval={4000}
@@ -767,14 +901,14 @@ export default function IntroducePage(): React.JSX.Element {
 
               {/* 智能管理后台 */}
               <div className="intro-feature-showcase">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
                   <div>
                     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                       <span className="intro-gradient-text">智能管理后台</span>
                     </h3>
                     <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                       基于Vue3 + Element
-                      Plus的现代化管理后台，提供用户管理、内容审核、数据统计、系统监控等全面管理功能
+                      Plus的现代化管理后台，提供用户管理、内容审核、数据统计等全面管理功能
                     </p>
                     <ul className="space-y-4">
                       <li className="flex items-start">
