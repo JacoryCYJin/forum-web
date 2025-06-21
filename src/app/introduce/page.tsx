@@ -223,7 +223,7 @@ export default function IntroducePage(): React.JSX.Element {
         </div>
 
         {/* 统计数据区块 */}
-        <section className="intro-stats-section py-20">
+        {/* <section className="intro-stats-section py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div className="intro-stats-item text-white">
@@ -244,7 +244,7 @@ export default function IntroducePage(): React.JSX.Element {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* 系统架构概览 */}
         <section className="py-20 bg-gray-50 dark:bg-gray-800">
