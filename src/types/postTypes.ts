@@ -60,6 +60,11 @@ export interface Comment {
    * 评论内容
    */
   content: string;
+  
+  /**
+   * 评论创建时间
+   */
+  ctime?: string;
 }
 
 /**

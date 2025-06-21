@@ -118,20 +118,38 @@ export default function PostActions({
   /**
    * 处理分享
    */
-  const handleShare = useCallback(() => {
-    if (navigator.share) {
-      navigator.share({
-        title: postTitle,
-        url: window.location.href
-      }).catch(console.error);
-    } else {
-      // 复制链接到剪贴板
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        // 这里可以添加一个提示消息
-        console.log('链接已复制到剪贴板');
-      }).catch(console.error);
+  const handleShare = useCallback(async () => {
+    try {
+      const url = `${window.location.origin}/post/${postId}`;
+      await navigator.clipboard.writeText(url);
+      
+      // 可以添加一个临时的成功提示
+      const button = document.activeElement as HTMLButtonElement;
+      if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = `
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="text-xs">已复制</span>
+        `;
+        setTimeout(() => {
+          button.innerHTML = originalText;
+        }, 2000);
+      }
+      
+      console.log(`已复制链接到剪贴板: ${postTitle}`);
+    } catch (error) {
+      console.error('复制链接失败:', error);
+      // 降级方案：选择文本
+      const textArea = document.createElement('textarea');
+      textArea.value = `${window.location.origin}/post/${postId}`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
     }
-  }, [postTitle]);
+  }, [postId, postTitle]);
 
   // 按钮基础样式类
   const buttonBaseClass = "flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 font-medium border text-sm min-h-[40px]";

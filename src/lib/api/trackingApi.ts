@@ -57,16 +57,56 @@ const getEnvironmentInfo = () => {
 /**
  * 获取用户IP地址
  * 
- * 使用公共API获取用户IP地址
+ * 使用多种方式尝试获取用户IP地址
  * 
  * @returns 用户IP地址的Promise
  */
 const getUserIp = async (): Promise<string> => {
   try {
-    // 使用ipify API获取用户IP
-    const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json();
-    return data.ip;
+    // 方法1: 尝试使用ipify API
+    try {
+      const response = await fetch('https://api.ipify.org?format=json', { 
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.ip) return data.ip;
+      }
+    } catch {
+      console.log('ipify API获取IP失败，尝试下一种方法');
+    }
+    
+    // 方法2: 尝试使用ip.sb
+    try {
+      const response = await fetch('https://api.ip.sb/ip', { 
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+      if (response.ok) {
+        const ip = await response.text();
+        if (ip && ip.trim()) return ip.trim();
+      }
+    } catch {
+      console.log('ip.sb API获取IP失败，尝试下一种方法');
+    }
+    
+    // 方法3: 尝试使用httpbin
+    try {
+      const response = await fetch('https://httpbin.org/ip', { 
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.origin) return data.origin;
+      }
+    } catch {
+      console.log('httpbin API获取IP失败，返回默认值');
+    }
+    
+    // 所有方法都失败，使用默认值
+    return '0.0.0.0';
   } catch (error) {
     console.error('获取用户IP失败:', error);
     return '0.0.0.0'; // 返回默认值

@@ -10,11 +10,58 @@ import { useState, useEffect } from "react";
 import { getUserInfoApi } from "@/lib/api/userApi";
 import UserLink from "@/components/common/UserLink/UserLink";
 import { addCommentApi } from "@/lib/api/commentApi";
-// import Pagination from "@/components/common/Pagination/Pagination";
+import { trackCommentPost } from "@/lib/api/trackingApi";
 import ReportDialog from "@/components/common/ReportDialog/ReportDialog";
 import type { User } from "@/types/userTypes";
 import type { Comment, PageResponse } from "@/types/postTypes";
 import type { AddCommentRequest } from "@/types/commentTypes";
+
+/**
+ * 格式化评论时间，根据时间差显示不同格式
+ * @param dateTimeStr 时间字符串
+ * @returns 格式化后的时间字符串
+ */
+function formatCommentTime(dateTimeStr?: string): string {
+  if (!dateTimeStr) {
+    return "刚刚";
+  }
+  
+  const commentDate = new Date(dateTimeStr);
+  const now = new Date();
+  
+  // 计算时间差（毫秒）
+  const diffMs = now.getTime() - commentDate.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  // 5分钟内显示"刚刚"
+  if (diffMinutes < 5) {
+    return "刚刚";
+  }
+  
+  // 1小时内显示分钟
+  if (diffHours < 1) {
+    return `${diffMinutes}分钟前`;
+  }
+  
+  // 24小时内显示小时
+  if (diffDays < 1) {
+    return `${diffHours}小时前`;
+  }
+  
+  // 7天内显示天数
+  if (diffDays < 7) {
+    return `${diffDays}天前`;
+  }
+  
+  // 超过7天显示具体日期 YYYY-MM-DD
+  const year = commentDate.getFullYear();
+  const month = String(commentDate.getMonth() + 1).padStart(2, '0');
+  const day = String(commentDate.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+}
 
 /**
  * 评论项组件属性接口
@@ -112,6 +159,9 @@ function CommentItem({ comment }: CommentItemProps) {
     );
   }
 
+  // 格式化评论时间
+  const formattedTime = formatCommentTime(comment.ctime);
+
   return (
     <>
       <div className="group hover:bg-neutral-25 dark:hover:bg-zinc-800/30 transition-all duration-200 border-b border-neutral-100 dark:border-zinc-700/50 last:border-b-0">
@@ -130,7 +180,7 @@ function CommentItem({ comment }: CommentItemProps) {
                 <svg className="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                刚刚
+                {formattedTime}
               </div>
             </div>
 
@@ -289,6 +339,15 @@ export default function CommentSection({
       // 触发评论提交回调，用于事件跟踪
       if (onCommentSubmitted) {
         onCommentSubmitted(newCommentId, commentContent.trim());
+      }
+      
+      // 添加评论埋点 - 确保在评论成功后调用埋点API
+      try {
+        await trackCommentPost(postId);
+        console.log("评论埋点记录成功");
+      } catch (trackingError) {
+        console.error("评论埋点记录失败:", trackingError);
+        // 埋点失败不影响主要业务流程，所以不抛出异常
       }
 
       console.log("评论发布成功");

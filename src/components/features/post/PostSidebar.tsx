@@ -69,13 +69,20 @@ interface PostSidebarProps {
 export default function PostSidebar({ 
   postId, 
   postTitle,
-  commentCount,
+  commentCount: initialCommentCount,
   initialComments,
   onCommentSubmitted,
   onLikeStatusChanged,
   onFavouriteStatusChanged
 }: PostSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  // 使用本地状态跟踪评论数，初始值来自props
+  const [commentCount, setCommentCount] = useState(initialCommentCount);
+
+  // 处理评论数量更新
+  const handleCommentCountUpdated = (newCount: number) => {
+    setCommentCount(newCount);
+  };
 
   return (
     <div className={`bg-white dark:bg-dark-secondary rounded-lg shadow border border-neutral-100 dark:border-zinc-700 overflow-hidden transition-all duration-300 ${isCollapsed ? 'max-h-20' : ''}`}>
@@ -148,6 +155,8 @@ export default function PostSidebar({
               postId={postId}
               initialComments={initialComments}
               onCommentSubmitted={onCommentSubmitted}
+              initialCommentCount={initialCommentCount}
+              onCommentCountUpdated={handleCommentCountUpdated}
             />
           </div>
         </div>
